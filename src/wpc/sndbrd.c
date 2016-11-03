@@ -70,6 +70,7 @@ void sndbrd_diag(int board, int button) {
 }
 
 void sndbrd_data_w(int board, int data) {
+printf("RTH boar:%d data:%d\n",board,data);
   const struct sndbrdIntf *b = intf[board].brdIntf;
   if(b && (b->flags & SNDBRD_NOTSOUND)==0)
 	snd_cmd_log(board, data);

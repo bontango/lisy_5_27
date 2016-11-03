@@ -2,9 +2,9 @@
 #./a.out 127.0.0.1 108
 #sleep 1
 #insert coin
-./a.out 127.0.0.1 105
+./a.out 127.0.0.1 106
 sleep 1
-./a.out 127.0.0.1 5
+./a.out 127.0.0.1 6
 #start game
 ./a.out 127.0.0.1 103
 sleep 1
