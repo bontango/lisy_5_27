@@ -1,0 +1,14 @@
+#close 4th Ball Through
+./a.out 127.0.0.1 101
+sleep 1
+#close 5th Ball Through
+./a.out 127.0.0.1 102
+sleep 1
+#insert coin
+./a.out 127.0.0.1 111
+sleep 1
+./a.out 127.0.0.1 11
+#start game
+./a.out 127.0.0.1 106
+sleep 1
+./a.out 127.0.0.1 6

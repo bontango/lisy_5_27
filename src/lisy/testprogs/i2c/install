@@ -1,0 +1,2 @@
+sudo cp lisy_check /usr/local/bin
+sudo cp check_K3 /usr/local/bin

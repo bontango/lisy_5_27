@@ -1,0 +1,16 @@
+# lisy80 Makefile
+# RTH 07.2017
+# for test_pic_eeprom.c prog
+
+CC      = /usr/bin/gcc
+CFLAGS  = -Wall -g -D_REENTRANT -DDEBUG
+LDFLAGS = -lwiringPi
+
+OBJ = utils.o hw_lib.o switches.o displays.o coils.o eeprom.o fileio.o fadecandy.o opc.o lisy.o write_pic_eeprom.o
+
+tester: $(OBJ)
+	$(CC) $(CFLAGS) -o write_pic_eeprom $(OBJ) $(LDFLAGS)
+
+%.o: ../%.c ../%.h
+	$(CC) $(CFLAGS) -c $<
+

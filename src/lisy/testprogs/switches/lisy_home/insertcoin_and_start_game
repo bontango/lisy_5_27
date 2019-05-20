@@ -1,0 +1,12 @@
+#for lisy80 n is set switch to ON, 10n is set switch to off
+#
+#set through
+../a.out 127.0.0.1 76
+#left coin switch
+../a.out 127.0.0.1 17
+sleep 0.4
+../a.out 127.0.0.1 117
+#start game
+../a.out 127.0.0.1 47
+sleep 0.4
+../a.out 127.0.0.1 147

@@ -1,0 +1,4 @@
+#for lisy80 n is set switch to ON, 10n is set switch to off
+../a.out 127.0.0.1 17
+sleep 0.4
+../a.out 127.0.0.1 117

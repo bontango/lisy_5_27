@@ -1,0 +1,34 @@
+#echo wait 30 seconds for booting centaur
+#sleep 30
+echo close 4th Ball Through
+./a.out 127.0.0.1 101
+sleep 1
+echo close 5th Ball Through
+./a.out 127.0.0.1 102
+sleep 1
+echo insert coin
+./a.out 127.0.0.1 111
+sleep 1
+./a.out 127.0.0.1 11
+echo start game
+./a.out 127.0.0.1 106
+sleep 1
+./a.out 127.0.0.1 6
+sleep 1
+echo  send bumperswitch two times
+./a.out 127.0.0.1 140
+sleep 1
+./a.out 127.0.0.1 40
+sleep 1
+./a.out 127.0.0.1 140
+sleep 1
+./a.out 127.0.0.1 40
+echo  send switch no 4 two times
+./a.out 127.0.0.1 104
+sleep 1
+./a.out 127.0.0.1 4
+sleep 1
+./a.out 127.0.0.1 104
+sleep 1
+./a.out 127.0.0.1 4
+
