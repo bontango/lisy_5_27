@@ -32,7 +32,7 @@
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     92
+#define LISY35control_SOFTWARE_SUB     93
 
 //fake definiton needed in lisy80
 typedef struct {
@@ -1058,7 +1058,7 @@ void send_lamp_infos( int sockfd )
      lamp_no=i*10+j;
      if (lamp[lamp_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
      if (lamp[lamp_no]) sprintf(name,"L%02d_off",lamp_no); else sprintf(name,"L%02d_on",lamp_no);
-     sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'L%02d\n%s\n%s\' /> </form>\n",name,colorcode,lamp_no,lamp_description_line1[lamp_no],lamp_description_line2[lamp_no]);
+     sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'L%02d\r\n%s\n%s\' /> </form>\n",name,colorcode,lamp_no,lamp_description_line1[lamp_no],lamp_description_line2[lamp_no]);
      sendit( sockfd, buffer);
     }
    sprintf(buffer,"<br>\n");
@@ -1420,22 +1420,22 @@ void send_software_infos( int sockfd )
 
    //get installed version of lisy1
    dum = system("/usr/local/bin/lisy -lisyversion");
-   sprintf(buffer,"LISY35 version installed is 5.0%02d<br>\n",WEXITSTATUS(dum));
+   sprintf(buffer,"LISY35 version installed is 5.%02d<br>\n",WEXITSTATUS(dum));
    sendit( sockfd, buffer);
 
    //init switch pic and get Software version
    dum = lisy80_switch_pic_init();
-   sprintf(buffer,"Software Switch PIC has version %d.%d<br>\n",dum/100, dum%100);
+   sprintf(buffer,"Software Switch PIC has version %d.%02d<br>\n",dum/100, dum%100);
    sendit( sockfd, buffer);
 
    //get Software version Display PIC
    dum = display_get_sw_version();
-   sprintf(buffer,"Software Display PIC has version %d.%d<br>\n",dum/100, dum%100);
+   sprintf(buffer,"Software Display PIC has version %d.%02d<br>\n",dum/100, dum%100);
    sendit( sockfd, buffer);
 
   //get Software version, Coil PIC
    dum = coil_get_sw_version();
-   sprintf(buffer,"Software Coil PIC has version %d.%d<br>\n",dum/100, dum%100);
+   sprintf(buffer,"Software Coil PIC has version %d.%02d<br>\n",dum/100, dum%100);
    sendit( sockfd, buffer);
 
 }
