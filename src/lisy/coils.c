@@ -175,53 +175,6 @@ void lisy80_coil_sound_set( int sound)
 
 }
 
-//sound set via PIC I2C com LISY35
-void lisy35_coil_sound_set( int sound, unsigned char is_extended)
-{
-
- unsigned char lsb,msb;
-
- if ( is_extended ) //we have an extended soundcard, PIC will handle it
- {
-
-   lsb = sound%16;
-   msb = sound/16;
-
-   lisy35_sound_ext_sb_set(lsb);
-   lisy35_sound_ext_sb_set(msb);
-
-   if ( ls80dbg.bitv.sound )
-   {
-        sprintf(debugbuf,"setting lower nybble sound to:%d (extended SB)" ,lsb );
-        lisy80_debug(debugbuf);
-        sprintf(debugbuf,"setting higher nybble sound to:%d (extended SB)" ,msb );
-        lisy80_debug(debugbuf);
-   }
- }
- else
- {
-  //do we need 'soundE' ?
-  if ( sound > 15)
-  {
-   lisy35_display_set_soundE(1);
-   sound = sound - 15;
-  }
-  else
-   lisy35_display_set_soundE(0);
-
-  if ( ls80dbg.bitv.sound )
-   {
-        sprintf(debugbuf,"setting sound to:%d (standard SB)" ,sound );
-        lisy80_debug(debugbuf);
-   }
-
-   //send sound data via PIC internal routine
-   lisy35_sound_std_sb_set(sound);
-
- }
-}
-
-
 //sound set via PIC I2C com LISY1
 void lisy1_coil_sound_set( int sound)
 {
@@ -361,7 +314,7 @@ for (i=1; i<=64; i++)
 
 
 /*
-lisy35_coil_set, for test routine only
+lisy35_coil_set, FOR TEST ROUTINE ONLY
 	coil -> nr of coil
 		1..15 momentary solenoids
 		16 ..19 continous solenoids
@@ -869,6 +822,34 @@ void lisy35_coil_set_sound_select( unsigned char value)
         lisy80_write_byte_coil_pic(  mydata_coil.byte );
 
 }
+
+//set the type of teh extended SB installed
+// 0 sets to 2581-51 (default)
+// 1 sets to S&T 
+void lisy35_coil_set_extended_SB_type( unsigned char type)
+{
+
+ if (ls80dbg.bitv.basic)
+     {
+       if (type)  lisy80_debug("Soundboard is a S&T");
+        else lisy80_debug("Soundboard is a 2581-51");
+     }
+
+  mydata_coil.bitv5.IS_CMD = 1;        //we are sending a command here
+  mydata_coil.bitv5.COMMAND = LS80COILCMD_EXT_CMD_ID;
+  if(type)
+     mydata_coil.bitv5.EXT_CMD = LISY35_EXT_CMD_SB_IS_SAT;
+  else
+     mydata_coil.bitv5.EXT_CMD = LISY35_EXT_CMD_SB_IS_51;
+
+  //write to PIC
+  lisy80_write_byte_coil_pic(  mydata_coil.byte );
+
+}
+
+
+
+
 
 //set the direction (input/output) of J4PIN5 of coil pic
 // 1 sets to input (default)

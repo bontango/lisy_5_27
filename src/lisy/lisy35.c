@@ -684,6 +684,15 @@ void lisy35_set_variant(void)
    if (core_gameData->hw.soundBoard == 0) lisy35_game.soundboard_variant = LISY35_SB_CHIMES; //no soundboard
    else if ((core_gameData->hw.gameSpecific1 & 0x01) == 0) lisy35_game.soundboard_variant = LISY35_SB_STANDARD;
    else lisy35_game.soundboard_variant = LISY35_SB_EXTENDED;
+
+   //if it is an extended soundboard, set the subtype as timing is different for 2581-51 and S&T
+   if ( lisy35_game.soundboard_variant == LISY35_SB_EXTENDED)
+   {
+    if (core_gameData->hw.soundBoard == SNDBRD_BY51) lisy35_coil_set_extended_SB_type(0);
+	else lisy35_coil_set_extended_SB_type(1);
+   }
+
+   //debug?
    if ( ls80dbg.bitv.basic )
    {
     switch(lisy35_game.soundboard_variant)
@@ -695,7 +704,10 @@ void lisy35_set_variant(void)
      sprintf(debugbuf,"Info: LISY35 will use soundboard variant 1 (standard SB)");
      break;
     case LISY35_SB_EXTENDED:
-     sprintf(debugbuf,"Info: LISY35 will use soundboard variant 2 (EXTENDED SB)");
+      if (core_gameData->hw.soundBoard == SNDBRD_BY51)
+         sprintf(debugbuf,"Info: LISY35 will use soundboard variant 2 (EXTENDED SB Type 2581-51)");
+      else
+         sprintf(debugbuf,"Info: LISY35 will use soundboard variant 2 (EXTENDED SB Type S&T)");
      break;
     }
     lisy80_debug(debugbuf);
@@ -863,11 +875,13 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
     if( CHECK_BIT( cont_data, 2) && !CHECK_BIT( old_cont_data, 2))
     {
         //lisy35_nvram_handler( 1, NULL);
-        want_to_write_nvram = 1;
+        //want_to_write_nvram = 1; RTH test no delayd write
+	lisy_nvram_write_to_file();
         //debug
         if ( ls80dbg.bitv.basic )
         {
-         lisy80_debug("flipper disabled we do ASK for a nvram write");
+         //lisy80_debug("flipper disabled we do ASK for a nvram write");
+         lisy80_debug("flipper disabled we do a nvram write");
         }
     }
 
@@ -950,7 +964,7 @@ unsigned char sound_E;
           //we only send this if it changed from last value
  	  if ( last_sound_select != sound_select )
 	  {
-           lisy35_coil_set_sound_select(sound_select);
+           //lisy35_coil_set_sound_select(sound_select); RTH 5.19: the pic does this for us
            //was there a move from 0->1 for sound select status?
            if (( last_sound_select == 0) & ( sound_select == 1)) sound_int_occured = 1;
   	   last_sound_select = sound_select;
@@ -995,23 +1009,20 @@ unsigned char sound_E;
    //what soundboardvariant do we have
    if ( lisy35_game.soundboard_variant != LISY35_SB_EXTENDED)
    {
-    //raw mode, just send it
-    lisy35_mom_coil_set(data);
+    //send sound to PIC, which will handle timing
+    lisy35_sound_std_sb_set(data);
+    // reset int condition
+    sound_int_occured = 0;
     //debug?
     if ( ls80dbg.bitv.sound )
     {
       sprintf(debugbuf,"sound data(standard sb): 0x%02x)",16*last_sound_E + data);
       lisy80_debug(debugbuf);
     }
-    count++; //count the bytes
-    if ( count == 2) //second byte, reset int condition
-    {
-    count = 0;
-    sound_int_occured = 0;
-    }
    }//standard SB or chimes
    else
    {
+   //extended soundboard, we do expect two nibble
    if ( count == 0) //first nibble, store it
    {
     first_nybble = data;

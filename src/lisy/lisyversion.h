@@ -2,7 +2,7 @@
 #define LISYVERSION_H
 
 #define LISY_SOFTWARE_MAIN     5
-#define LISY_SOFTWARE_SUB      18
+#define LISY_SOFTWARE_SUB      19
 
 #endif  /* LISYVERSION_H */
 

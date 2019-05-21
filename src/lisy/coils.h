@@ -15,7 +15,6 @@ void lisy35_lamp_init ( void );
 int coil_get_sw_version(void);
 void lisy80_coil_sound_set( int sound );
 void lisy1_coil_sound_set( int sound );
-void lisy35_coil_sound_set( int sound, unsigned char is_extended);
 void coil_cmd2pic_noansw(unsigned char command);
 int coil_cmd2pic(unsigned char command);
 int coil_get_k3(void);
@@ -33,7 +32,7 @@ void lisy35_coil_set_direction_J4PIN5( unsigned char direction);
 void lisy35_coil_set_direction_J4PIN8( unsigned char direction);
 void lisy35_coil_set_direction_J1PIN8( unsigned char direction);
 void lisy35_coil_set_lampdriver_variant( unsigned char variant);
-//void lisy35_coil_set_soundboard_variant( unsigned char variant);
+void lisy35_coil_set_extended_SB_type( unsigned char type);
 int lisy35_coil_get_mpu_dip(int dip_number);
 void lisy35_coil_read_mpu_dips(void);
 
@@ -59,8 +58,8 @@ void lisy35_coil_read_mpu_dips(void);
 #define LISY35_EXT_CMD_AUX_BOARD_1 3  // AS-2518-43 12 lamps
 #define LISY35_EXT_CMD_AUX_BOARD_2 4  // AS-2518-52 28 lamps
 #define LISY35_EXT_CMD_AUX_BOARD_3 5  // AS-2518-23 60 lamps
-//FREE #define LISY35_EXT_CMD_SOUND_RAW 6  //for normal soundboard & chimes
-//FREE #define LISY35_EXT_CMD_SOUND_COOKED 7  //for ext soundboard ( S&T))
+#define LISY35_EXT_CMD_SB_IS_51 6  //Soundboard is a 2581-51 (extended mode)
+#define LISY35_EXT_CMD_SB_IS_SAT 7  //Soundboard is a S&T (extended mode)
 #define LISY35_EXT_CMD_J4PIN5_INPUT 8  // CO2_PB4 LATEbits.LE0   cont Sol 1
 #define LISY35_EXT_CMD_J4PIN5_OUTPUT 9  // CO2_PB4 LATEbits.LE0  cont Sol 1
 #define LISY35_EXT_CMD_J4PIN8_INPUT 10  //CO3_PB7 LATAbits.LA2   cont Sol 4
