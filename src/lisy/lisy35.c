@@ -809,9 +809,9 @@ int lisy35_nvram_handler_old(int read_or_write, UINT8 *by35_CMOS_Bally)
    lisy35_block.content.starts++;
    if(ls80dbg.bitv.basic) lisy35_block.content.debugs++;
    if(lisy35_game.gamenr > 63) 
-       lisy35_block.content.counts[63]++; //RTH Limitation from LISY80
+       { lisy35_block.content.counts[63]++; } //RTH Limitation from LISY80
    else
-       lisy35_block.content.counts[lisy35_game.gamenr]++;
+       { lisy35_block.content.counts[lisy35_game.gamenr]++; }
 
        lisy35_block.content.Software_Main = sw_main;
        lisy35_block.content.Software_Sub = sw_sub;
@@ -874,7 +874,7 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
 
   //handle continous solenois
   //new cont data?
-  if ( old_cont_data != cont_data )
+  if (( old_cont_data != cont_data ) & ( lisy35_bally_hw_check_finished ==1))
   {
     //check for flipper disable
     if( CHECK_BIT( cont_data, 2) && !CHECK_BIT( old_cont_data, 2))
@@ -981,8 +981,8 @@ unsigned char sound_E;
            }
 	  }//sound_select
           //send sound_E
-          //we only send this if it changed from last value
- 	  if ( last_sound_E != sound_E )
+          //we only send this if it changed from last value and HW check is over
+ 	  if ( ( last_sound_E != sound_E ) & ( lisy35_bally_hw_check_finished ==1) )
  	  {
   	  lisy35_display_set_soundE(sound_E);
   	  last_sound_E = sound_E;
