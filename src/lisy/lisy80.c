@@ -26,7 +26,6 @@
 #include "lisy_home.h"
 #include "lisy.h"
 #include "lisy_mame.h"
-#include "lisyversion.h"
 
 
 //global vars for timing & speed
@@ -125,6 +124,7 @@ void lisy80_init( void )
 {
  int i;
  char s_lisy_software_version[16];
+ unsigned char sw_main,sw_sub,commit;
 
  //do the init on vars
  solenoid_state.byte = 0;
@@ -137,8 +137,10 @@ void lisy80_init( void )
  //set signal handler
  lisy80_set_sighandler();
 
+
  //show up on calling terminal
- sprintf(s_lisy_software_version,"%02d.%03d ",LISY_SOFTWARE_MAIN,LISY_SOFTWARE_SUB);
+ lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+ sprintf(s_lisy_software_version,"%02d.%03d ",sw_main,sw_sub);
  fprintf(stderr,"This is LISY (Lisy80) by bontango, Version %s\n",s_lisy_software_version);
 
  //show the 'boot' message
@@ -1050,6 +1052,7 @@ int lisy80_nvram_handler_old(int read_or_write, UINT8 *GTS80_pRAM_GTB)
  static eeprom_block_t nvram_block;
  static eeprom_block_t lisy80_block;
  static UINT8 *GTS80_pRAM;
+ unsigned char sw_main,sw_sub,commit;
  int i,ret;
 
  //check content at first time
@@ -1093,12 +1096,15 @@ int lisy80_nvram_handler_old(int read_or_write, UINT8 *GTS80_pRAM_GTB)
     lisy80_block.content.gamenr = lisy80_game.gamenr;
    }
 
+   //get sw version
+   lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+
    //now update statistics
    lisy80_block.content.starts++;
    if(ls80dbg.bitv.basic) lisy80_block.content.debugs++;
    lisy80_block.content.counts[lisy80_game.gamenr]++;
-   lisy80_block.content.Software_Main = LISY_SOFTWARE_MAIN;
-   lisy80_block.content.Software_Sub = LISY_SOFTWARE_SUB;
+   lisy80_block.content.Software_Main = sw_main;
+   lisy80_block.content.Software_Sub = sw_sub;
    ret = lisy_eeprom_256byte_write( lisy80_block.byte, 1);
    if ( ls80dbg.bitv.basic )
    {

@@ -26,7 +26,6 @@
 #include "sound.h"
 #include "lisy.h"
 #include "lisy_mame.h"
-#include "lisyversion.h"
 
 
 //global var for internal game_name structure,
@@ -57,7 +56,7 @@ void lisy35_init( void )
 {
  int i,sb;
  char s_lisy_software_version[16];
-
+ unsigned char sw_main,sw_sub,commit;
 
  //do the init on vars
  //for (i=0; i<=36; i++) lisy1_lamp[i]=0;
@@ -66,7 +65,8 @@ void lisy35_init( void )
  lisy80_set_sighandler();
 
  //show up on calling terminal
- sprintf(s_lisy_software_version,"%02d.%03d ",LISY_SOFTWARE_MAIN,LISY_SOFTWARE_SUB);
+ lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+ sprintf(s_lisy_software_version,"%02d.%03d ",sw_main,sw_sub);
  fprintf(stderr,"This is LISY (Lisy35) by bontango, Version %s\n",s_lisy_software_version);
 
  //show the 'boot' message
@@ -758,6 +758,7 @@ int lisy35_nvram_handler_old(int read_or_write, UINT8 *by35_CMOS_Bally)
  static eeprom_block_t nvram_block;
  static eeprom_block_t lisy35_block;
  static UINT8 *by35_CMOS;
+ unsigned char sw_main,sw_sub,commit;
  int i,ret;
 
  //check content at first time
@@ -801,6 +802,9 @@ int lisy35_nvram_handler_old(int read_or_write, UINT8 *by35_CMOS_Bally)
     lisy35_block.content.gamenr = lisy35_game.gamenr;
    }
 
+  //get sw version
+   lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+
    //now update statistics
    lisy35_block.content.starts++;
    if(ls80dbg.bitv.basic) lisy35_block.content.debugs++;
@@ -808,8 +812,9 @@ int lisy35_nvram_handler_old(int read_or_write, UINT8 *by35_CMOS_Bally)
        lisy35_block.content.counts[63]++; //RTH Limitation from LISY80
    else
        lisy35_block.content.counts[lisy35_game.gamenr]++;
-   lisy35_block.content.Software_Main = LISY_SOFTWARE_MAIN;
-   lisy35_block.content.Software_Sub = LISY_SOFTWARE_SUB;
+
+       lisy35_block.content.Software_Main = sw_main;
+       lisy35_block.content.Software_Sub = sw_sub;
    ret = lisy_eeprom_256byte_write( lisy35_block.byte, 1);
    if ( ls80dbg.bitv.basic )
    {

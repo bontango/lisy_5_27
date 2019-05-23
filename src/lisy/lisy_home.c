@@ -23,7 +23,6 @@
 #include "fadecandy.h"
 #include "externals.h"
 #include "lisy.h"
-#include "lisyversion.h"
 
 
 //our pointers to preloaded sounds

@@ -25,7 +25,6 @@
 #include "sound.h"
 #include "lisy.h"
 #include "usbserial.h"
-#include "lisyversion.h"
 
 //typedefs
 
@@ -90,6 +89,7 @@ void lisy_w_init( void )
 {
  int i,sb;
  char s_lisy_software_version[16];
+ unsigned char sw_main,sw_sub,commit;
 
 
  //do the init on vars
@@ -98,8 +98,10 @@ void lisy_w_init( void )
  //set signal handler
  lisy80_set_sighandler();
 
+
  //show up on calling terminal
- sprintf(s_lisy_software_version,"%02d.%03d ",LISY_SOFTWARE_MAIN,LISY_SOFTWARE_SUB);
+ lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+ sprintf(s_lisy_software_version,"%02d.%03d ",sw_main,sw_sub);
  fprintf(stderr,"This is LISY (Lisy Mini) by bontango, Version %s\n",s_lisy_software_version);
 
  //show the 'boot' message

@@ -14,6 +14,8 @@ void lisy_shutdown(void);
 void lisy_hw_init(int lisy_variant);
 int lisy_set_gamename( char *arg_from_main, char *lisy_gamename);
 void lisy_nvram_write_to_file( void );
+void lisy_get_sw_version( unsigned char *sw_main, unsigned char *sw_sub, unsigned char *commit);
+
 
 #endif  /* LISY_H */
 

@@ -15,6 +15,7 @@
 #include "utils.h"
 #include "hw_lib.h"
 #include "fadecandy.h"
+#include "lisyversion.h"
 
 
 //global var for handling different hardware revisions
@@ -196,4 +197,17 @@ int lisy_set_gamename( char *arg_from_main, char *lisy_gamename)
         }
 
  return(0);
+}
+
+//get lisyversion ( from GITVERSION in lisyversion.h )
+void lisy_get_sw_version( unsigned char *sw_main, unsigned char *sw_sub, unsigned char *commit)
+{
+
+ char gitversion[40] = GITVERSION;
+
+ //gitversion has format:  "5.20-1-g6f15813"
+ *sw_main = atoi(strtok(gitversion, "."));
+ *sw_sub = atoi(strtok(NULL, "-"));
+ *commit = atoi(strtok(NULL, "-"));
+
 }
