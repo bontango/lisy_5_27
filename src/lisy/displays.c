@@ -272,12 +272,16 @@ switch (dat) {
     //if ( display != 0) //not for status display at the moment //RTH
       player[display][digit] = datchar;
 
+   //debug?
+   if ( ls80dbg.bitv.displays )
+    {
      printf(" digit  :0123456\n");
      printf("Player 1:%s\n",player[1]);
      printf("Player 2:%s\n",player[2]);
      printf("Player 3:%s\n",player[3]);
      printf("Player 4:%s\n",player[4]);
      printf("status:%s\n",player[0]);
+    }
   }
 
 }
