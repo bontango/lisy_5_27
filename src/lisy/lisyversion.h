@@ -1,1 +1,0 @@
-#define GITVERSION  "5.21-1-ga900398"
