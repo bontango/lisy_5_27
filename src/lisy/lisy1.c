@@ -519,7 +519,13 @@ void lisy1_lamp_handler( int data, int isld)
         lisy80_debug(debugbuf);
        }
 
-       //RTH: we may add nvram write later on here, like with system80
+       //do a nvram write each time the game over relay ( lamp[0]) is going to change (Game Over or Game start)
+       if ( (i + offset) == 0 )
+        {
+	   lisy_nvram_write_to_file();
+           //nvram_delayed_write = NVRAM_DELAY;
+           if ( ls80dbg.bitv.basic ) lisy80_debug("NVRAM delayed write initiaed by GAME OVER Relay");
+          }
 
        //remember
        lisy1_lamp[i+offset] = new_lamp[i];
@@ -657,7 +663,7 @@ void lisy1_shutdown(void)
 //read_or_write = 0 means read
 // 1 means buffered write
 // 2 means write to eeprom (usually delayed)
-unsigned char lisy1_nvram_handler(int read_or_write, unsigned char ramAddr, unsigned char accu)
+unsigned char lisy1_nvram_handler_old(int read_or_write, unsigned char ramAddr, unsigned char accu)
 {
   //printf("lisy1_nvram_handler %s accu:%d ramAddr:%d\n",read_or_write ? "WRITE" : "READ",accu,ramAddr);
 

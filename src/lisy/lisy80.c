@@ -281,8 +281,9 @@ int lisy80_special_function(int myswitch, int action)
     //and set volume according to position of poti
     if ( action == 1 ) 
      { 
-       nvram_delayed_write = NVRAM_DELAY;
-       if ( ls80dbg.bitv.basic) lisy80_debug("NVRAM delayed write initiated by REPLAY Switch");
+       //RTH this conflicts with highcore ettings in testmode
+       //nvram_delayed_write = NVRAM_DELAY;
+       //if ( ls80dbg.bitv.basic) lisy80_debug("NVRAM delayed write initiated by REPLAY Switch");
 
        //set volume in case position of poti has chnaged
        //AND we do emulate sound with pi soundcard
@@ -954,9 +955,9 @@ void lisy80_coil_handler_b( int data)
 	     else sprintf(debugbuf,"LISY80_COIL_HANDLER: Transistor_Q:%d OFF",i+1+offset);
 	lisy80_debug(debugbuf);
        }
-  	   //do a delayd nvram write each time the game over relay ( lamp[0]) is going from zero to one (Game Over)
-	   //this is done in the tickle routine
-  	   if ( ((i + offset) == 0) & (lisy80_lamp[0] == 1) ) 
+  	   //do a delayd nvram write each time the game over relay ( lamp[0]) is going to change (Game Over or Game start)
+	   //the nvram call is done in the tickle routine
+  	   if ( (i + offset) == 0 ) 
              {
               nvram_delayed_write = NVRAM_DELAY;
               if ( ls80dbg.bitv.basic ) lisy80_debug("NVRAM delayed write initiaed by GAME OVER Relay");

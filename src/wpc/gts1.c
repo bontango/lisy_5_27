@@ -243,7 +243,7 @@ static WRITE_HANDLER(port_w) {
 				{
 					cpu_writemem16(0x1800 + locals.ramAddr, locals.accu);
 #ifdef LISY_SUPPORT
-					lisy1_nvram_handler(1, locals.ramAddr, locals.accu);
+					//lisy1_nvram_handler(1, locals.ramAddr, locals.accu);
 #endif
 				}
 //					memory_region(GTS1_MEMREG_CPU)[0x1800 + locals.ramAddr] = locals.accu;
@@ -254,7 +254,7 @@ static WRITE_HANDLER(port_w) {
 #ifndef LISY_SUPPORT
 					locals.accu = cpu_readmem16(0x1800 + locals.ramAddr);
 #else
-					locals.accu = lisy1_nvram_handler(0, locals.ramAddr, 0);
+					//locals.accu = lisy1_nvram_handler(0, locals.ramAddr, 0);
 #endif
 				}
 //					locals.accu = memory_region(GTS1_MEMREG_CPU)[0x1800 + locals.ramAddr];
