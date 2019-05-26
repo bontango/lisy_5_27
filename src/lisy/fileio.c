@@ -1236,6 +1236,7 @@ int  lisymini_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game)
  unsigned char dip_switch_val;
  int line_no;
  int first_line = 1;
+ unsigned char found = 0;
 
  //get value of dipswitch
  dip_switch_val = lisymini_get_dip("S2");
@@ -1260,11 +1261,12 @@ int  lisymini_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game)
      	  strcpy(lisymini_game->type,strtok(NULL, ";"));	//game type
      	  lisymini_game->throttle = atoi(strtok(NULL, ";"));	//throttle value per Bally game
      	  strcpy(lisymini_game->comment,strtok(NULL, ";"));	//comment if available
+	  found = 1; //found it
           break;
 	}
    } //while
    fclose(fstream);
 
   //give back the name and the number of the game
-  return(line_no);
+  if (found) return(line_no); else return(-1);
 }

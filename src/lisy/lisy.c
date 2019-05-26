@@ -80,12 +80,6 @@ gettimeofday(&lisy_start_t,(struct timezone *)0);
 //init th wiringPI library first
 lisy80_hwlib_wiringPI_init();
 
-//any options?
-//at this stage only look for basic debug option here
-//if (nodebug) //overwrite dip settings?
-// ls80dbg.bitv.basic = 0;
-//else
-// {
  if ( lisy80_dip1_debug_option() )
  {
   fprintf(stderr,"LISY basic DEBUG activ\n");
@@ -99,15 +93,21 @@ lisy80_hwlib_wiringPI_init();
 
  }
  else ls80dbg.bitv.basic = 0;
-//}
 
 //do init the hardware
 //this also sets the debug options by reading jumpers via switch pic
-if( lisy_variant == 4) lisymini_hwlib_init(); //for williams we use special board, minilisy only
-else lisy_hwlib_init();
+if( lisy_variant == 4)
+ { 
+   //for williams we use special board, minilisy only
+   lisymini_hwlib_init();
+ }
+else
+ {
+   lisy_hwlib_init();
+ }
 
-//now look for the other dips and for extended debug options
-lisy80_get_dips();
+   //now look for the other dips and for extended debug options
+   lisy80_get_dips();
 
 }
 

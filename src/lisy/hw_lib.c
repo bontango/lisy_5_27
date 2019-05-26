@@ -167,23 +167,12 @@ void lisymini_hwlib_init( void )
  //fix for LISYmini at the moment
  lisy_hardware_revision = LISY_HW_LISY_W;
 
- //show what version this pic is using
- //TBD
-
- //get value of k3 dip; hardware 320 and later  only
+ //get value of k3 dip;
  //3 == no options active
  lisy_K3_value = lisymini_get_dip("K3");
-  //debug
-  if (ls80dbg.bitv.basic)
-  {
-   sprintf(debugbuf,"Minilisy returns for K3 %d",lisy_K3_value);
-   lisy80_debug(debugbuf);
-  }
 
-//now get debug options and 'some' S1 DIPs
-dip_missing_values = lisymini_get_dip("S1");
-//and options for debugging
-K1_debug_values = lisymini_get_dip("K1");
+ //now get debug options
+ K1_debug_values = lisymini_get_dip("K1");
 
  //init usb serial
  if ( lisy_usb_init() >= 0) 
@@ -205,10 +194,10 @@ K1_debug_values = lisymini_get_dip("K1");
  lisy80_set_green_led(0);
  lisy80_set_dp_led(1);
 
+*/ 
 
  //init internal FIFO
  LISY80_BufferInit();
-*/ 
 }
 
 
@@ -781,6 +770,10 @@ if ( lisy_hardware_revision == 311 )
   ls80opt.bitv.debug = ~digitalRead(LISY80_HW311_DIP1_S7);
   ls80opt.bitv.autostart = ~digitalRead(LISY80_HW311_DIP1_S8);
 }
+else if ( lisy_hardware_revision == 121 )  //lisy mini
+{
+ ls80opt.byte = lisymini_get_dip("S1");
+}
 else
 {
   //set the mode for DIP Switch 1, Input with pull up enable, 'ON' means pulled to GND
@@ -996,11 +989,10 @@ void lisy35_switch_pic_init(unsigned char variant)
 unsigned char lisymini_get_dip( char* wantdip)
 {
 
-
-#define LISYMINI_STROBE_1 0
-#define LISYMINI_STROBE_2 2
-#define LISYMINI_STROBE_3 13
-#define LISYMINI_STROBE_4 25
+#define LISYMINI_STROBE_1 25
+#define LISYMINI_STROBE_2 13
+#define LISYMINI_STROBE_3 2
+#define LISYMINI_STROBE_4 0
 
 #define LISYMINI_RET_1 10
 #define LISYMINI_RET_2 11
@@ -1052,9 +1044,10 @@ digitalWrite (LISYMINI_STROBE_4,1);
 delay(LISYMINI_WAITTIME); //100ms delay from wiringpi
 S2.bitv.eight = digitalRead (LISYMINI_RET_1);
 S2.bitv.four = digitalRead (LISYMINI_RET_2);
-K1.bitv.four = digitalRead (LISYMINI_RET_3);
-K2.bitv.one = digitalRead (LISYMINI_RET_4);
+K1.bitv.five = digitalRead (LISYMINI_RET_3);
+K1.bitv.one = digitalRead (LISYMINI_RET_4);
 S1.bitv.five = digitalRead (LISYMINI_RET_5);
+
 //strobe 3
 digitalWrite (LISYMINI_STROBE_1,0);
 digitalWrite (LISYMINI_STROBE_2,0);
@@ -1064,8 +1057,8 @@ digitalWrite (LISYMINI_STROBE_4,0);
 delay(LISYMINI_WAITTIME); //100ms delay from wiringpi
 S2.bitv.seven = digitalRead (LISYMINI_RET_1);
 S2.bitv.three = digitalRead (LISYMINI_RET_2);
-K1.bitv.three = digitalRead (LISYMINI_RET_3);
-K3.bitv.two = ~digitalRead (LISYMINI_RET_4); //reversed
+K1.bitv.four = digitalRead (LISYMINI_RET_3);
+K3.bitv.two = ~digitalRead (LISYMINI_RET_4);  //k3 is invers
 S1.bitv.four = digitalRead (LISYMINI_RET_5);
 
 //strobe 2
@@ -1077,9 +1070,10 @@ digitalWrite (LISYMINI_STROBE_4,0);
 delay(LISYMINI_WAITTIME); //100ms delay from wiringpi
 S2.bitv.six = digitalRead (LISYMINI_RET_1);
 S2.bitv.two = digitalRead (LISYMINI_RET_2);
-K1.bitv.two = digitalRead (LISYMINI_RET_3);
-K3.bitv.one = ~digitalRead (LISYMINI_RET_4); //reversed
+K1.bitv.three = digitalRead (LISYMINI_RET_3);
+K3.bitv.one = ~digitalRead (LISYMINI_RET_4);  //K3 is invers
 S1.bitv.three = digitalRead (LISYMINI_RET_5);
+
 //strobe 1
 digitalWrite (LISYMINI_STROBE_1,1);
 digitalWrite (LISYMINI_STROBE_2,0);
@@ -1089,8 +1083,8 @@ digitalWrite (LISYMINI_STROBE_4,0);
 delay(LISYMINI_WAITTIME); //100ms delay from wiringpi
 S2.bitv.five = digitalRead (LISYMINI_RET_1);
 S2.bitv.one = digitalRead (LISYMINI_RET_2);
-K1.bitv.one = digitalRead (LISYMINI_RET_3);
-K1.bitv.five = digitalRead (LISYMINI_RET_4);
+K1.bitv.two = digitalRead (LISYMINI_RET_3);
+K2.bitv.one = digitalRead (LISYMINI_RET_4);
 S1.bitv.one = digitalRead (LISYMINI_RET_5);
 
   //only one time
