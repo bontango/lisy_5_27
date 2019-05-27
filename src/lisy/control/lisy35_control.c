@@ -32,7 +32,7 @@
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     93
+#define LISY35control_SOFTWARE_SUB     94
 
 //fake definiton needed in lisy80
 typedef struct {
@@ -178,7 +178,7 @@ void do_sound_set( char *buffer)
  //set again same sound means set to zero
  if ( sound[sound_no] == 1)
   {
-   lisy35_coil_sound_set( 0, 0 );
+   lisy35_sound_std_sb_set( 0 );
    //set internal var (remember)
    for(i=0; i<=31; i++) sound[i] = 0;
    sound[0] = 1;
@@ -200,7 +200,7 @@ void do_sound_set( char *buffer)
  }
 
  //now set sound
- lisy35_coil_sound_set( sound_no, 0 );
+ lisy35_sound_std_sb_set( sound_no );
 
 }
 
@@ -827,7 +827,7 @@ if( lisy35_game.soundboard_variant == 0)
      sprintf(buffer,"this game uses Chimes, please use Solenoids to test sound<br><br>\n");
      sendit( sockfd, buffer);
 }
-else if( lisy35_game.soundboard_variant == 1)
+else if( lisy35_game.soundboard_variant == 1) //standard SB
 {
      sprintf(buffer,"push button to send specific sound<br><br>\n");
      sendit( sockfd, buffer);
@@ -856,11 +856,14 @@ else if( lisy35_game.soundboard_variant == 2)
 
    //calculate soundnumber/command ( max=255 from html input type)
    sound_no = atoi(ext_sound_no);
-   lisy35_coil_sound_set( sound_no, 1 );
 
    //calculate lsb.msb for output
    lsb = sound_no%16;
    msb = sound_no/16;
+
+   //send it
+   lisy35_sound_ext_sb_set(lsb); //LSB
+   lisy35_sound_ext_sb_set(msb); //MSB
 
    sprintf(buffer,"a command with value %d ( lsb:%d msb:%d) has been send to the soundcard<br><br>\n",sound_no,lsb,msb);
    sendit( sockfd, buffer);
@@ -1418,9 +1421,10 @@ void send_software_infos( int sockfd )
      char buffer[256];
      int dum;
 
-   //get installed version of lisy1
-   dum = system("/usr/local/bin/lisy -lisyversion");
-   sprintf(buffer,"LISY35 version installed is 5.%02d<br>\n",WEXITSTATUS(dum));
+   //get installed version of lisy
+   unsigned char sw_main,sw_sub,commit;
+   lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+   sprintf(buffer,"%d.%d-%d\n",sw_main,sw_sub,commit);
    sendit( sockfd, buffer);
 
    //init switch pic and get Software version
