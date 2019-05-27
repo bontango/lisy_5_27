@@ -116,7 +116,7 @@ union u_Z28 {
 int lisy80_SOL9;		//we spend an int for SOL9
 unsigned char lisy80_lamp[48];	//all the lamps (48)
 int lisy80_flip_flop[12];
-int old_sounds;		//remember sound settings
+int old_neg_sounds;		//remember sound settings, negated version
 
 
 //init SW portion of lisy80
@@ -130,7 +130,7 @@ void lisy80_init( void )
  solenoid_state.byte = 0;
  lisy80_Z28.byte = 0;
  lisy80_SOL9 = 0;
- old_sounds = 15; //because of negated outputs
+ old_neg_sounds = 0; //RTH: change it in SOL pic as it do init with 0, where at startup output is '1111' because of inverter
  for (i=0; i<=47; i++) lisy80_lamp[i]=0;
  for (i=0; i<=11; i++) lisy80_flip_flop[i]=0;
 
@@ -758,6 +758,8 @@ if ( a_or_b == 1)
 void lisy80_coil_handler_a( int data)
 {
 
+ int new_sound;
+
 //read what the RIOT wants to do
 lisy80_riot2_porta.byte = data;
 // SOL9 has an inverter behind
@@ -883,34 +885,35 @@ if (lisy80_SOL9 != lisy80_riot2_porta.bitv1.SOL9 ) {
 //Note: Output is negated because of LS04 at PA0..PA4 (Z27)
 if ( lisy80_riot2_porta.bitv2.SOUND_EN == 0) // Z31 (7408 'AND') sound control enabled
 	 {
-	  if (old_sounds != lisy80_riot2_porta.bitv2.SOUND ) {
+	  if (old_neg_sounds != lisy80_riot2_porta.bitv2.SOUND ) {
 		//set value for LISY80 which is negated because of Z27
 		lisy80_sound.bitv3.S1 = ~lisy80_riot2_porta.bitv3.S1;
 		lisy80_sound.bitv3.S2 = ~lisy80_riot2_porta.bitv3.S2;
 		lisy80_sound.bitv3.S4 = ~lisy80_riot2_porta.bitv3.S4;
 		lisy80_sound.bitv3.S8 = ~lisy80_riot2_porta.bitv3.S8;
+		new_sound = lisy80_sound.bitv2.SOUND; //this is the negated one for the PIC
 		if ( ls80dbg.bitv.sound )
   		{
-        		sprintf(debugbuf,"setting sound to:%d" ,lisy80_sound.bitv2.SOUND + sound16 );
+        		sprintf(debugbuf,"setting sound to:%d" ,new_sound + sound16 );
         		lisy80_debug(debugbuf);
   		}
-	  	lisy80_sound_set(lisy80_sound.bitv2.SOUND);  //set to new value
+	  	lisy80_sound_set(new_sound);  //set to new value
 
 		//JustBoom Sound? we may want to play wav files here
 		//need to add separate sound line here! for sound >16
 		//RTH: need to be changed to 'sndbrd_0_data_w' 
-       		if ( lisy80_has_own_sounds ) lisy80_play_wav(lisy80_sound.bitv2.SOUND + sound16);
+       		if ( lisy80_has_own_sounds ) lisy80_play_wav(new_sound + sound16);
 
 	        //remember old value
-		old_sounds = lisy80_riot2_porta.bitv2.SOUND;
+		old_neg_sounds = lisy80_riot2_porta.bitv2.SOUND;
 	   }
 	}
 else //not enabled, so value is '1111' and output is zero
 	 {
 	  //only if sound changed
-	  if (old_sounds != 15 ) {
-	      old_sounds = 15;
-	      if ( ls80dbg.bitv.sound ) lisy80_debug("setting sound to:0");
+	  if (old_neg_sounds != 15 ) {
+	      old_neg_sounds = 15;
+	      if ( ls80dbg.bitv.sound ) lisy80_debug("sound ctrl not enabled, setting sound to:0");
 	      lisy80_sound_set(0);  // zero
 	   }
 	}
