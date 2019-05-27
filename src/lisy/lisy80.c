@@ -140,7 +140,7 @@ void lisy80_init( void )
 
  //show up on calling terminal
  lisy_get_sw_version( &sw_main, &sw_sub, &commit);
- sprintf(s_lisy_software_version,"%02d.%03d ",sw_main,sw_sub);
+ sprintf(s_lisy_software_version,"%d%02d %02d",sw_main,sw_sub,commit);
  fprintf(stderr,"This is LISY (Lisy80) by bontango, Version %s\n",s_lisy_software_version);
 
  //show the 'boot' message
