@@ -59,10 +59,9 @@ int main(int argc, char **argv)
 	    unsigned char sw_main,sw_sub,commit;
 	    lisy_get_sw_version( &sw_main, &sw_sub, &commit);
             //show up on calling terminal
-            fprintf(stdout,"Version %02d.%03d-%d\n",sw_main,sw_sub,commit);
+            fprintf(stdout,"%d.%d-%d\n",sw_main,sw_sub,commit);
 
-            //give back
-            return(sw_sub);
+            return(0);
            }
 
         //otherwise lets check what game we need to emulate (lisy.c)
