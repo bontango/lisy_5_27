@@ -472,21 +472,6 @@ lisy80_coil_sound_set(sound);
 
 }
 
-//set the sound LISY1
-void lisy1_sound_set(int sound)
-{
-
-if ( ls80dbg.bitv.sound )
-  {
-        sprintf(debugbuf,"setting sound to:%d" ,sound );
-        lisy80_debug(debugbuf);
-  }
-
-lisy1_coil_sound_set(sound);
-
-
-}
-
 // identiyf if buffer on switch PIC is ready
 //resturn 1 if yes, 0 otherwise
 //which is the status of the GPIO connected to Switch PIC

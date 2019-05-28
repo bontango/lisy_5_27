@@ -445,39 +445,11 @@ switch(ioport)
    case 6: lisy1_coil_set( Q_SYS1_SOL7, !enable); break;
    case 7: lisy1_coil_set( Q_SYS1_SOL8, !enable); break;
  }
+ 
+ //possible debugging is done in lisy1_coil_set
+ //as we have look for min pules time there 
   
-if ( ls80dbg.bitv.coils )
-{
-switch(ioport)
- {
-   case 0: sprintf(debugbuf," 0-0-Outhole set to %s",enable ? "OFF" : "ON");
-	   lisy80_debug(debugbuf);
-           break;
-   case 1: sprintf(debugbuf," 0-1-Knocker set to %s",enable ? "OFF" : "ON");
-	   lisy80_debug(debugbuf);
-           break;
-   case 2: sprintf(debugbuf," 0-2-Tens Chime set to %s",enable ? "OFF" : "ON");
-	   lisy80_debug(debugbuf);
-           break;
-   case 3: sprintf(debugbuf," 0-3-Hundred Chime set to %s",enable ? "OFF" : "ON");
-	   lisy80_debug(debugbuf);
-           break;
-   case 4: sprintf(debugbuf," 0-4-Thousend Chime set to %s",enable ? "OFF" : "ON");
-	   lisy80_debug(debugbuf);
-           break;
-   case 5: sprintf(debugbuf," 0-5-Solenoid 6 %s",enable ? "OFF" : "ON");
-	   lisy80_debug(debugbuf);
-           break;
-   case 6: sprintf(debugbuf," 0-6-Solenoid 7 %s",enable ? "OFF" : "ON");
-	   lisy80_debug(debugbuf);
-           break;
-   case 7: sprintf(debugbuf," 0-7-Solenoid 8 %s",enable ? "OFF" : "ON");
-	   lisy80_debug(debugbuf);
-           break;
- }
-}
-  
-}
+} //lisy1_solenoid_handler
 
 //lamp handler for system1
 void lisy1_lamp_handler( int data, int isld)

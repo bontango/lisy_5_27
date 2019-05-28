@@ -175,25 +175,6 @@ void lisy80_coil_sound_set( int sound)
 
 }
 
-//sound set via PIC I2C com LISY1
-void lisy1_coil_sound_set( int sound)
-{
-   //with SYstem 1 we have three coils for sound, meaning 7 possibilities for sound (3 bit)
-   //we may do it the same way as for system80 later
-        if ( sound & 0x01 ) lisy1_coil_set( Q_TENS, 1); else  lisy1_coil_set( Q_TENS, 0);
-        if ( sound & 0x02 ) lisy1_coil_set( Q_HUND, 1); else  lisy1_coil_set( Q_HUND, 0);
-        if ( sound & 0x04 ) lisy1_coil_set( Q_TOUS, 1); else  lisy1_coil_set( Q_TOUS, 0);
-
-if ( ls80dbg.bitv.sound )
-  {
-      if ( sound & 0x01 ) lisy80_debug("sound Q_TENS to 1"); else lisy80_debug("sound Q_TENS to 0");
-      if ( sound & 0x02 ) lisy80_debug("sound Q_HUND to 1"); else lisy80_debug("sound Q_HUND to 0");
-      if ( sound & 0x04 ) lisy80_debug("sound Q_TOUS to 1"); else lisy80_debug("sound Q_TOUS to 0");
-  }
-
-
-}
-
 //coil set via PIC I2C com
 void coil_coil_set( int coil, int action)
 {
@@ -726,18 +707,18 @@ void lisy1_coil_set( int coil, int action)
      }
 
     //add debug for sound, in case action == ON
-    if ( (ls80dbg.bitv.sound) && ( action == 0) )
+    if ( (ls80dbg.bitv.sound) )
      {
 	switch(coil)
     	{
         	case Q_TENS: 
-        		lisy80_debug("play sound for Q_TENS");
+        		if ( action ) lisy80_debug("play sound for Q_TENS"); else lisy80_debug("sound Q_TENS OFF");
                	       break;
         	case Q_HUND: 
-        		lisy80_debug("play sound for Q_HUND");
+        	        if ( action ) lisy80_debug("play sound for Q_HUND"); else lisy80_debug("sound Q_HUND OFF");
                	       break;
         	case Q_TOUS: 
-        		lisy80_debug("play sound for Q_TOUS");
+        		if ( action ) lisy80_debug("play sound for Q_TOUS"); else lisy80_debug("sound Q_TOUS OFF");
                	       break;
          }
      }
