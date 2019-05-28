@@ -552,10 +552,12 @@ void lisy1TickleWatchdog( void )
 */
 void lisy1_throttle(void)
 {
-static int first = 1;
+static unsigned char  first = 1;
+static unsigned char  scaling_target_reached = 0;
 unsigned int now;
 int sleeptime;
 static unsigned int last;
+static double startscale = 0.5;
 
 
 if (first)
@@ -563,22 +565,44 @@ if (first)
   first = 0;
   //store start time first, which is number of microseconds since wiringPiSetup (wiringPI lib)
   last = micros();
+ //set scale to startscale
+ cpunum_set_clockscale(0, startscale);
  }
+
 
  // if we are faster than throttle value which is per default 3000 usec (3 msec)
  //we need to slow down a bit
+ //lets iterate the best value for cpu scaling from puinmame
 
+ if(!scaling_target_reached)
+ {
  //see how many micros passed
  now = micros();
  //beware of 'wrap' which happens each 71 minutes
  if ( now < last) now = last; //we had a wrap
 
- //calculate difference and sleep a bit
+ //calculate difference and calculate scalefactor until we have a good value
  sleeptime = g_lisy1_throttle_val - ( now - last); 
- if (sleeptime > 0) delayMicroseconds ( sleeptime );
+ //if (sleeptime > 0) delayMicroseconds ( sleeptime );
+ if (sleeptime > 0 )
+ {
+  startscale = startscale - 0.001;
+  //set new value
+  cpunum_set_clockscale(0, startscale);
+ }
+ else
+ {
+  scaling_target_reached = 1;  
+  if ( ls80dbg.bitv.basic )
+  {
+   sprintf(debugbuf,"Info: scaling target reached:%f",startscale);
+   lisy80_debug(debugbuf);
+  }
+ } 
 
  //store current time for next round with speed limitc
  last = micros();
+ }//calculate scale
 
 }
 
