@@ -495,7 +495,7 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
  {
    if ( ( ret = lisy_udp_switch_reader( &action, 0 )) != 80)
    {
-     sprintf(debugbuf,"LISY35_SWITCH_READER (UDP Server Data received: %d",ret);
+     sprintf(debugbuf,"LISY80_SWITCH_READER (UDP Server Data received: %d",ret);
      lisy80_debug(debugbuf);
    }
  }
