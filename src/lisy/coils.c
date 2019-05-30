@@ -702,7 +702,7 @@ void lisy1_coil_set( int coil, int action)
     //debug
     if (ls80dbg.bitv.coils)
      {
-        sprintf(debugbuf,"setting coil:%d to:%d (SOLENOID)",coil,action);
+        sprintf(debugbuf,"setting coil:%d to:%d (SOLENOID)",mycoil,action);
         lisy80_debug(debugbuf);
      }
 
