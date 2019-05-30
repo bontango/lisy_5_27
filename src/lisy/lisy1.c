@@ -320,6 +320,17 @@ static int simulate_coin_flag = 0;
 //read values from pic
 //check if there is an update first
 ret = lisy1_switch_reader( &action );
+//if debug mode is set we get our reedings from udp switchreader in additon
+//but do not overwrite real switches
+if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
+ {
+   if ( ( ret = lisy_udp_switch_reader( &action, 0 )) != 80)
+   {
+     sprintf(debugbuf,"LISY1_SWITCH_READER (UDP Server Data received: %d",ret);
+     lisy80_debug(debugbuf);
+   }
+ }
+
 
 //SLAM handling is reverse in lisy1, meaning 0 is CLOSED
 //we suppress processing of SLAM Switch actions with option slam active
@@ -327,7 +338,8 @@ if ( (ret == 76) && (ls80opt.bitv.slam == 1)) return(swMatrixLISY1[sys1strobe-1]
 
 
 //NOTE: system has has 8*5==40 switches in maximum, counting 00..04;10...14; ...
-//we use 'internal strobe 6' to handle special switches in the same way ( SLAM=06,OUTHOLE=16,RESET=26 )
+//we use 'internal strobe 6' to handle special switches in the same way 
+//SLAM bit7  OUTHOLE bit6 RESET bit5
 if (ret < 80) //ret is switchnumber
       {
 
