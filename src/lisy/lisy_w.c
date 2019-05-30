@@ -326,7 +326,7 @@ ret = lisy_w_switch_reader( &action );
 
 //if debug mode is set we get our reedings from udp switchreader in additon
 //but do not overwrite real switches
-if ( ( ls80dbg.bitv.basic ) & ( ret == 80)) 
+if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
  {
    if ( ( ret = lisy_udp_switch_reader( &action, 0 )) != 80)
    {

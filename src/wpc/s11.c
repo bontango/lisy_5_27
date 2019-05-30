@@ -550,7 +550,7 @@ lisy_w_throttle();
  }
 static READ_HANDLER(pia4a_r) 
  {
-#if defined(LISY_SUPPORT)
+#ifndef LISY_SUPPORT
  return core_getSwCol(locals.swCol);
 #endif
 #if defined(LISY_SUPPORT)
