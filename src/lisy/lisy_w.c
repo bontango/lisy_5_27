@@ -29,6 +29,7 @@
 //typedefs
 
 /*
+********   SYSTEM 7  *************
 from core.c
 #define DISP_SEG_7(row,col,type) {4*row,16*col,row*20+col*8+1,7,type}
 *
@@ -52,6 +53,21 @@ Player 2: 29
 Player 3: 1
 Player 4: 9
 Credits: 20 28 Balls: 0 8
+
+
+
+********   SYSTEM 9  *************
+const struct core_dispLayout s11_dispS9[] = {
+  {4, 0, 1,7, CORE_SEG87}, {4,16, 9,7, CORE_SEG87},
+  {0, 0,21,7, CORE_SEG87}, {0,16,29,7, CORE_SEG87},
+  DISP_SEG_CREDIT(0,8,CORE_SEG7S),DISP_SEG_BALLS(20,28,CORE_SEG7S),{0}
+results in:
+Player 1: 1
+Player 2: 9
+Player 3: 21
+Player 4: 29
+Credits: 0 8 Balls: 20 28
+
 */
 
  typedef union {
@@ -69,8 +85,24 @@ Credits: 20 28 Balls: 0 8
           UINT16 player4[7]; //29..35
 	  UINT16 dum2[CORE_SEGCOUNT-36]; //the rest
       } disp;
-  } t_mysegments;
+  } t_mysegments_s7;
 
+ typedef union {
+       core_tSeg segments;
+       //assigment accoring to s7games.c & core.c/.h see above
+       struct {
+	  UINT16 credits1; //0
+          UINT16 player3[7]; //1..7
+	  UINT16 credits2;  //8
+          UINT16 player4[7]; //9..15
+	  UINT16 dum1[4]; //16..19
+	  UINT16 balls1; //20
+          UINT16 player1[7]; //21..27
+	  UINT16 balls2; //28
+          UINT16 player2[7]; //29..35
+	  UINT16 dum2[CORE_SEGCOUNT-36]; //the rest
+      } disp;
+  } t_mysegments;
 
 //global var for internal game_name structure,
 //set by  lisy80_get_gamename in unix/main
