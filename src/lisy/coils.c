@@ -702,8 +702,24 @@ void lisy1_coil_set( int coil, int action)
     //debug
     if (ls80dbg.bitv.coils)
      {
-        sprintf(debugbuf,"setting coil:%d to:%d (SOLENOID)",mycoil,action);
-        lisy80_debug(debugbuf);
+	switch(coil)
+    	{
+        	case Q_KNOCK: 
+        		if ( action ) lisy80_debug("Q_KNOCK on"); else lisy80_debug("Q_KNOCK OFF");
+               	       break;
+        	case Q_OUTH: 
+        		if ( action ) lisy80_debug("Q_OUTH on"); else lisy80_debug("Q_OUTH OFF");
+               	       break;
+        	case Q_SYS1_SOL6: 
+        		if ( action ) lisy80_debug("Q_SYS1_SOL6 on"); else lisy80_debug("Q_SYS1_SOL6 OFF");
+               	       break;
+        	case Q_SYS1_SOL7: 
+        		if ( action ) lisy80_debug("Q_SYS1_SOL7 on"); else lisy80_debug("Q_SYS1_SOL7 OFF");
+               	       break;
+        	case Q_SYS1_SOL8: 
+        		if ( action ) lisy80_debug("Q_SYS1_SOL8 on"); else lisy80_debug("Q_SYS1_SOL8 OFF");
+               	       break;
+        }
      }
 
     //add debug for sound, in case action == ON

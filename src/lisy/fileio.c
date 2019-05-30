@@ -1048,6 +1048,7 @@ int  lisy1_file_get_coilopts(void)
  int coil_no;
  int first_line = 1;
  FILE *fstream;
+ int gtb_pulse[9];
  int i;
 
  //set lisy1 defaults which is 150 msec
@@ -1063,15 +1064,29 @@ int  lisy1_file_get_coilopts(void)
       return -1;
    }
 
+   //config file will hav coil numbering 1..8
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)
      coil_no = atoi(strtok(line, ";")); 	//coil number
      //range check
-     if ( coil_no <= 7)
-        lisy1_coil_min_pulse_time[coil_no] = atoi(strtok(NULL, ";"));	
+     if ( coil_no <= 8)
+        gtb_pulse[coil_no] = atoi(strtok(NULL, ";"));	
    } //while
    fclose(fstream);
+
+  //change position of OUTHOLE as OUTHOLE is SOL1 internal
+  //so that numbering of coila correspondent with Gottlieb numbering
+  //in order not to need change PIC SW, historical reason
+  lisy1_coil_min_pulse_time[0] = gtb_pulse[2]; //knock
+  lisy1_coil_min_pulse_time[1] = gtb_pulse[3]; //tens
+  lisy1_coil_min_pulse_time[2] = gtb_pulse[4]; //hund
+  lisy1_coil_min_pulse_time[3] = gtb_pulse[5]; //tous
+  lisy1_coil_min_pulse_time[4] = gtb_pulse[1]; //OUTHOLE
+  lisy1_coil_min_pulse_time[5] = gtb_pulse[6]; //SOL6
+  lisy1_coil_min_pulse_time[6] = gtb_pulse[7]; //SOL7
+  lisy1_coil_min_pulse_time[7] = gtb_pulse[8]; //SOL8
+
 
   return 0;
 }
