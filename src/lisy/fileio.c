@@ -923,6 +923,7 @@ int  lisy1_file_get_gamename(t_stru_lisy1_games_csv *lisy1_game)
      	  strcpy(lisy1_game->long_name,strtok(NULL, ";"));	//game long name
      	  strcpy(lisy1_game->rom_id,strtok(NULL, ";"));		//system 1 rom ID (1 char)
      	  lisy1_game->throttle = atoi(strtok(NULL, ";"));	//throttle value per Gottlieb game
+     	  lisy1_game->clockscale = atof(strtok(NULL, ";"));	//clockscale value per Gottlieb game
      	  strcpy(lisy1_game->comment,strtok(NULL, ";"));	//comment if available
           break;
 	}

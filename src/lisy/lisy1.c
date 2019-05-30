@@ -33,6 +33,7 @@ t_stru_lisy1_games_csv lisy1_game;
 
 //global var for timing and speed
 int g_lisy1_throttle_val = 3000;
+double g_lisy1_clockscale_val = 0.5;
 
 //internal switch Matrix for system1, we need 7 elements
 //as pinmame internal starts with 1
@@ -169,6 +170,10 @@ int lisy1_get_gamename(char *gamename)
   g_lisy1_throttle_val = lisy1_game.throttle;
   //give this info on screen
   fprintf(stderr,"LISY1: Throttle value is %d\n",g_lisy1_throttle_val);
+  //store clockscale value from gamelist to global var
+  g_lisy1_clockscale_val = lisy1_game.clockscale;
+  //give this info on screen
+  fprintf(stderr,"LISY1: clockscale value is %f\n",g_lisy1_clockscale_val);
 
   //other infos are stored in global var
 
@@ -578,7 +583,8 @@ if (first)
   //store start time first, which is number of microseconds since wiringPiSetup (wiringPI lib)
   last = micros();
  //set scale to startscale
- cpunum_set_clockscale(0, startscale);
+ //cpunum_set_clockscale(0, startscale);
+ cpunum_set_clockscale(0, g_lisy1_clockscale_val);
  }
 
 
@@ -586,35 +592,17 @@ if (first)
  //we need to slow down a bit
  //lets iterate the best value for cpu scaling from puinmame
 
- if(!scaling_target_reached)
- {
  //see how many micros passed
  now = micros();
  //beware of 'wrap' which happens each 71 minutes
  if ( now < last) now = last; //we had a wrap
 
- //calculate difference and calculate scalefactor until we have a good value
+ //calculate difference and sleep a bit
  sleeptime = g_lisy1_throttle_val - ( now - last); 
- //if (sleeptime > 0) delayMicroseconds ( sleeptime );
- if (sleeptime > 0 )
- {
-  startscale = startscale - 0.001;
-  //set new value
-  cpunum_set_clockscale(0, startscale);
- }
- else
- {
-  scaling_target_reached = 1;  
-  if ( ls80dbg.bitv.basic )
-  {
-   sprintf(debugbuf,"Info: scaling target reached:%f",startscale);
-   lisy80_debug(debugbuf);
-  }
- } 
+ if (sleeptime > 0) delayMicroseconds ( sleeptime );
 
  //store current time for next round with speed limitc
  last = micros();
- }//calculate scale
 
 }
 

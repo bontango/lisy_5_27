@@ -19,7 +19,8 @@ typedef struct
   char gamename[10];  // game name mame fromat (8 chars)
   char long_name[40];  // game name from csv
   char rom_id[10];  // system1 rom-id (1 char)
-  int throttle;  // throttle value per Gottlieb game, default is 1000
+  int throttle;  // throttle value per Gottlieb game, default is 3000
+  double clockscale;  // clockscale value per Gottlieb game, default is  0.5
   char comment[80];  // comment from csv
   char lamp17_is_Coil;  // will be 1 for Joker Poker, Countdown,Pinball-Pool and Buck Rogers
   char lamp18_is_Coil;  // will be 1 for Countdown
