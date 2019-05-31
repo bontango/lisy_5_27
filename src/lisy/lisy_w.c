@@ -14,6 +14,7 @@
 #include "xmame.h"
 #include "driver.h"
 #include "wpc/core.h"
+#include "wpc/s11.h"
 #include "lisy_w.h"
 #include "fileio.h"
 #include "hw_lib.h"
@@ -368,6 +369,10 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
      --ret;
    }
  }
+
+//special switches
+if ( ret == 71) {core_setSw( S11_SWADVANCE, action ); printf("RTH S11_SWADVANCE But action=%d\n",action); }
+if ( ret == 72) {core_setSw( S11_SWUPDN, action ); printf("RTH S11_SWUPDN But action=%d\n",action); }
 
 //NOTE: system has has 8*8==64 switches in maximum, counting 1...64; ...
 //we use 'internal strobe 6' to handle special switches in the same way ( TEST=49,S33=50 )

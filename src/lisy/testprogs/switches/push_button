@@ -9,5 +9,5 @@ push=$(($1+100))
 
 echo pushing $push
 ./a.out 127.0.0.1 $push
-sleep 0.4
+sleep 0.5
 ./a.out 127.0.0.1 $1

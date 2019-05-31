@@ -686,6 +686,8 @@ static SWITCH_UPDATE(s11) {
 		procGetSwitchEvents();
 #endif
 
+#ifndef LISY_SUPPORT
+//if we have LISY, all switches come from LISY (Matrix[0] has e.g. ADVANCE Button!
   if (inports) {
     coreGlobals.swMatrix[0] = (inports[S11_COMINPORT] & 0x7f00)>>8;
     // All the matrix switches come from the P-ROC, so we only want to read
@@ -694,6 +696,7 @@ static SWITCH_UPDATE(s11) {
     coreGlobals.swMatrix[1] = inports[S11_COMINPORT];
 #endif
   }
+#endif
 
   /*-- Generate interupts for diganostic keys --*/
   cpu_set_nmi_line(0, core_getSw(S11_SWCPUDIAG) ? ASSERT_LINE : CLEAR_LINE);
