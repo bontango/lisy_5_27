@@ -1052,8 +1052,10 @@ int  lisy1_file_get_coilopts(void)
  int gtb_pulse[9];
  int i;
 
- //set lisy1 defaults which is 150 msec
+ //set lisy1 defaults which is 150 msec for coils
  for ( i=0; i<=7; i++) lisy1_coil_min_pulse_time[i] = 150;
+ //and 25ms for sound
+ for ( i=2; i<=4; i++) lisy1_coil_min_pulse_time[i] = 25;
 
  //construct the filename; using global var lisy80_gamenr
  sprintf(coil_file_name,"%s%03d%s",LISY1_COIL_PATH,lisy1_game.gamenr,LISY1_COIL_FILE);
