@@ -332,26 +332,15 @@ void lisy_w_display_handler(void)
 
 /*
   switch handler
-  give back the value of the pinmame Matrix byte
-  swMatrix[0] is pinmame internal 
-  swMatrix[1..8] is Williams
+  we use core_setSw and let pinmame
+  read core switches
 */
-unsigned char lisy_w_switch_handler( int col )
+void lisy_w_switch_handler( void )
 {
 int ret;
-unsigned char strobe,returnval,action;
+unsigned char action;
 static int simulate_coin_flag = 0;
 
-
-// get the truth columni tcol 1..8 (code from core.c)
-// col is 1,2,4,8,16,32, ...
-  int tcol = 1;
-  if (col) {
-    while ((col & 0x01) == 0) {
-      col >>= 1;
-      tcol += 1;
-    }
-  }
 
 //read values over usbserial
 //check if there is an update first
@@ -375,31 +364,20 @@ if ( ret == 71) {core_setSw( S11_SWADVANCE, action ); printf("RTH S11_SWADVANCE 
 if ( ret == 72) {core_setSw( S11_SWUPDN, action ); printf("RTH S11_SWUPDN But action=%d\n",action); }
 
 //NOTE: system has has 8*8==64 switches in maximum, counting 1...64; ...
-//we use 'internal strobe 6' to handle special switches in the same way ( TEST=49,S33=50 )
-if (ret < 80) //ret is switchnumber
+if (ret <= 64 ) //ret is switchnumber
       {
 
-        //calculate strobe & return
-        //Note: this is different from system80
-        strobe = ret / 8;
-        returnval = ret % 8;
-
-        //set the bit in the Matrix var according to action
-        // action 1 means set the bit
-        // any other means delete the bit
-	//add 1 to strobe as we start with 1 not with zero
-        if (action ) //set bit
-                   SET_BIT(swMatrixLISY_W[strobe+1],returnval);
-        else  //delete bit
-                   CLEAR_BIT(swMatrixLISY_W[strobe+1],returnval);
+        //set the switch
+        core_setSw( ret, action );
 
         if ( ls80dbg.bitv.switches )
         {
-           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER Switch#:%d strobe:%d return:%d action:%d\n",ret,strobe+1,returnval,action);
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER Switch#:%d action:%d\n",ret,action);
            lisy80_debug(debugbuf);
         }
-  } //if ret < 80 => update internal matrix
+  } //if ret <= 64
 
+/*
 //do we need a 'special' routine to handle that switch?
 //system35 Test switch is separate but mapped to strobe:6 ret:7
 //so matrix 7,7 to check
@@ -442,17 +420,8 @@ if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
     lisy_timer( 0, 1, 2);
  }
 } //freeplay option set
-
-  return(swMatrixLISY_W[tcol]);
-}
-
-//get special switches
-UINT8 lisy_w_get_special_switch( UINT8 sw)
-{
-
-//lisy80_debug("spec switch");
-return 1;
-
+*/
+  return;
 }
 
 //solenoid handler

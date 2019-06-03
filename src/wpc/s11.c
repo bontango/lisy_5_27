@@ -550,12 +550,11 @@ lisy_w_throttle();
  }
 static READ_HANDLER(pia4a_r) 
  {
-#ifndef LISY_SUPPORT
- return core_getSwCol(locals.swCol);
-#endif
 #if defined(LISY_SUPPORT)
-   return lisy_w_switch_handler(locals.swCol); //get the switches from LISY_W
+  //get the switches from LISY_mini
+  lisy_w_switch_handler();
 #endif
+ return core_getSwCol(locals.swCol);
  }
 
 /*-------
