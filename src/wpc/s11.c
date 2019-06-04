@@ -565,6 +565,9 @@ static WRITE_HANDLER(pia5b_w) {
   //Data East 128x16 games need to eat the 0xfe command (especially Hook)
   if ((core_gameData->gen & GEN_DEDMD16) && (data == 0xfe)) return;
   locals.sndCmd = data; sndbrd_1_data_w(0,data);
+#if defined(LISY_SUPPORT)
+  lisy_w_sound_handler(data);
+#endif
 }
 
 /*-- Sound board sound command available --*/

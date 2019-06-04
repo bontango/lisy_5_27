@@ -354,14 +354,11 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
    {
      sprintf(debugbuf,"LISY_W_SWITCH_HANDLER (UDP Server Data received: %d",ret);
      lisy80_debug(debugbuf);
-     //we start internally with 0, so substract one
-     --ret;
    }
  }
 
-//special switches
-if ( ret == 71) {core_setSw( S11_SWADVANCE, action ); printf("RTH S11_SWADVANCE But action=%d\n",action); }
-if ( ret == 72) {core_setSw( S11_SWUPDN, action ); printf("RTH S11_SWUPDN But action=%d\n",action); }
+//jump back in case no switch pressed
+if ( ret == 80) return;
 
 //NOTE: system has has 8*8==64 switches in maximum, counting 1...64; ...
 if (ret <= 64 ) //ret is switchnumber
@@ -375,8 +372,50 @@ if (ret <= 64 ) //ret is switchnumber
            sprintf(debugbuf,"LISY_W_SWITCH_HANDLER Switch#:%d action:%d\n",ret,action);
            lisy80_debug(debugbuf);
         }
+  return;
   } //if ret <= 64
 
+//special switches
+if ( ret == 71) {
+        //memory protect; debugging only, as withon pinmamem this switch is not used
+        if ( ls80dbg.bitv.switches )
+        {
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER MEMORY PROTECT(%d) action:%d\n",ret,action);
+           lisy80_debug(debugbuf);
+        }
+    }
+if ( ret == 72) {
+        core_setSw( S11_SWADVANCE, action );
+        if ( ls80dbg.bitv.switches )
+        {
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWADVANCE(%d) action:%d\n",ret,action);
+           lisy80_debug(debugbuf);
+        }
+    }
+if ( ret == 73) {
+        core_setSw( S11_SWUPDN, action );
+        if ( ls80dbg.bitv.switches )
+        {
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWUPDN(%d) action:%d\n",ret,action);
+           lisy80_debug(debugbuf);
+        }
+    }
+if ( ret == 78) {  //not from APC but maybe from udb reader for testing
+        core_setSw( S11_SWCPUDIAG, action );
+        if ( ls80dbg.bitv.switches )
+        {
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWCPUDIAG(%d) action:%d\n",ret,action);
+           lisy80_debug(debugbuf);
+        }
+    }
+if ( ret == 79) { //not from APC but maybe from udb reader for testing
+        core_setSw( S11_SWSOUNDDIAG, action );
+        if ( ls80dbg.bitv.switches )
+        {
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWSOUNDDIAG(%d) action:%d\n",ret,action);
+           lisy80_debug(debugbuf);
+        }
+    }
 /*
 //do we need a 'special' routine to handle that switch?
 //system35 Test switch is separate but mapped to strobe:6 ret:7
@@ -527,7 +566,7 @@ if ( ls80dbg.bitv.switches )
 
 }
 
-//display handler
+//lamp handler
 void lisy_w_lamp_handler( )
 {
 
@@ -569,3 +608,11 @@ void lisy_w_lamp_handler( )
   memcpy(mylampMatrix,coreGlobals.lampMatrix,sizeof(mylampMatrix));
  }//changed
 }//lamp_handler
+
+
+//sound handler
+void lisy_w_sound_handler( unsigned char data )
+{
+
+  printf("RTH sound handler: %d\n",data);
+}
