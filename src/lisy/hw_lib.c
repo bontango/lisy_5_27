@@ -161,6 +161,11 @@ int lisy_get_hardware_revision(int disp_sw_ver, int *hw_ID)
 void lisymini_hwlib_init( void )
 {
 
+ //set GPIOs for the traffic ligth
+ pinMode ( LISY_MINI_LED_RED, OUTPUT);
+ pinMode ( LISY80_LED_YELLOW, OUTPUT);
+ pinMode ( LISY80_LED_GREEN, OUTPUT);
+
  //lets do debug
  if (ls80dbg.bitv.basic) lisy80_debug("LISY_Mini Hardware init start");
 
@@ -180,21 +185,16 @@ void lisymini_hwlib_init( void )
  else
  {
   fprintf(stderr,"ERROR: cannot open usb serial communication\n");
+ lisy80_set_red_led(1);
+ lisy80_set_yellow_led(0);
+ lisy80_set_green_led(0);
   exit(1);
  }
 
-/*
- //set GPIOs for the traffic ligth
- pinMode ( LISY_MINI_LED_RED, OUTPUT);
- pinMode ( LISY80_LED_YELLOW, OUTPUT);
- pinMode ( LISY80_LED_GREEN, OUTPUT);
  //set all the leds controlled by the PI
  lisy80_set_red_led(0);
- lisy80_set_yellow_led(1);
- lisy80_set_green_led(0);
- lisy80_set_dp_led(1);
-
-*/ 
+ lisy80_set_yellow_led(0);
+ lisy80_set_green_led(1);
 
  //init internal FIFO
  LISY80_BufferInit();
@@ -849,7 +849,11 @@ void lisy80_set_yellow_led( int value )
 
 void lisy80_set_green_led( int value )
 {
- digitalWrite (LISY80_LED_GREEN, value);
+ int dum;
+ if ( lisy_hardware_revision == LISY_HW_LISY_W) dum = LISY_MINI_LED_GREEN; 
+ else  dum = LISY80_LED_GREEN;
+
+ digitalWrite (dum, value);
 }
 
 //discharge function for reading capacitor data

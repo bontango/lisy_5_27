@@ -166,7 +166,8 @@ struct {
 #define LISY80_HW320_DATA_D3   13    // Data from Pic ( D3 & D7)
 //others changed in 320
 #define LISY80_HW320_LED_RED 14	//LED to signal errors
-#define LISY_MINI_LED_RED 6	//LED to signal errors LISY_Mini
+#define LISY_MINI_LED_RED 4	//LED to signal errors LISY_Mini
+#define LISY_MINI_LED_GREEN 6	//LED to signal that LISY is running
 
 //sound settings
 #define LISY80_A_PIN     7    //GPIO 4 (7)
