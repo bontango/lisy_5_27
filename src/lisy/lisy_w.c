@@ -504,7 +504,6 @@ if ( mysol != coreGlobals.solenoids)
 //this is called early from unix/main.c
 int lisymini_get_gamename(char *gamename)
 {
-
  int ret;
 
  //use function from fileio to get more details about the gamne

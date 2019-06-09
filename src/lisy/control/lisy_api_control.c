@@ -35,6 +35,13 @@
 #define LISYAPIcontrol_SOFTWARE_MAIN    0
 #define LISYAPIcontrol_SOFTWARE_SUB     1
 
+//fake definiton needed in lisy_w
+void core_setSw(int myswitch, unsigned char action) {  };
+
+
+//fake definiton needed in lisy1
+void cpunum_set_clockscale(int cpu, float clockscale) {  };
+
 //fake definiton needed in lisy80
 typedef struct {
  struct {
@@ -52,16 +59,6 @@ typedef struct
 t_coreGlobals coreGlobals;
 void lisy_nvram_write_to_file( void ) {  }
 
-//here are the variables from unix/main.c
-char lisy_gamename[20];
-int res;
-
-
-unsigned char Switches_LISY35[49] = { 0,0,0,0,0,0,0,0,0,0,
-				      0,0,0,0,0,0,0,0,0,0,
-				      0,0,0,0,0,0,0,0,0,0,
-				      0,0,0,0,0,0,0,0,0,0,
-				      0,0,0,0,0,0,0,0 };
 
 //global vars
 char switch_description_line1[80][80];
@@ -76,6 +73,7 @@ char coil_description_line2[20][80];
 t_stru_lisy1_games_csv lisy1_game;
 t_stru_lisy35_games_csv lisy35_game;
 t_stru_lisy80_games_csv lisy80_game;
+t_stru_lisymini_games_csv lisymini_game;
 //global avr for sound optuions
 //t_stru_lisy80_sounds_csv lisy80_sound_stru[32];
 //int lisy_volume = 80; //SDL range from 0..128
@@ -153,7 +151,7 @@ void do_sound_set( char *buffer)
  //set again same sound means set to zero
  if ( sound[sound_no] == 1)
   {
-   lisy35_coil_sound_set( 0, 0 );
+   //RTH lisy35_coil_sound_set( 0, 0 );
    //set internal var (remember)
    for(i=0; i<=31; i++) sound[i] = 0;
    sound[0] = 1;
@@ -175,7 +173,7 @@ void do_sound_set( char *buffer)
  }
 
  //now set sound
- lisy35_coil_sound_set( sound_no, 0 );
+ //RTH lisy35_coil_sound_set( sound_no, 0 );
 
 }
 
@@ -455,8 +453,8 @@ void do_lamp_set( char *buffer)
 }
 
 //read the lamp descriptions from the file
-#define LISY35_LAMPS_PATH "/boot/lisy/lisy35/control/lamp_descriptions/"
-#define LISY35_LAMPS_FILE "_lisy35_lamps.csv"
+#define LISYAPI_LAMPS_PATH "/boot/lisy/lisy_m/control/lamp_descriptions/"
+#define LISYAPI_LAMPS_FILE "_lisymini_lamps.csv"
 void get_lamp_descriptions(void)
 {
 
@@ -471,30 +469,30 @@ void get_lamp_descriptions(void)
 
 
  //construct the filename; using global var lisy80_gamenr
- sprintf(lamp_file_name,"%s%03d%s",LISY35_LAMPS_PATH,lisy35_game.gamenr,LISY35_LAMPS_FILE);
+ sprintf(lamp_file_name,"%s%03d%s",LISYAPI_LAMPS_PATH,lisymini_game.gamenr,LISYAPI_LAMPS_FILE);
 
  //try to read the file with game nr
  fstream = fopen(lamp_file_name,"r");
    if(fstream != NULL)
    {
-      fprintf(stderr,"LISY35 Info: lamp descriptions according to %s\n\r",lamp_file_name);
+      fprintf(stderr,"LISY MINI Info: lamp descriptions according to %s\n\r",lamp_file_name);
    }
    else
    {
     //second try: to read the file with default
     //construct the new filename; using 'default'
-    sprintf(lamp_file_name,"%sdefault%s",LISY35_LAMPS_PATH,LISY35_LAMPS_FILE);
+    sprintf(lamp_file_name,"%sdefault%s",LISYAPI_LAMPS_PATH,LISYAPI_LAMPS_FILE);
     fstream = fopen(lamp_file_name,"r");
       if(fstream != NULL)
       {
-      fprintf(stderr,"LISY35 Info: lamp descriptions according to %s\n\r",lamp_file_name);
+      fprintf(stderr,"LISY MINI Info: lamp descriptions according to %s\n\r",lamp_file_name);
       }
     }//second try
 
   //check if first or second try where successfull
   if(fstream == NULL)
       {
-        fprintf(stderr,"LISY35 Info: lamp descriptions not found \n\r");
+        fprintf(stderr,"LISY MINI Info: lamp descriptions not found \n\r");
         return ;
         }
   //now assign teh descriptions
@@ -503,7 +501,7 @@ void get_lamp_descriptions(void)
      if (first_line) { first_line=0; continue; } //skip first line (Header)
      //interpret the line
      lamp_no = atoi(strtok(line, ";"));
-     if (lamp_no <60)  //max 60 lamps
+     if (lamp_no <=64)  //max 64 lamps, we start countng with 1
         {
 	  if (( desc = strtok(NULL, ";") ) != NULL )
 	      {
@@ -525,88 +523,13 @@ void get_lamp_descriptions(void)
 		}
 	  else  strcpy ( lamp_description_line2[lamp_no], " ");
         }
-	else fprintf(stderr,"LISY35 Info: Lamp descriptions wrong info \n\r");
-   }
-}
-
-//read the lamp descriptions from the file (second board)
-//#define LISY35_LAMPS_PATH "/boot/lisy/lisy35/control/lamp_descriptions/"
-#define LISY35_LAMPS2_FILE "_lisy35_lamps2.csv"
-void get_lamp2_descriptions(void)
-{
-
-   FILE *fstream;
-   char lamp_file_name[80];
-   char buffer[1024];
-   char *line,*desc;
-   int first_line = 1;
-   int lamp_no;
-
-
-
-
- //construct the filename; using global var lisy80_gamenr
- sprintf(lamp_file_name,"%s%03d%s",LISY35_LAMPS_PATH,lisy35_game.gamenr,LISY35_LAMPS2_FILE);
-
- //try to read the file with game nr
- fstream = fopen(lamp_file_name,"r");
-   if(fstream != NULL)
-   {
-      fprintf(stderr,"LISY35 Info: lamp descriptions (sec. board)  according to %s\n\r",lamp_file_name);
-   }
-   else
-   {
-    //second try: to read the file with default
-    //construct the new filename; using 'default'
-    sprintf(lamp_file_name,"%sdefault%s",LISY35_LAMPS_PATH,LISY35_LAMPS2_FILE);
-    fstream = fopen(lamp_file_name,"r");
-      if(fstream != NULL)
-      {
-      fprintf(stderr,"LISY35 Info: lamp descriptions (sec. board)  according to %s\n\r",lamp_file_name);
-      }
-    }//second try
-
-  //check if first or second try where successfull
-  if(fstream == NULL)
-      {
-        fprintf(stderr,"LISY35 Info: lamp descriptions (sec. board)  not found \n\r");
-        return ;
-        }
-  //now assign teh descriptions
-   while( ( line=fgets(buffer,sizeof(buffer),fstream)) != NULL)
-   {
-     if (first_line) { first_line=0; continue; } //skip first line (Header)
-     //interpret the line
-     lamp_no = atoi(strtok(line, ";"));
-     if (lamp_no <60)  //max 60 lamps
-        {
-	  if (( desc = strtok(NULL, ";") ) != NULL )
-	      {
-	  	strcpy ( lamp2_description_line1[lamp_no], desc);
-	  	//remove trailing CR/LF
-		lamp2_description_line1[lamp_no][strcspn(lamp2_description_line1[lamp_no], "\r\n")] = 0;
-	  	//if we have an empty string, put one blank 
-		if( strlen( lamp2_description_line1[lamp_no]) == 0) strcpy(  lamp2_description_line1[lamp_no]," ");
-		}
-	  else  strcpy ( lamp2_description_line1[lamp_no], " ");
-
-	  if (( desc = strtok(NULL, ";") ) != NULL )
-	      {
-	  	strcpy ( lamp2_description_line2[lamp_no], desc);
-	  	//remove trailing CR/LF
-		lamp2_description_line2[lamp_no][strcspn(lamp2_description_line2[lamp_no], "\r\n")] = 0;
-	  	//if we have an empty string, put one blank 
-		if( strlen( lamp2_description_line2[lamp_no]) == 0) strcpy(  lamp2_description_line2[lamp_no]," ");
-		}
-	  else  strcpy ( lamp2_description_line2[lamp_no], " ");
-        }
-	else fprintf(stderr,"LISY35 Info: Lamp descriptions wrong info \n\r");
+	else fprintf(stderr,"LISY MINI Info: Lamp descriptions wrong info \n\r");
    }
 }
 
 //read the switch descriptions from the file
-#define LISY35_SWITCHES_PATH "/boot/lisy/lisy35/control/switch_descriptions/"
-#define LISY35_SWITCHES_FILE "_lisy35_switches.csv"
+#define LISYAPI_SWITCHES_PATH "/boot/lisy/lisy_m/control/switch_descriptions/"
+#define LISYAPI_SWITCHES_FILE "_lisymini_switches.csv"
 void get_switch_descriptions(void)
 {
 
@@ -621,30 +544,30 @@ void get_switch_descriptions(void)
 
 
  //construct the filename; using global var lisy80_gamenr
- sprintf(switch_file_name,"%s%03d%s",LISY35_SWITCHES_PATH,lisy35_game.gamenr,LISY35_SWITCHES_FILE);
+ sprintf(switch_file_name,"%s%03d%s",LISYAPI_SWITCHES_PATH,lisymini_game.gamenr,LISYAPI_SWITCHES_FILE);
 
  //try to read the file with game nr
  fstream = fopen(switch_file_name,"r");
    if(fstream != NULL)
    {
-      fprintf(stderr,"LISY35 Info: switch descriptions according to %s\n\r",switch_file_name);
+      fprintf(stderr,"LISY MINI Info: switch descriptions according to %s\n\r",switch_file_name);
    }
    else
    {
     //second try: to read the file with default
     //construct the new filename; using 'default'
-    sprintf(switch_file_name,"%sdefault%s",LISY35_SWITCHES_PATH,LISY35_SWITCHES_FILE);
+    sprintf(switch_file_name,"%sdefault%s",LISYAPI_SWITCHES_PATH,LISYAPI_SWITCHES_FILE);
     fstream = fopen(switch_file_name,"r");
       if(fstream != NULL)
       {
-      fprintf(stderr,"LISY35 Info: switch descriptions according to %s\n\r",switch_file_name);
+      fprintf(stderr,"LISY MINI Info: switch descriptions according to %s\n\r",switch_file_name);
       }
     }//second try
 
   //check if first or second try where successfull
   if(fstream == NULL)
       {
-        fprintf(stderr,"LISY35 Info: DIP switch descriptions not found \n\r");
+        fprintf(stderr,"LISY MINI Info: DIP switch descriptions not found \n\r");
         return ;
         }
   //now assign teh descriptions
@@ -671,7 +594,7 @@ void get_switch_descriptions(void)
                 }
           else  strcpy ( switch_description_line2[switch_no], "");
         }
-        else fprintf(stderr,"LISY35 Info: Switch descriptions wrong info \n\r");
+        else fprintf(stderr,"LISY MINI Info: Switch descriptions wrong info \n\r");
    }
 
 }
@@ -680,8 +603,8 @@ void get_switch_descriptions(void)
 //SOLENOIDS
 
 //read the coil descriptions from the file
-#define LISY35_COILS_PATH "/boot/lisy/lisy35/control/coil_descriptions/"
-#define LISY35_COILS_FILE "_lisy35_coils.csv"
+#define LISYAPI_COILS_PATH "/boot/lisy/lisy_m/control/coil_descriptions/"
+#define LISYAPI_COILS_FILE "_lisymini_coils.csv"
 void get_coil_descriptions(void)
 {
 
@@ -696,30 +619,30 @@ void get_coil_descriptions(void)
 
 
  //construct the filename; using global var lisy80_gamenr
- sprintf(coil_file_name,"%s%03d%s",LISY35_COILS_PATH,lisy35_game.gamenr,LISY35_COILS_FILE);
+ sprintf(coil_file_name,"%s%03d%s",LISYAPI_COILS_PATH,lisymini_game.gamenr,LISYAPI_COILS_FILE);
 
  //try to read the file with game nr
  fstream = fopen(coil_file_name,"r");
    if(fstream != NULL)
    {
-      fprintf(stderr,"LISY35 Info: coil descriptions according to %s\n\r",coil_file_name);
+      fprintf(stderr,"LISY MINI Info: coil descriptions according to %s\n\r",coil_file_name);
    }
    else
    {
     //second try: to read the file with default
     //construct the new filename; using 'default'
-    sprintf(coil_file_name,"%sdefault%s",LISY35_COILS_PATH,LISY35_COILS_FILE);
+    sprintf(coil_file_name,"%sdefault%s",LISYAPI_COILS_PATH,LISYAPI_COILS_FILE);
     fstream = fopen(coil_file_name,"r");
       if(fstream != NULL)
       {
-      fprintf(stderr,"LISY35 Info: coil descriptions according to %s\n\r",coil_file_name);
+      fprintf(stderr,"LISY MINI Info: coil descriptions according to %s\n\r",coil_file_name);
       }
     }//second try
 
   //check if first or second try where successfull
   if(fstream == NULL)
       {
-        fprintf(stderr,"LISY35 Info: coil descriptions not found \n\r");
+        fprintf(stderr,"LISY MINI Info: coil descriptions not found \n\r");
         return ;
         }
   //now assign teh descriptions
@@ -728,7 +651,7 @@ void get_coil_descriptions(void)
      if (first_line) { first_line=0; continue; } //skip first line (Header)
      //interpret the line
      coil_no = atoi(strtok(line, ";"));
-     if (coil_no <=19)
+     if (coil_no <=16)
         {
           if (( desc = strtok(NULL, ";") ) != NULL )
               {
@@ -831,7 +754,7 @@ else if( lisy35_game.soundboard_variant == 2)
 
    //calculate soundnumber/command ( max=255 from html input type)
    sound_no = atoi(ext_sound_no);
-   lisy35_coil_sound_set( sound_no, 1 );
+   //RTH lisy35_coil_sound_set( sound_no, 1 );
 
    //calculate lsb.msb for output
    lsb = sound_no%16;
@@ -1312,8 +1235,8 @@ void send_switch_infos( int sockfd )
      //we need to add 1, as 0 is switch one(1)
      ret++;
 
-     if (ret < 80) //ret is switchnumber: NOTE: Bally  8*6==48 switches in maximum, counting 01..48
-        Switches_LISY35[ret] = action;
+     //if (ret < 80) //ret is switchnumber: NOTE: Bally  8*6==48 switches in maximum, counting 01..48
+        // RTH Switches_LISY35[ret] = action;
      }while( ret < 80);
 
      //now send whole matrix back together with some header
@@ -1329,7 +1252,7 @@ void send_switch_infos( int sockfd )
        { 
 	switch_no = i*8 + j;
  	//assign color, red is closed, green is open, default fo table is green
-	if ( !Switches_LISY35[switch_no]) strcpy(colorcode,code_green); else  strcpy(colorcode,code_red);
+	//RTH if ( !Switches_LISY35[switch_no]) strcpy(colorcode,code_green); else  strcpy(colorcode,code_red);
         sprintf(buffer,"%sSwitch %02d<br>%s<br>%s</td>\n",colorcode,switch_no,switch_description_line1[switch_no],switch_description_line2[switch_no]);
 
         sendit( sockfd, buffer);
@@ -1345,10 +1268,10 @@ void send_home_infos( int sockfd )
 {
      char buffer[256];
 
-   sprintf(buffer,"<h2>LISY35 Webeditor Home Page</h2> \n");
+   sprintf(buffer,"<h2>LISY API Webeditor Home Page</h2> \n");
    sendit( sockfd, buffer);
 
-   sprintf(buffer,"This is LISY35control version %d.%d<br>\n",LISY35control_SOFTWARE_MAIN,LISY35control_SOFTWARE_SUB);
+   sprintf(buffer,"This is LISY_API_control version %d.%d<br>\n",LISYAPIcontrol_SOFTWARE_MAIN,LISYAPIcontrol_SOFTWARE_SUB);
    sendit( sockfd, buffer);
    send_basic_infos(sockfd);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_switches.php\">Switches</a><br><br> \n");
@@ -1596,10 +1519,13 @@ int main(int argc, char *argv[])
      char buffer[256];
      char ip_interface[10];
      struct sockaddr_in serv_addr, cli_addr, *myip;
-     int i,n;
+     int i,n,res;
      int do_exit = 0;
      struct ifreq ifa;
      char *line;
+     char lisy_gamename[20];
+     char lisy_variant[20];
+
 
 
      //init ars
@@ -1614,26 +1540,21 @@ int main(int argc, char *argv[])
 
 
      //check which pinball we are going to control
-     if ( (res = lisy_set_gamename("lisy_m", lisy_gamename)) >= 0)
-                  {
-                   fprintf(stderr,"LISYMINI: we are controlling Game No:%d %s\n\r",res,lisy_gamename);
-                  }
-                else
- 		   {
-                   fprintf(stderr,""LISYMINI: no matching game or other error\n\r");
- 		   return (-1);
-                  }
+     //this will also call lisy_hw_init
+     strcpy(lisy_variant,"lisy_m");
+     if ( (res = lisy_set_gamename(lisy_variant, lisy_gamename)) != 0)
+ 	   {
+             fprintf(stderr,"LISYMINI: no matching game or other error\n\r");
+             return (-1);
+           }
 
     //use the init functions from lisy.c
     lisy_init();
 
-    //do init the HW
-    lisy_hw_init();
 
 
     //init internal lamp vars as well
-    for(i=0; i<=59; i++) lamp[i] = 0;
-    for(i=0; i<=59; i++) lamp2[i] = 0;
+    for(i=0; i<=64; i++) lamp[i] = 0;
 
     //init internal continous solenoid vars as well
     for(i=0; i<=4; i++) cont_sol[i] = 0;
@@ -1642,13 +1563,10 @@ int main(int argc, char *argv[])
     //init internal sound vars as well
     for(i=0; i<=31; i++) sound[i] = 0;
 
-
-
     //read the descriptions for the switches
     get_switch_descriptions();
     //read the descriptions for the lamps
     get_lamp_descriptions();
-    get_lamp2_descriptions();
     //read the descriptions for the coils
     get_coil_descriptions();
 
@@ -1657,7 +1575,7 @@ int main(int argc, char *argv[])
  if ( ls80opt.bitv.JustBoom_sound )
  {
   //set volume according to poti
-  sprintf(debugbuf,"/bin/echo \"Welcome to LISY 35 Control Version 0.%d\" | /usr/bin/festival --tts",LISY35control_SOFTWARE_SUB);
+  sprintf(debugbuf,"/bin/echo \"Welcome to LISY API Control Version 0.%d\" | /usr/bin/festival --tts",LISYAPIcontrol_SOFTWARE_SUB);
   system(debugbuf);
  }
 
@@ -1679,11 +1597,11 @@ int main(int argc, char *argv[])
      if(n) //no IP found
      {
        //construct the message
-        fprintf(stderr,"Bally NO IP");
-        display35_show_str( 1, "000000");
-        display35_show_str( 2, "000000");
-        display35_show_str( 3, "000000");
-        display35_show_str( 4, "000000");
+        fprintf(stderr,"LISY MINI NO IP");
+        //display35_show_str( 1, "000000");
+        //display35_show_str( 2, "000000");
+        //display35_show_str( 3, "000000");
+        //display35_show_str( 4, "000000");
      }
      else //we found an IP
      {
@@ -1692,16 +1610,16 @@ int main(int argc, char *argv[])
         line = inet_ntoa(myip->sin_addr);
 	//split the ip to four displays and store value for display routine
         sprintf(buffer,"%-6s",strtok(line, "."));
-        display35_show_str( 1, buffer); //strcpy(display_D1,buffer); strcpy(display_D1A,buffer);
+        //display35_show_str( 1, buffer); //strcpy(display_D1,buffer); strcpy(display_D1A,buffer);
        fprintf(stderr,"%s\n",buffer);
         sprintf(buffer,"%-6s",strtok(NULL, "."));
-        display35_show_str( 2, buffer); //strcpy(display_D2,buffer); strcpy(display_D2A,buffer);
+        //display35_show_str( 2, buffer); //strcpy(display_D2,buffer); strcpy(display_D2A,buffer);
        fprintf(stderr,"%s\n",buffer);
         sprintf(buffer,"%-6s",strtok(NULL, "."));
-        display35_show_str( 3, buffer); //strcpy(display_D3,buffer); strcpy(display_D3A,buffer);
+        //display35_show_str( 3, buffer); //strcpy(display_D3,buffer); strcpy(display_D3A,buffer);
        fprintf(stderr,"%s\n",buffer);
         sprintf(buffer,"%-6s",strtok(NULL, "."));
-        display35_show_str( 4, buffer); //strcpy(display_D4,buffer); strcpy(display_D4A,buffer);
+        //display35_show_str( 4, buffer); //strcpy(display_D4,buffer); strcpy(display_D4A,buffer);
        fprintf(stderr,"%s\n",buffer);
      }
 
