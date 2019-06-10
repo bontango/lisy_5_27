@@ -99,8 +99,8 @@ int main(int argc, char *argv[])
   pullUpDnControl (LISYMINI_RET_4, PUD_DOWN);
   //strobe 2
   digitalWrite (LISYMINI_STROBE_1,0);
-  digitalWrite (LISYMINI_STROBE_2,1);
-  digitalWrite (LISYMINI_STROBE_3,0);
+  digitalWrite (LISYMINI_STROBE_2,0);
+  digitalWrite (LISYMINI_STROBE_3,1);
   digitalWrite (LISYMINI_STROBE_4,0);
   //wait a bit
   delay(LISYMINI_WAITTIME); //x ms delay from wiringpi
@@ -109,8 +109,8 @@ int main(int argc, char *argv[])
   if(data) data=0; else data=1;
   //strobe 3
   digitalWrite (LISYMINI_STROBE_1,0);
-  digitalWrite (LISYMINI_STROBE_2,0);
-  digitalWrite (LISYMINI_STROBE_3,1);
+  digitalWrite (LISYMINI_STROBE_2,1);
+  digitalWrite (LISYMINI_STROBE_3,0);
   digitalWrite (LISYMINI_STROBE_4,0);
   //wait a bit
   delay(LISYMINI_WAITTIME); //x ms delay from wiringpi
