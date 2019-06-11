@@ -225,7 +225,7 @@ int lisy_usb_init()
 
     //print status of switches
     printf("Switch Status:\n");
-    for(i=0; i<=7; i++)
+    for(i=0; i<=8; i++)
      {
        for(j=1; j<=8; j++)
 	{
@@ -355,7 +355,7 @@ void lisy_usb_sol_ctrl(int sol_no,unsigned char action)
       //send cmd
      if ( write( lisy_usb_serfd,&cmd,1) != 1)
         fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
-     //send lamp number
+     //send solenoid number
       //send cmd
      if ( write( lisy_usb_serfd,&sol_no,1) != 1)
         fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
@@ -363,3 +363,19 @@ void lisy_usb_sol_ctrl(int sol_no,unsigned char action)
 
 }
 
+void lisy_usb_sol_pulse(int sol_no)
+{
+ uint8_t cmd;
+
+  cmd=LISY_S_PULSE_SOL;
+
+      //send cmd
+     if ( write( lisy_usb_serfd,&cmd,1) != 1)
+        fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
+     //send solenoid number
+      //send cmd
+     if ( write( lisy_usb_serfd,&sol_no,1) != 1)
+        fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
+
+
+}
