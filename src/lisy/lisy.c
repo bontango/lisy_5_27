@@ -193,6 +193,7 @@ int lisy_set_gamename( char *arg_from_main, char *lisy_gamename)
 	else
         {
             fprintf(stderr,"LISY: found LISY support compiled in, but not activated yet \n\r");
+            fprintf(stderr,"LISY: argument was: >%s<\n",arg_from_main);
 	    return (1);
         }
 

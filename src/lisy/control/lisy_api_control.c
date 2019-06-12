@@ -28,12 +28,13 @@
 #include "../sound.h"
 #include "../lisy.h"
 #include "../fadecandy.h"
+#include "../lisy_api.h"
 #include "../usbserial.h"
 
 
 //the version
 #define LISYAPIcontrol_SOFTWARE_MAIN    0
-#define LISYAPIcontrol_SOFTWARE_SUB     2
+#define LISYAPIcontrol_SOFTWARE_SUB     3
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -1177,28 +1178,35 @@ void send_home_infos( int sockfd )
 void send_software_infos( int sockfd )
 {
      char buffer[256];
-     int dum;
+     char answer[40];
+     unsigned char data;
+     unsigned char sw_main,sw_sub,commit;
 
-   //get installed version of lisy1
-   dum = system("/usr/local/bin/lisy -lisyversion");
-   sprintf(buffer,"LISY35 version installed is 5.%02d<br>\n",WEXITSTATUS(dum));
+   //get installed version of lisy
+   lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+   sprintf(answer,"%d%02d %02d",sw_main,sw_sub,commit);
+   sprintf(buffer,"LISY Mini version installed is %s<br>\n",answer);
    sendit( sockfd, buffer);
 
-   //init switch pic and get Software version
-   dum = lisy80_switch_pic_init();
-   sprintf(buffer,"Software Switch PIC has version %d.%02d<br>\n",dum/100, dum%100);
-   sendit( sockfd, buffer);
+    lisy_api_read_string(LISY_G_HW, answer );
+    sprintf(buffer,"HW client is %s<br>\n",answer);
+    sendit( sockfd, buffer);
 
-   //get Software version Display PIC
-   dum = display_get_sw_version();
-   sprintf(buffer,"Software Display PIC has version %d.%02d<br>\n",dum/100, dum%100);
-   sendit( sockfd, buffer);
+    lisy_api_read_string(LISY_G_LISY_VER, answer );
+    sprintf(buffer,"Client has SW version %s<br>\n",answer);
+    sendit( sockfd, buffer);
 
-  //get Software version, Coil PIC
-   dum = coil_get_sw_version();
-   sprintf(buffer,"Software Coil PIC has version %d.%02d<br>\n",dum/100, dum%100);
-   sendit( sockfd, buffer);
+    lisy_api_read_byte(LISY_G_NO_LAMPS, &data );
+    sprintf(buffer,"Client supports %d lamps<br>\n",data);
+    sendit( sockfd, buffer);
 
+    lisy_api_read_byte(LISY_G_NO_SOL, &data );
+    sprintf(buffer,"Client supports %d solenoids<br>\n",data);
+    sendit( sockfd, buffer);
+
+    lisy_api_read_byte(LISY_G_NO_SW, &data );
+    sprintf(buffer,"Client supports %d switches<br>\n",data);
+    sendit( sockfd, buffer);
 }
 
 //send info from nvram

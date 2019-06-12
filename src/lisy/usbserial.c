@@ -68,7 +68,7 @@ int set_interface_attribs(int fd, int speed)
 //read \0 terminated string and store into string content
 //return -2 in case we had problems to send  cmd
 //return -1 in case we had problems to receive string
-int read_string(unsigned char cmd, char *content)
+int lisy_api_read_string(unsigned char cmd, char *content)
 {
 
   char nextbyte;
@@ -101,7 +101,7 @@ int read_string(unsigned char cmd, char *content)
 //return -2 in case we had problems to send  cmd
 //return -1 in case we had problems to receive byte
 //return 0 otherwise
-unsigned char read_byte(unsigned char cmd, unsigned char *data)
+unsigned char lisy_api_read_byte(unsigned char cmd, unsigned char *data)
 {
 
  //send command
@@ -186,28 +186,24 @@ int lisy_usb_init()
     n++;
     } while (( data != '\0') & ( n < 10));
 
-    fprintf(stderr,"LISY_Mini: HW Client is: %s (nis%d)\n",answer,n);
+    fprintf(stderr,"LISY_Mini: HW Client is: %s \n",answer);
 
 
   if ( ls80dbg.bitv.basic ) 
   {
-/*
+    if ( lisy_api_read_string(LISY_G_LISY_VER, answer) < 0) return (-1);
+    sprintf(debugbuf,"LISY_Mini: Client has SW version: %s",answer);
+    lisy80_debug(debugbuf);
+
+    if ( lisy_api_read_string(LISY_G_API_VER, answer) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client uses API Version: %s",answer);
     lisy80_debug(debugbuf);
 
-    if ( read_string(LISY_G_HW, answer) < 0) return (-1);
-    sprintf(debugbuf,"LISY_Mini: HW Client is: %s",answer);
-    lisy80_debug(debugbuf);
-
-    if ( read_string(LISY_G_LISY_VER, answer) < 0) return (-1);
-    sprintf(debugbuf,"LISY_Mini: SW Client is: %s",answer);
-    lisy80_debug(debugbuf);
-*/
-    if ( read_byte(LISY_G_NO_LAMPS, &data) < 0) return (-1);
+    if ( lisy_api_read_byte(LISY_G_NO_LAMPS, &data) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client supports %d lamps",data);
     lisy80_debug(debugbuf);
 
-    if ( read_byte(LISY_G_NO_SOL, &data) < 0) return (-1);
+    if ( lisy_api_read_byte(LISY_G_NO_SOL, &data) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client supports %d solenoids",data);
     lisy80_debug(debugbuf);
 /*  
@@ -219,7 +215,7 @@ int lisy_usb_init()
     sprintf(debugbuf,"LISY_Mini: Client supports %d displays",data);
     lisy80_debug(debugbuf);
 */
-    if ( read_byte(LISY_G_NO_SW, &data) < 0) return (-1);
+    if ( lisy_api_read_byte(LISY_G_NO_SW, &data) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client supports %d switches",data);
     lisy80_debug(debugbuf);
 
@@ -292,7 +288,7 @@ unsigned char lisy_usb_ask_for_changed_switch(void)
  int ret;
 
  //ask APC via serial
- ret = read_byte(LISY_G_CHANGED_SW, &my_switch);
+ ret = lisy_api_read_byte(LISY_G_CHANGED_SW, &my_switch);
  if (ret < 0) 
   {
     fprintf(stderr,"ERROR: problem with switchreading: %d\n",ret);
@@ -319,7 +315,7 @@ unsigned char lisy_usb_get_switch_status( unsigned char number)
       }
 
  //ask APC via serial
- ret = read_byte(number, &status);
+ ret = lisy_api_read_byte(number, &status);
  if (ret < 0) 
   {
     fprintf(stderr,"ERROR: problem with switch status reading: %d\n",ret);
