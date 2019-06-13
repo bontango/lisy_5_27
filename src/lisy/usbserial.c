@@ -341,7 +341,8 @@ void lisy_usb_lamp_ctrl(int lamp_no,unsigned char action)
         fprintf(stderr,"Lamps Error writing to serial %s\n",strerror(errno));
 }
 
-//solenoid control
+//SOLENOID CONTROL
+//solenoid ON and OFF
 void lisy_usb_sol_ctrl(int sol_no,unsigned char action)
 {
  uint8_t cmd;
@@ -359,6 +360,7 @@ void lisy_usb_sol_ctrl(int sol_no,unsigned char action)
 
 }
 
+//pulse solenoid
 void lisy_usb_sol_pulse(int sol_no)
 {
  uint8_t cmd;
@@ -372,6 +374,54 @@ void lisy_usb_sol_pulse(int sol_no)
       //send cmd
      if ( write( lisy_usb_serfd,&sol_no,1) != 1)
         fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
+
+
+}
+
+//set HW rule for solenoid
+//RTH minimal version for the moment
+void lisy_usb_sol_set_hwrule(int special_switch, int sol_no)
+{
+ uint8_t cmd;
+ uint8_t par;
+
+struct
+ {
+  uint8_t index; //Index c of the solenoid to configure
+  uint8_t sw1; //Switch sw1. Set bit 7 to invert the switch.
+  uint8_t sw2; //Switch sw2. Set bit 7 to invert the switch.
+  uint8_t sw3; //Switch sw3. Set bit 7 to invert the switch.
+  uint8_t pulse_time; //Pulse time in ms (0-255)
+  uint8_t pulse_pwm_power; //Pulse PWM power (0-255). 0=0% power. 255=100% power
+  uint8_t hold_pwm_power; //Hold PWM power (0-255). 0=0% power. 255=100% power
+  uint8_t flag_sw1; //Flag for sw1
+  uint8_t flag_sw2; //Flag for sw2
+  uint8_t flag_sw3; //Flag for sw3
+ }
+s_lisy_hw_rule;
+
+  cmd=LISY_S_SET_HWRULE;
+
+
+write( lisy_usb_serfd,&cmd,1);
+par = sol_no;
+write( lisy_usb_serfd,&par,1);
+par = special_switch;
+write( lisy_usb_serfd,&par,1);
+par = 127;
+write( lisy_usb_serfd,&par,1); //no sw2
+write( lisy_usb_serfd,&par,1); //no sw3
+par=40;
+write( lisy_usb_serfd,&par,1); //pulsetime
+par=191;
+write( lisy_usb_serfd,&par,1); //pulse power
+par=64;
+write( lisy_usb_serfd,&par,1); //hold power
+par=3;
+write( lisy_usb_serfd,&par,1); //sw1 activ on and off
+par=0;
+write( lisy_usb_serfd,&par,1); //sw2 disabled
+write( lisy_usb_serfd,&par,1); //sw3 disabled
 
 
 }

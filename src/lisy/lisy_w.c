@@ -139,6 +139,16 @@ void lisy_w_init( void )
 
  //show the 'boot' message
  //display_show_boot_message_lisy35(s_lisy_software_version);
+ //RTH to be done
+
+ //set HW rules for solenoids
+ //RTH this is game specific
+ //at the moment we do it fix for Comet
+ lisy_usb_sol_set_hwrule( 65, 17); //left kicker
+ lisy_usb_sol_set_hwrule( 66, 18); //right kicker
+ lisy_usb_sol_set_hwrule( 67, 19); //upper bumber
+ lisy_usb_sol_set_hwrule( 68, 20); //left bumber
+ lisy_usb_sol_set_hwrule( 69, 21); //lower bumber
 
  //show green ligth for now, lisy1 is running
  lisy80_set_red_led(0);
@@ -613,5 +623,6 @@ void lisy_w_lamp_handler( )
 void lisy_w_sound_handler( unsigned char data )
 {
 
-  printf("RTH sound handler: %d\n",data);
+//first tests
+//  printf("RTH sound handler: %d\n",data);
 }

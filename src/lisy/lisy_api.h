@@ -48,6 +48,9 @@
 #define	LISY_S_TEXT_TO_SPEECH	53	//say the text - option(1byte) + string 'text'
 #define	LISY_S_SET_VOLUME	54	//sound volume in percent
 
+//RTH pre API 0.09
+#define	LISY_S_SET_HWRULE	74	//Configure Hardware Rule for Solenoid
+
 //general, parameter none
 #define	LISY_INIT		100	//init/reset LISY - return byte 0=OK, >0 Errornumber Errornumbers TBD
 #define	LISY_WATCHDOG		101	//watchdog - return byte 0=OK, >0 Errornumber Errornumbers TBD
