@@ -34,7 +34,7 @@
 
 //the version
 #define LISYAPIcontrol_SOFTWARE_MAIN    0
-#define LISYAPIcontrol_SOFTWARE_SUB     3
+#define LISYAPIcontrol_SOFTWARE_SUB     4
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -1108,6 +1108,18 @@ void send_switch_infos( int sockfd )
       ret = lisy_w_switch_reader( &action );
       if (ret < 80) switch_LISYAPI[ret] = action;
      }while( ret < 80);
+
+    //if debug mode is set we get our reedings from udp switchreader in additon
+    if ( ls80dbg.bitv.basic )
+     {
+       if ( ( ret = lisy_udp_switch_reader( &action, 0 )) != 80)
+       {
+	 switch_LISYAPI[ret] = action;
+         sprintf(debugbuf,"LISY_W_SWITCH_HANDLER (UDP Server Data received: %d",ret);
+         lisy80_debug(debugbuf);
+       }
+     }
+
 
      //now send whole matrix back together with some header
      send_basic_infos(sockfd);
