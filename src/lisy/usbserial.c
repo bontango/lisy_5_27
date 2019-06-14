@@ -380,10 +380,11 @@ void lisy_usb_sol_pulse(int sol_no)
 
 //set HW rule for solenoid
 //RTH minimal version for the moment
-void lisy_usb_sol_set_hwrule(int special_switch, int sol_no)
+void lisy_usb_sol_set_hwrule(int sol_no, int special_switch)
 {
  uint8_t cmd;
  uint8_t par;
+ uint8_t error_occured = 0;
 
 struct
  {
@@ -403,25 +404,37 @@ s_lisy_hw_rule;
   cmd=LISY_S_SET_HWRULE;
 
 
-write( lisy_usb_serfd,&cmd,1);
+  if ( ls80dbg.bitv.basic ) 
+  {
+    sprintf(debugbuf,"LISY_Mini: HW Rule set for solnenoid:%d and switch:%d",sol_no,special_switch);
+    lisy80_debug(debugbuf);
+  }
+
+if ( write( lisy_usb_serfd,&cmd,1) != 1) error_occured++;
+
 par = sol_no;
-write( lisy_usb_serfd,&par,1);
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //1
 par = special_switch;
-write( lisy_usb_serfd,&par,1);
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //2
 par = 127;
 write( lisy_usb_serfd,&par,1); //no sw2
-write( lisy_usb_serfd,&par,1); //no sw3
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //nosw2 -3
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //nosw3 -4
 par=40;
-write( lisy_usb_serfd,&par,1); //pulsetime
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //pulsetime -5
 par=191;
-write( lisy_usb_serfd,&par,1); //pulse power
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++;//pulse power -6
 par=64;
-write( lisy_usb_serfd,&par,1); //hold power
-par=3;
-write( lisy_usb_serfd,&par,1); //sw1 activ on and off
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++;  //hold power -7
+par=1;
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //sw1 activ on ->pulse -8
 par=0;
 write( lisy_usb_serfd,&par,1); //sw2 disabled
-write( lisy_usb_serfd,&par,1); //sw3 disabled
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++;  //sw2 disabled -9
+if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++;  //sw3 disabled -10
+
+if ( error_occured) 
+        fprintf(stderr,"Setting hW rules, Error writing to serial %s , %d times\n",strerror(errno),error_occured);
 
 
 }

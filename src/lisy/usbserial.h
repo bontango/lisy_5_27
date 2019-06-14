@@ -10,8 +10,7 @@ void lisy_usb_sol_ctrl(int sol_no,unsigned char action);
 void lisy_usb_sol_pulse(int sol_no);
 int lisy_api_read_string(unsigned char cmd, char *content);
 unsigned char lisy_api_read_byte(unsigned char cmd, unsigned char *data);
-void lisy_usb_sol_set_hwrule(int special_switch, int sol_no);
-
+void lisy_usb_sol_set_hwrule(int sol_no, int special_switch);
 
 #endif  /* LISY_USBSER_H */
 

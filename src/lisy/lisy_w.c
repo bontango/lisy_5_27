@@ -144,11 +144,11 @@ void lisy_w_init( void )
  //set HW rules for solenoids
  //RTH this is game specific
  //at the moment we do it fix for Comet
- lisy_usb_sol_set_hwrule( 65, 17); //left kicker
- lisy_usb_sol_set_hwrule( 66, 18); //right kicker
- lisy_usb_sol_set_hwrule( 67, 19); //upper bumber
- lisy_usb_sol_set_hwrule( 68, 20); //left bumber
- lisy_usb_sol_set_hwrule( 69, 21); //lower bumber
+ lisy_usb_sol_set_hwrule( 17, 65 ); //left kicker
+ lisy_usb_sol_set_hwrule( 18, 66 ); //right kicker
+ lisy_usb_sol_set_hwrule( 19, 67 ); //upper bumber
+ lisy_usb_sol_set_hwrule( 20, 68 ); //left bumber
+ lisy_usb_sol_set_hwrule( 21, 69 ); //lower bumber
 
  //show green ligth for now, lisy1 is running
  lisy80_set_red_led(0);
