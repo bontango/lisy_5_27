@@ -301,6 +301,7 @@ if (ls80dbg.bitv.basic) lisy80_debug("LISY_S_PULSE_TIME\n");
 
 
  read(sockfd,&value,1);
+ lisy1_coil_min_pulse_time[number-1] = value;
 
 if (ls80dbg.bitv.coils)
  {
@@ -474,7 +475,7 @@ if (isSYS1)
     {
      //now pulse the coil
      lisy1_coil_set(coil,1);
-     usleep(COIL_PULSE_TIME);
+     usleep(lisy1_coil_min_pulse_time[coil]);
      lisy1_coil_set(coil,0);
      }
  }//system1
@@ -712,7 +713,6 @@ int main(int argc, char *argv[])
     lisy80_set_red_led(0);
     lisy80_set_yellow_led(0);
     lisy80_set_green_led(1);
-*/
 
   //check for coil min_pulse parameter
   //option is active if value is either 0 or 1
@@ -732,7 +732,7 @@ int main(int argc, char *argv[])
        fprintf(stderr,"coil No [%d]: %d msec minimum pulse time\n",i,lisy1_coil_min_pulse_time[i]);
     }
    }
-
+*/
 
 
    //switches, initial state
