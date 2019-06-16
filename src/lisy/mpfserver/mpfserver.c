@@ -591,28 +591,17 @@ int main(int argc, char *argv[])
      char lisy_variant[20];
      unsigned char sw_main,sw_sub,commit;
 
-     //lets get the variant from the command line
-     //no validation check at the moment
-     strcpy(lisy_variant,argv[1]);
 
      //it is serial or lan(socket)  mode
-     if ( (argc != 3) || ( (strncmp(argv[2],"socket",6) != 0 ) && (strncmp(argv[2],"serial",6) != 0 )))
+     if ( (argc != 3) || ( (strncmp(argv[2],"slave",5) != 0 ) && (strncmp(argv[2],"master",6) != 0 )))
         {
-         printf("use: %s lisy_variant socket|serial\n",argv[0]);
+         printf("use: %s lisy_variant master|slave\n",argv[0]);
 	 exit (1);
 	}
 
-
-     if (strncmp(argv[2],"socket",6) == 0 )
- 	 socket_mode=1;
-     else
- 	 socket_mode=0;
-
-    //show up on calling terminal
-    sprintf(s_mpf_software_version,"%02d.%03d ",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
-    printf("This is MPF Server for LISY by bontango, Version %s (%s)\n",s_mpf_software_version,socket_mode ? "socket mode" : "serial mode");
-
-
+     //lets get the variant from the command line
+     //no validation check at the moment
+     strcpy(lisy_variant,argv[1]);
 
      //check which pinball we are going to control
      //this will also call lisy_hw_init
@@ -630,6 +619,23 @@ int main(int argc, char *argv[])
     lisy_get_sw_version( &sw_main, &sw_sub, &commit);
     sprintf(lisy_hw.lisy_ver,"%d.%02d ",sw_main,sw_sub);
     sprintf(lisy_hw.api_ver,"%d.%02d ",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
+
+    //determine if we are in socket mode
+    //master has socket mode always
+    //slave when S1-dip3 (watchdog/Ball Save) is set to on
+
+     if (strncmp(argv[2],"master",6) == 0 )
+ 	 socket_mode=1;
+     else
+       {
+ 	 if ( ls80opt.bitv.watchdog  ) socket_mode=1;
+       }
+
+    //show up on calling terminal
+    sprintf(s_mpf_software_version,"%02d.%03d ",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
+    printf("This is MPF Server for LISY by bontango, Version %s (%s)\n",s_mpf_software_version,socket_mode ? "socket mode" : "serial mode");
+
+
 
     //set HW
     if ( lisy_hardware_revision == 100 ) isSYS1 = 1; else isSYS1 = 0;
