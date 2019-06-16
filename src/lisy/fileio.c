@@ -1054,13 +1054,21 @@ int  lisy1_file_get_coilopts(void)
 
  //set lisy1 defaults which is 150 msec for coils
  for ( i=0; i<=7; i++) lisy1_coil_min_pulse_time[i] = 150;
- //and 25ms for sound
- for ( i=2; i<=4; i++) lisy1_coil_min_pulse_time[i] = 25;
 
- //construct the filename; using global var lisy80_gamenr
+ //construct the filename; using global var lisy1_gamenr
  sprintf(coil_file_name,"%s%03d%s",LISY1_COIL_PATH,lisy1_game.gamenr,LISY1_COIL_FILE);
 
+ //try to read the file with game nr
  fstream = fopen(coil_file_name,"r");
+
+  //second try: to read the file with default
+  if(fstream == NULL)
+  {
+    //construct the new filename; using 'default'
+    sprintf(coil_file_name,"%sdefault%s",LISY1_COIL_PATH,LISY1_COIL_FILE);
+    fstream = fopen(coil_file_name,"r");
+   }//second try
+
    if(fstream == NULL)
    {
       fprintf(stderr,"\n LISY1: opening %s failed ",coil_file_name);
