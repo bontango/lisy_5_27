@@ -28,7 +28,7 @@ OBJ = $(LOP)lisy80.o \
       $(LOP)lisy_w.o \
       lisy_api_control.o
 
-lisy35_control: $(OBJ)
+lisy_api_control: $(OBJ)
 	$(CC) $(CFLAGS) -o lisy_api_control $(OBJ) $(LDFLAGS)
 
 %.o: ../%.c ../%.h

@@ -462,14 +462,22 @@ unsigned char lisy80_read_byte_coil_pic(void)
  return(lisy80_read_byte_pic(fd_coil_pic));
 }
 
+//set the sound LISY1
+void lisy1_sound_set(int sound)
+{
 
+  int mysound;
+
+  //sound is solenoids 3..7, so need to shift here
+  if ( sound & 0x01 ) lisy1_coil_set( Q_TENS, 1); else lisy1_coil_set( Q_TENS, 0);
+  if ( sound & 0x02 ) lisy1_coil_set( Q_HUND, 1); else lisy1_coil_set( Q_HUND, 0);
+  if ( sound & 0x04 ) lisy1_coil_set( Q_TOUS, 1); else lisy1_coil_set( Q_TOUS, 0);
+}
 
 //set the sound LISY80
 void lisy80_sound_set(int sound)
 {
-
-lisy80_coil_sound_set(sound);
-
+  lisy80_coil_sound_set(sound);
 }
 
 // identiyf if buffer on switch PIC is ready

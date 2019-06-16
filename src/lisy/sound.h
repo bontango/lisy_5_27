@@ -16,7 +16,7 @@ int mpf_play_mp3(Mix_Music *music);
 
 //#define LISY80_SOUND_PATH "/boot/lisy80/sounds/"
 
-//#define MP3_SOUND_PATH "./hardware_sounds"
+#define MP3_SOUND_PATH "./hardware_sounds"
 
 #define PCM_DEVICE "default"
 

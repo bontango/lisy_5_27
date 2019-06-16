@@ -21,62 +21,61 @@
 #include <termios.h>
 #include <errno.h>
 #include <dirent.h>
+#include "../lisy_w.h"
 #include "../fileio.h"
 #include "../hw_lib.h"
-#include "../coils.h"
 #include "../displays.h"
+#include "../coils.h"
 #include "../switches.h"
-#include "../eeprom.h"
 #include "../utils.h"
+#include "../eeprom.h"
 #include "../sound.h"
+#include "../lisy.h"
 #include "../fadecandy.h"
-#include "../externals.h"
-#include "../lisyversion.h"
-#include "../linked_list.h"
-#include "lisy_api.h"
+#include "../lisy_api.h"
+#include "../usbserial.h"
+#include "linked_list.h"
 #include "mpfserver.h"
 
 char s_mpf_software_version[16];
 
-//dummy shutdowns
-void lisy1_shutdown( void ) { }
-void lisy80_shutdown( void ) { }
-void lisy35_shutdown( void ) { }
+//fake definiton needed in lisy_w
+void core_setSw(int myswitch, unsigned char action) {  };
 
-//the debug options
-//in main prg set in  lisy80.c
-ls80dbg_t ls80dbg;
-int lisy80_is80B;
+//fake definiton needed in lisy1
+void cpunum_set_clockscale(int cpu, float clockscale) {  };
 
-//local switch Matrix, we need 9 elements
-//as pinmame internal starts with 1
-//there is one value per return
-unsigned char swMatrix[9] = { 0,0,0,0,0,0,0,0 };
-//internal switch Matrix for system1, we need 7 elements
-//as pinmame internal starts with 1
-//swMatrix 6 for SLAM and other special switches
-unsigned char swMatrixLISY1[7] = { 0,0,0,0,0,0,0 };
+//fake definiton needed in lisy80
+typedef struct {
+ struct {
+    unsigned int  soundBoard;
+  } hw;
+} core_tGameData;
 
-//global var for coil min pulse time option, always activated for lisy1
-int lisy1_coil_min_pulse_time[8] = { 0,0,0,0,0,0,0,0};
+core_tGameData *core_gameData;
 
-int lisy80_time_to_quit_flag; //not used here
-//global var for additional options
-//typedef is defined in hw_lib.h
-ls80opt_t ls80opt;
+//fake definiton needed for mame functions
+typedef struct
+{
+ unsigned char lampMatrix[2];
+} t_coreGlobals;
+t_coreGlobals coreGlobals;
+void lisy_nvram_write_to_file( void ) {  }
 
-//global var for internal game_name structure, set by  lisy80_file_get_gamename in main
-t_stru_lisy80_games_csv lisy80_game;
+//lisy pulse mod extension
+//int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
+//int lisy80_coil_min_pulse_mod = 0; //deaktivated by default
+extern int lisy1_coil_min_pulse_time[8];
+
+
+//global var for internal game_name structure, set by  lisy35_file_get_gamename in main
 t_stru_lisy1_games_csv lisy1_game;
 t_stru_lisy35_games_csv lisy35_game;
-
-//lisy80 pulse mod extension
-int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
-int lisy80_coil_min_pulse_mod = 0; //deaktivated by default
+t_stru_lisy80_games_csv lisy80_game;
+t_stru_lisymini_games_csv lisymini_game;
 
 //global avr for sound optuions
 t_stru_lisy80_sounds_csv lisy80_sound_stru[32];
-int lisy_volume = 80; //SDL range from 0..128
 //global var for all switches
 unsigned char lisy_switches[80];
 //global var for all lamps
@@ -100,35 +99,6 @@ void error(const char *msg)
 {
     perror(msg);
 }
-
-//inits (more or less copy of inits in lisy1.c and lisy80.c
-void lisy1_init( void )
-{
-   //init coils
-   lisy1_coil_init( );
-   //get the configured game
-   lisy1_file_get_gamename( &lisy1_game);
-   //show the 'boot' message
-   display_show_boot_message_lisy1(s_mpf_software_version,lisy1_game.rom_id,lisy1_game.gamename);
-
-}
-
-
-void lisy80_init( void )
-{
-   //init coils
-   lisy80_coil_init( );
-   //get the configured game
-   lisy80_file_get_gamename( &lisy80_game);
-   //show the 'boot' message
-   display_show_boot_message(s_mpf_software_version,lisy80_game.gtb_no,lisy80_game.gamename);
-}
-
-void lisy35_init( void )
-{
-}
-
-
 //send back string
 void send_back_string(int sockfd,unsigned char code,char *str)
 {
@@ -261,7 +231,7 @@ if (ls80dbg.bitv.sound)
 
 
 //play the file via SDL2, file is in ./hardware_sounds
-play_file(unsigned char option,char *filename)
+void play_file(unsigned char option,char *filename)
 {
 
      Mix_Music *newmusic;
@@ -287,7 +257,7 @@ play_file(unsigned char option,char *filename)
 }
 
 //say the text
-say_text(unsigned char option,char *text)
+void say_text(unsigned char option,char *text)
 {
 if (ls80dbg.bitv.basic)
  {
@@ -304,7 +274,7 @@ if (ls80dbg.bitv.basic)
 }
 
 //set volume, parameter is in percent
-set_volume(unsigned char volume_in_percent)
+void set_volume(unsigned char volume_in_percent)
 {
 if (ls80dbg.bitv.basic)
  {
@@ -557,7 +527,7 @@ else
 }
 
 //subroutine for serial com
-int set_interface_attribs(int fd, int speed)
+int mpf_set_interface_attribs(int fd, int speed)
 {
     struct termios tty;
 
@@ -614,21 +584,25 @@ int main(int argc, char *argv[])
      //dirent vars
      DIR *d;
      struct dirent *dir;
-     int len;
+     int len,res;
      char file_with_path[512];
+     char lisy_gamename[20];
+     char lisy_variant[20];
+     unsigned char sw_main,sw_sub,commit;
 
-
-   
+     //lets get the variant from the command line
+     //no validation check at the moment
+     strcpy(lisy_variant,argv[1]);
 
      //it is serial or lan(socket)  mode
-     if ( (argc != 2) || ( (strncmp(argv[1],"socket",6) != 0 ) && (strncmp(argv[1],"serial",6) != 0 )))
+     if ( (argc != 3) || ( (strncmp(argv[2],"socket",6) != 0 ) && (strncmp(argv[2],"serial",6) != 0 )))
         {
-         printf("use: %s socket|serial\n",argv[0]);
+         printf("use: %s lisy_variant socket|serial\n",argv[0]);
 	 exit (1);
 	}
 
 
-     if (strncmp(argv[1],"socket",6) == 0 )
+     if (strncmp(argv[2],"socket",6) == 0 )
  	 socket_mode=1;
      else
  	 socket_mode=0;
@@ -637,15 +611,23 @@ int main(int argc, char *argv[])
     sprintf(s_mpf_software_version,"%02d.%03d ",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
     printf("This is MPF Server for LISY by bontango, Version %s (%s)\n",s_mpf_software_version,socket_mode ? "socket mode" : "serial mode");
 
-     //do init the hardware
-     lisy_hw_init(0);
 
-    //set signal handler
-    lisy80_set_sighandler();
- 
+
+     //check which pinball we are going to control
+     //this will also call lisy_hw_init
+     if ( (res = lisy_set_gamename(lisy_variant, lisy_gamename)) != 0)
+           {
+             fprintf(stderr,"LISYMINI: no matching game or other error\n\r");
+             return (-1);
+           }
+
+    //use the init functions from lisy.c
+    lisy_init();
+
 
     //set values to be returned to mpf
-    sprintf(lisy_hw.lisy_ver,"%d.%02d ",LISY_SOFTWARE_MAIN,LISY_SOFTWARE_SUB);
+    lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+    sprintf(lisy_hw.lisy_ver,"%d.%02d ",sw_main,sw_sub);
     sprintf(lisy_hw.api_ver,"%d.%02d ",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
 
     //set HW
@@ -714,6 +696,7 @@ int main(int argc, char *argv[])
    //init internal coil vars as well
    for(i=0; i<=9; i++) lisy_coils[i] = 0;
 
+/*
     //init lisy1 or lisy80
     if ( lisy_hardware_revision == 100 )  //lisy1
 	lisy1_init();
@@ -729,6 +712,7 @@ int main(int argc, char *argv[])
     lisy80_set_red_led(0);
     lisy80_set_yellow_led(0);
     lisy80_set_green_led(1);
+*/
 
   //check for coil min_pulse parameter
   //option is active if value is either 0 or 1
@@ -866,7 +850,7 @@ int main(int argc, char *argv[])
         return -1;
     }
     /*baudrate 115200, 8 bits, no parity, 1 stop bit */
-    set_interface_attribs(serfd, B115200);
+    mpf_set_interface_attribs(serfd, B115200);
 
 
     }
