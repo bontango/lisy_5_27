@@ -32,7 +32,7 @@
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     94
+#define LISY35control_SOFTWARE_SUB     95
 
 //fake definiton needed in lisy80
 typedef struct {
@@ -1629,6 +1629,7 @@ int main(int argc, char *argv[])
      int do_exit = 0;
      struct ifreq ifa;
      char *line;
+     int tries = 0;
 
 
      //init ars
@@ -1699,20 +1700,31 @@ int main(int argc, char *argv[])
      sockfd = socket(AF_INET, SOCK_STREAM, 0);
      if (sockfd < 0) 
         error("ERROR opening socket");
-     //try to find out our IP on Wlan0
-     strcpy (ifa.ifr_name, "wlan0");
-     strcpy (ip_interface, "WLAN0"); //upercase for message
+
+
+     //try to find out our IP on eth0
+     strcpy (ifa.ifr_name, "eth0");
+     strcpy (ip_interface, "ETH0"); //upercase for message
      if((n=ioctl(sockfd, SIOCGIFADDR, &ifa)) != 0) 
       {
-	//no IP on WLAN0, we try eth0 now
-        strcpy (ifa.ifr_name, "eth0");
-        strcpy (ip_interface, "ETH0"); //upercase for message
-        if((n=ioctl(sockfd, SIOCGIFADDR, &ifa)) != 0) 
-           strcpy (ifa.ifr_name, "noip");
+	//no IP on eth0, we try wlan0 now, 20 times
+        strcpy (ifa.ifr_name, "wlan0");
+        strcpy (ip_interface, "WLAN0"); //upercase for message
+	do
+        {
+          n=ioctl(sockfd, SIOCGIFADDR, &ifa);
+	  tries++;
+	  if ( ls80dbg.bitv.basic )
+	   {
+             sprintf(debugbuf,"get IP of wlan0: try number:%d",tries);
+             lisy80_debug(debugbuf);
+           }
+        } while ( (n!=0) &( tries<20));
       }
 
      if(n) //no IP found
      {
+        strcpy (ifa.ifr_name, "noip");
        //construct the message
         fprintf(stderr,"Bally NO IP");
         display35_show_str( 1, "000000");
