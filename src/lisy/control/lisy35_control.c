@@ -32,7 +32,14 @@
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     95
+#define LISY35control_SOFTWARE_SUB     96
+
+//fake definiton needed in lisy_w
+void core_setSw(int myswitch, unsigned char action) {  };
+
+
+//fake definiton needed in lisy1
+void cpunum_set_clockscale(int cpu, float clockscale) {  };
 
 //fake definiton needed in lisy80
 typedef struct {
