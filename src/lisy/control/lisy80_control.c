@@ -9,58 +9,79 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <net/if.h>
 #include <arpa/inet.h>
 #include <wiringPi.h>
+#include "../lisy_w.h"
 #include "../fileio.h"
 #include "../hw_lib.h"
-#include "../coils.h"
 #include "../displays.h"
+#include "../coils.h"
 #include "../switches.h"
-#include "../eeprom.h"
 #include "../utils.h"
+#include "../eeprom.h"
 #include "../sound.h"
+#include "../lisy.h"
 #include "../fadecandy.h"
+#include "../lisy_api.h"
+#include "../usbserial.h"
+#include "../utils.h"
 
 //the version
 #define LISY80control_SOFTWARE_MAIN    0
-#define LISY80control_SOFTWARE_SUB     22
+#define LISY80control_SOFTWARE_SUB     23
 
-//dummy inits
-void lisy1_init( int lisy80_throttle_val) { }
-void lisy80_init( int lisy80_throttle_val) { }
-void lisy35_init( int lisy80_throttle_val) { }
-//dummy shutdowns
-void lisy1_shutdown( void ) { }
-void lisy80_shutdown( void ) { }
-void lisy35_shutdown( void ) { }
+
+//fake definiton needed in lisy_w
+void core_setSw(int myswitch, unsigned char action) {  };
+
+
+//fake definiton needed in lisy1
+void cpunum_set_clockscale(int cpu, float clockscale) {  };
+
+//fake definiton needed in lisy80
+typedef struct {
+ struct {
+    unsigned int  soundBoard;
+  } hw;
+} core_tGameData;
+
+core_tGameData *core_gameData;
+
+//fake definiton needed for mame functions
+typedef struct
+{
+ unsigned char lampMatrix[2];
+} t_coreGlobals;
+t_coreGlobals coreGlobals;
+void lisy_nvram_write_to_file( void ) {  }
+
+
+
 
 //the debug options
 //in main prg set in  lisy80.c
-ls80dbg_t ls80dbg;
-int lisy80_is80B;
+//ls80dbg_t ls80dbg;
+//int lisy80_is80B;
 //local switch Matrix, we need 9 elements
 //as pinmame internal starts with 1
 //there is one value per return
-unsigned char swMatrix[9] = { 0,0,0,0,0,0,0,0 };
-int lisy80_time_to_quit_flag; //not used here
+extern unsigned char swMatrix[9];
+//unsigned char swMatrix[9] = { 0,0,0,0,0,0,0,0 };
+//int lisy80_time_to_quit_flag; //not used here
 //global var for additional options
 //typedef is defined in hw_lib.h
-ls80opt_t ls80opt;
+//ls80opt_t ls80opt;
 unsigned char lisy80_gtb_socket_switches[80];
 //global var for coil min pulse time option ( e.g. for spring break )
-int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
-int lisy80_coil_min_pulse_mod = 0; //deaktivated by default
+//int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
+//int lisy80_coil_min_pulse_mod = 0; //deaktivated by default
 //global var for coil min pulse time option, always activated for lisy1
-int lisy1_coil_min_pulse_time[8] = { 0,0,0,0,0,0,0,0};
-
-//for fadecandy init
-extern int lisy_has_fadecandy;
-unsigned char lisy_K3_value;
+//int lisy1_coil_min_pulse_time[8] = { 0,0,0,0,0,0,0,0};
 
 //global vars
 char switch_description_line1[80][80];
@@ -76,7 +97,7 @@ t_stru_lisy80_games_csv lisy80_game;
 
 //global avr for sound optuions
 t_stru_lisy80_sounds_csv lisy80_sound_stru[32];
-int lisy_volume = 80; //SDL range from 0..128
+//int lisy_volume = 80; //SDL range from 0..128
 //global var for all lamps
 unsigned char lamp[52];
 //global var for all sounds
@@ -1261,12 +1282,13 @@ int main(int argc, char *argv[])
      char buffer[256];
      char ip_interface[10];
      struct sockaddr_in serv_addr, cli_addr, *myip;
-     int i,n;
+     int i,n,res;
      int do_exit = 0;
      struct ifreq ifa;
      char *line;
-
-
+     int tries = 0;
+     char lisy_gamename[20];
+     char lisy_variant[20];
 
      //init global vars; all switches supposed to be open, whcih means value 1
      for (i=0; i<80; i++) lisy80_gtb_socket_switches[i] = 1;
@@ -1278,43 +1300,17 @@ int main(int argc, char *argv[])
       }
 
 
-     //start init lisy80 hardware
-     //init th wiringPI library first
-     lisy80_hwlib_wiringPI_init();
+     //check which pinball we are going to control
+     //this will also call lisy_hw_init
+     strcpy(lisy_variant,"lisy80");
+     if ( (res = lisy_set_gamename(lisy_variant, lisy_gamename)) != 0)
+           {
+             fprintf(stderr,"LISY80: no matching game or other error\n\r");
+             return (-1);
+           }
 
-    //any options?
-    //ls80opt.byte = lisy80_get_dip1();
-    if ( lisy80_dip1_debug_option() ) ls80dbg.bitv.basic = 1; else ls80dbg.bitv.basic = 0;
-
-
-    //do init the hardware
-    //this also sets the debug options by reading jumpers via switch pic
-    lisy_hwlib_init();
-
-    //now look for the other dips and for extended debug options
-    lisy80_get_dips();
-
-    //get the configured game
-    lisy80_file_get_gamename( &lisy80_game);
-
-
- //init the fadecandy HW ( if told present via K3 )
- if ( lisy_K3_value <= 1 )
- {
-  if ( lisy_fadecandy_init(80) )
-   {
-    if (ls80dbg.bitv.basic == 1 )
-       fprintf(stderr,"Info: No fadecandy HW or no LED configured\n");
-       lisy_has_fadecandy = 0;
-   }
-  else
-   {
-    if (ls80dbg.bitv.basic == 1 )
-       fprintf(stderr,"Info: We have a fadecandy with config\n");
-       lisy_has_fadecandy = 1;
-   }
-}//K3 value
-
+    //use the init functions from lisy.c
+    lisy_init();
 
 
     //init coils
@@ -1347,20 +1343,33 @@ int main(int argc, char *argv[])
      sockfd = socket(AF_INET, SOCK_STREAM, 0);
      if (sockfd < 0) 
         error("ERROR opening socket");
-     //try to find out our IP on Wlan0
-     strcpy (ifa.ifr_name, "wlan0");
-     strcpy (ip_interface, "WLAN0"); //upercase for message
-     if((n=ioctl(sockfd, SIOCGIFADDR, &ifa)) != 0) 
+
+     //try to find out our IP on eth0
+     strcpy (ifa.ifr_name, "eth0");
+     strcpy (ip_interface, "ETH0"); //upercase for message
+     if((n=ioctl(sockfd, SIOCGIFADDR, &ifa)) != 0)
       {
-	//no IP on WLAN0, we try eth0 now
-        strcpy (ifa.ifr_name, "eth0");
-        strcpy (ip_interface, "ETH0"); //upercase for message
-        if((n=ioctl(sockfd, SIOCGIFADDR, &ifa)) != 0) 
-           strcpy (ifa.ifr_name, "noip");
+        //no IP on eth0, we try wlan0 now, 20 times
+        strcpy (ifa.ifr_name, "wlan0");
+        strcpy (ip_interface, "WLAN0"); //upercase for message
+        do
+        {
+          sleep(1);
+          n=ioctl(sockfd, SIOCGIFADDR, &ifa);
+          tries++;
+          if ( ls80dbg.bitv.basic )
+           {
+             sprintf(debugbuf,"get IP of wlan0: try number:%d",tries);
+             lisy80_debug(debugbuf);
+           }
+        } while ( (n!=0) &( tries<20));
       }
+
 
      if(n) //no IP found
      {
+      strcpy (ifa.ifr_name, "noip");
+
       if (lisy80_game.is80B)
       {
        //construct the message

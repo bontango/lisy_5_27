@@ -58,42 +58,13 @@ typedef struct
 t_coreGlobals coreGlobals;
 void lisy_nvram_write_to_file( void ) {  }
 
-//here are the variables from unix/main.c
-char lisy_gamename[20];
-int res;
 
-
-//dummy inits
-//void lisy1_init( int lisy80_throttle_val) { }
-//void lisy80_init( int lisy80_throttle_val) { }
-//void lisy35_init( int lisy80_throttle_val) { }
-//dummy shutdowns
-//void lisy1_shutdown( void ) { }
-//void lisy80_shutdown( void ) { }
-//void lisy35_shutdown( void ) { }
-
-//the debug options
-//in main prg set in  lisy80.c
-//ls80dbg_t ls80dbg;
-//int lisy80_is80B;
 //48 switches, keep it easy by using 49 elements
 unsigned char Switches_LISY35[49] = { 0,0,0,0,0,0,0,0,0,0,
 				      0,0,0,0,0,0,0,0,0,0,
 				      0,0,0,0,0,0,0,0,0,0,
 				      0,0,0,0,0,0,0,0,0,0,
 				      0,0,0,0,0,0,0,0 };
-//needed by switches.c ?
-//unsigned char swMatrix[9] = { 0,0,0,0,0,0,0,0,0 };
-//int lisy80_time_to_quit_flag; //not used here
-//global var for additional options
-//typedef is defined in hw_lib.h
-//ls80opt_t ls80opt;
-//global var for coil min pulse time option ( e.g. for spring break )
-//int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
-//int lisy80_coil_min_pulse_mod = 0; //deaktivated by default
-//global var for coil min pulse time option, always activated for lisy1
-//int lisy1_coil_min_pulse_time[8] = { 0,0,0,0,0,0,0,0};
-
 
 //global vars
 char switch_description_line1[80][80];
@@ -108,9 +79,6 @@ char coil_description_line2[20][80];
 t_stru_lisy1_games_csv lisy1_game;
 t_stru_lisy35_games_csv lisy35_game;
 t_stru_lisy80_games_csv lisy80_game;
-//global avr for sound optuions
-//t_stru_lisy80_sounds_csv lisy80_sound_stru[32];
-//int lisy_volume = 80; //SDL range from 0..128
 //global var for all contnious solenoids
 unsigned char cont_sol[5];
 //global var for all lamps
@@ -1632,12 +1600,13 @@ int main(int argc, char *argv[])
      char buffer[256];
      char ip_interface[10];
      struct sockaddr_in serv_addr, cli_addr, *myip;
-     int i,n;
+     int i,n,res;
      int do_exit = 0;
      struct ifreq ifa;
      char *line;
      int tries = 0;
-
+     char lisy_variant[20];
+     char lisy_gamename[20];
 
      //init ars
      core_gameData = malloc(sizeof *core_gameData);
@@ -1650,19 +1619,18 @@ int main(int argc, char *argv[])
       }
 
 
+
+     //check which pinball we are going to control
+     //this will also call lisy_hw_init
+     strcpy(lisy_variant,"lisy35");
+     if ( (res = lisy_set_gamename(lisy_variant, lisy_gamename)) != 0)
+           {
+             fprintf(stderr,"LISY35: no matching game or other error\n\r");
+             return (-1);
+           }
+
     //use the init functions from lisy.c
-    //in LISY called by unix/main, this is a copy/paste
-    //do init of LISY35 hardware first, as we need to read dip switch from the board to identify game to emulate
-            lisy_hw_init(0);
-                if ( (res=lisy35_get_gamename(lisy_gamename)) >= 0)
-                  {
-                   strcpy(argv[argc-1],lisy_gamename);
-                   fprintf(stderr,"LISY35: we are emulating Game No:%d %s\n\r",res,lisy_gamename);
-                  }
-                else
-                   fprintf(stderr,"LISY35: no matching game or other error\n\r");
-            //for LISY35 we need to initialize the variant ( PIC in/out config )
-            lisy35_set_variant();
+    lisy_init();
 
     //dirty, dirty dirty
     lisy35_set_soundboard_var();
@@ -1719,6 +1687,7 @@ int main(int argc, char *argv[])
         strcpy (ip_interface, "WLAN0"); //upercase for message
 	do
         {
+	  sleep(1);
           n=ioctl(sockfd, SIOCGIFADDR, &ifa);
 	  tries++;
 	  if ( ls80dbg.bitv.basic )

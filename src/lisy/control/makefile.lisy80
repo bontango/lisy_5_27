@@ -1,5 +1,5 @@
-# lisy80 makefile for lisycontrol
-# bontango 05.2019
+# lisy35 makefile for lisycontrol
+# bontango 12.2018
 
 CC      = /usr/bin/gcc
 CFLAGS  = -Wall -g -D_REENTRANT -DDEBUG
