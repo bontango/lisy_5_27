@@ -8,3 +8,4 @@ src/lisy/control/lisy1_control
 src/lisy/control/lisy80_control
 src/lisy/control/lisy35_control
 src/lisy/control/lisy_api_control
+src/lisy/control/picpgm_control

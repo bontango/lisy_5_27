@@ -358,7 +358,7 @@ void do_solenoid_set( char *buffer)
    }
      //now pulse the coil
          lisy80_coil_set(coil,1);
-         usleep(COIL_PULSE_TIME);
+         delay (150); // 150 milliseconds delay from wiringpi library
          lisy80_coil_set(coil,0);
 
 }
