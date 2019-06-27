@@ -1105,9 +1105,10 @@ void send_software_infos( int sockfd )
      char buffer[256];
      int dum;
 
-   //get installed version of lisy1
-   dum = system("/usr/local/bin/lisy -lisyversion");
-   sprintf(buffer,"LISY1 version installed is 5.0%02d<br>\n",WEXITSTATUS(dum));
+   //get installed version of lisy
+   unsigned char sw_main,sw_sub,commit;
+   lisy_get_sw_version( &sw_main, &sw_sub, &commit);
+   sprintf(buffer,"%d.%d-%d\n",sw_main,sw_sub,commit);
    sendit( sockfd, buffer);
 
    //init switch pic and get Software version
