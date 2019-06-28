@@ -1399,7 +1399,7 @@ void send_software_infos( int sockfd )
    //get installed version of lisy
    unsigned char sw_main,sw_sub,commit;
    lisy_get_sw_version( &sw_main, &sw_sub, &commit);
-   sprintf(buffer,"%d.%d-%d\n",sw_main,sw_sub,commit);
+   sprintf(buffer,"LISY Version: %d.%d-%d<br>\n",sw_main,sw_sub,commit);
    sendit( sockfd, buffer);
 
    //init switch pic and get Software version
