@@ -191,6 +191,10 @@ void coil_coil_set( int coil, int action)
         //write to PIC
         lisy80_write_byte_coil_pic(  mydata_coil.byte );
 
+   //eventhandler for LISY_HOME
+//   if ( lisy_hardware_ID == LISY_HW_ID_HOME)
+//		lisy_home_event_handler( LISY_HOME_EVENT_LAMP, coil, action, NULL);
+
 }
 
 /*
@@ -553,9 +557,6 @@ void lisy80_coil_set( int coil, int action)
         sprintf(debugbuf,"setting lamp:%d to:%d",coil,action);
         lisy80_debug(debugbuf);
      }
-   //eventhandler for LISY_HOME
-   if ( lisy_hardware_ID == LISY_HW_ID_HOME)
-		lisy_home_event_handler( LISY_HOME_EVENT_LAMP, coil, action, NULL);
 
    //do set fadecandy LED if active and lamp is mapped
    if ( lisy_has_fadecandy && lisy_lamp_to_led_map[coil-1].is_mapped )
@@ -571,8 +572,8 @@ void lisy80_coil_set( int coil, int action)
    else //no mapping, do normal lamp set
      coil_coil_set( coil, action);
 
-  //special action in case we have lamp 44-47 as the system80 does map this fix (reverse) to lamps 48-51
-  if ( ( coil >= 44 ) && ( coil <= 47 ) )
+  //special action in case we have lamp 45-48 as the system80 does map this fix (reverse) to lamps 49-52
+  if ( ( coil >= 45 ) && ( coil <= 48 ) )
    {
    if ( lisy_has_fadecandy && lisy_lamp_to_led_map[coil-1+4].is_mapped )
     {
