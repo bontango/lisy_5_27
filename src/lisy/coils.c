@@ -18,6 +18,7 @@
 #include "fadecandy.h"
 #include "lisy_home.h"
 #include "externals.h"
+#include "lisy.h"
 
 //global var
 union five {
@@ -553,7 +554,7 @@ void lisy80_coil_set( int coil, int action)
         lisy80_debug(debugbuf);
      }
    //eventhandler for LISY_HOME
-   if ( lisy_hardware_ID == LISY_HOME_HW_ID)
+   if ( lisy_hardware_ID == LISY_HW_ID_HOME)
 		lisy_home_event_handler( LISY_HOME_EVENT_LAMP, coil, action, NULL);
 
    //do set fadecandy LED if active and lamp is mapped

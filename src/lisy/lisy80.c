@@ -234,7 +234,7 @@ void lisy80_init( void )
  }
   
  //init LISY_Home if we are running on it
- if ( lisy_hardware_ID == LISY_HOME_HW_ID) 
+ if ( lisy_hardware_ID == LISY_HW_ID_HOME) 
    {
      if ( lisy_home_init_event() < 0)
        fprintf(stderr,"LISY HOME init failed, sound emulation disabled\n");
