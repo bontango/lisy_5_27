@@ -25,6 +25,7 @@
 #include "utils.h"
 #include "fadecandy.h"
 #include "externals.h"
+#include "lisy.h"
 
 struct stru_lisy80_error
 {

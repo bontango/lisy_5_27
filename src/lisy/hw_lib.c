@@ -31,6 +31,7 @@
 #include "fadecandy.h"
 #include "usbserial.h"
 #include "externals.h"
+#include "lisy.h"
 
 
 //global vars for I2C
