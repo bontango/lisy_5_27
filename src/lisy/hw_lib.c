@@ -79,6 +79,9 @@ int lisy_get_hardware_revision(int disp_sw_ver, int *hw_ID)
  //we want main version only
  disp_sw_ver =  disp_sw_ver/100;
 
+ //init hw_ID
+ *hw_ID = LISY_HW_ID_NONE;
+ 
  if (disp_sw_ver >= 4)
  {
 
