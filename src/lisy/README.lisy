@@ -35,6 +35,7 @@ src/wpc/gts80.c -> system80 implementation
 src/wpc/gts1.c -> system1 implementation
 src/wpc/by35.c -> Bally
 src/wpc/s7.c -> Williams
+src/wpc/sndbrd.c -> sound in general (used for williams only at the moment)
 
 All the sources are under /home/pi/lisy; look for "#define LISY_SUPPORT" in the pinmame source
 Start is in main.c in ./src/unix , we check for "special game names" in the calling command (last argument)
@@ -67,4 +68,4 @@ main.c calls 'run_game' in mame.c
 we call 'lisy_init' from here. according to lisy_hardware_revision initialion of LISY isoftware part is done
 
 
-bontango April 2019
+bontango June 2019

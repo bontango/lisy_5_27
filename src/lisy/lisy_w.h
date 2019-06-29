@@ -8,7 +8,6 @@ void lisy_w_solenoid_handler( void );
 void lisy_w_switch_handler( void );
 unsigned char lisy_w_switch_reader( unsigned char *action );
 void lisy_w_lamp_handler(void);
-void lisy_w_sound_handler( unsigned char data );
 
 #endif  /* LISY_W_H */
 

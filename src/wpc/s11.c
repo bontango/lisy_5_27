@@ -602,8 +602,7 @@ static WRITE_HANDLER(de_sndCmd_w) {
 #endif
 
 //NOTE: Not used for Data East
-//static WRITE_HANDLER(pia0ca2_w) { sndbrd_0_ctrl_w(0,data); }
-static WRITE_HANDLER(pia0ca2_w) { sndbrd_0_ctrl_w(0,data); lisy_w_sound_handler(data);}
+static WRITE_HANDLER(pia0ca2_w) { sndbrd_0_ctrl_w(0,data); }
 //NOTE: Not used for Data East
 static READ_HANDLER(pia5b_r) { return sndbrd_1_ctrl_r(0); }
 

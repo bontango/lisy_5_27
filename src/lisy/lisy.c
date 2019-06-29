@@ -212,3 +212,12 @@ void lisy_get_sw_version( unsigned char *sw_main, unsigned char *sw_sub, unsigne
  *commit = atoi(strtok(NULL, "-"));
 
 }
+
+//sound handler
+void lisy_sound_handler( unsigned char data )
+{
+
+//first tests
+  printf("RTH sound handler: %d\n",data);
+}
+      

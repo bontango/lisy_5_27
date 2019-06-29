@@ -16,6 +16,8 @@ int lisy_set_gamename( char *arg_from_main, char *lisy_gamename);
 void lisy_nvram_write_to_file( void );
 void lisy_get_sw_version( unsigned char *sw_main, unsigned char *sw_sub, unsigned char *commit);
 
+void lisy_sound_handler( unsigned char data );
+
 //the LISY HW revisions
 #define LISY_HW_LISY1   100             //LISY1
 #define LISY_HW_LISY80_311  311         //LISY80, old HW Version 3.11 (discontinue?)

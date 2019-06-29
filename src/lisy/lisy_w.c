@@ -621,11 +621,3 @@ void lisy_w_lamp_handler( )
  }//changed
 }//lamp_handler
 
-
-//sound handler
-void lisy_w_sound_handler( unsigned char data )
-{
-
-//first tests
-  printf("RTH sound handler: %d\n",data);
-}
