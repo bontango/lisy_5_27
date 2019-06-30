@@ -21,6 +21,9 @@ extern int lisy80_game_nr;
 extern int lisy_volume;
 extern int lisy_has_fadecandy;
 extern t_lisy_lamp_to_led_map lisy_lamp_to_led_map[52];
+extern t_lisy_home_map lisy_home_coil_map[52];
+extern t_lisy_home_map lisy_home_lamp_map[52];
+
 
 extern t_stru_lisy80_games_csv lisy80_game;
 extern t_stru_lisy1_games_csv lisy1_game;

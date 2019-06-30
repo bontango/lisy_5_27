@@ -46,6 +46,14 @@ int lisy_home_init_event(void)
  char wav_file_name[80];
 
 
+//check for fadecandy config -> do the mapping
+ret = lisy_file_get_home_mappings();
+ if ( ret < 0 )
+  {
+    fprintf(stderr,"Error: mapping for LISY Home error:%d\n",ret);
+    return -1;
+  }
+
  /* Initialize only SDL Audio on default device */
     if(SDL_Init(SDL_INIT_AUDIO) < 0)
     {
@@ -86,11 +94,95 @@ int lisy_home_init_event(void)
  return(ret);
 }
 
-//lamp
+//lamp and coils injkl. mapping
 void lisy_home_coil_event(int coil, int action)
 {
 
-   printf(" -- RTH --- coil %d event action: %d\n",coil,action);
+int real_coil;
+int mycoil;
+unsigned int current_status = LISYH_EXT_CMD_FIRST_SOLBOARD; //RTH we need to add second board
+
+union two {
+    unsigned char byte;
+    struct {
+    unsigned COIL:6, ACTION:1, IS_CMD:1;
+    //signed b0:1, b1:1, b2:1, b3:1, b4:1, b5:1, b6:1, b7:1;
+        } bitv;
+}data;
+
+
+ //look for possible mapping
+ if (coil <= 48) //it is a lamp
+  {
+    real_coil = lisy_home_lamp_map[coil].mapped_to;
+    //do we talk to the lampdriver currently?
+    if (  current_status != LISYH_EXT_CMD_LED_ROW_1)
+    {  //RTH need to be extended
+      coil_cmd2pic_noansw( LISYH_EXT_CMD_LED_ROW_1);
+      current_status != LISYH_EXT_CMD_LED_ROW_1;
+    }
+    //debug
+    if ( ls80dbg.bitv.lamps )
+    {
+      sprintf(debugbuf,"LISY HOME map lamp %d to %d",coil,real_coil);
+      lisy80_debug(debugbuf);
+    }
+   }
+ else //it is a coil
+  {
+    //do we talk to the solenoiddriver currently?
+    if (  current_status != LISYH_EXT_CMD_FIRST_SOLBOARD)
+    {  //RTH need to be extended
+      coil_cmd2pic_noansw( LISYH_EXT_CMD_FIRST_SOLBOARD);
+      current_status != LISYH_EXT_CMD_FIRST_SOLBOARD;
+    }
+
+  //determine which coil we use
+  switch( coil )
+   {
+    case Q_SOL1: mycoil = 1;
+                break;
+    case Q_SOL2: mycoil = 2;
+                break;
+    case Q_SOL3: mycoil = 3;
+                break;
+    case Q_SOL4: mycoil = 4;
+                break;
+    case Q_SOL5: mycoil = 5;
+                break;
+    case Q_SOL6: mycoil = 6;
+                break;
+    case Q_SOL7: mycoil = 7;
+                break;
+    case Q_SOL8: mycoil = 8;
+                break;
+    case Q_SOL9: mycoil = 9;
+                break;
+    default: mycoil = 0;
+                break;
+   }
+
+    real_coil = lisy_home_coil_map[mycoil].mapped_to;
+
+  if ( ls80dbg.bitv.coils )
+  {
+    sprintf(debugbuf,"LISY HOME map coil %d to %d",mycoil,real_coil);
+    lisy80_debug(debugbuf);
+  }
+
+  }
+
+        //now do the setting
+        --coil; //we have only 6 bit, so we start at zero for coil 1
+
+        // build control byte
+        data.bitv.COIL = real_coil;
+        data.bitv.ACTION = action;
+        data.bitv.IS_CMD = 0;        //this is a coil setting
+
+        //write to PIC
+        lisy80_write_byte_coil_pic(  data.byte );
+
 }
 
 
@@ -99,9 +191,7 @@ void lisy_home_coil_event(int coil, int action)
 void lisy_home_event_handler( int id, int arg1, int arg2, char *str)
 {
 
-//give this info on screen
-  if ( 0 )
-  //if ( ls80dbg.bitv.basic )
+  if ( ls80dbg.bitv.basic )
   {
     char str_event_id[40];
     switch(id)

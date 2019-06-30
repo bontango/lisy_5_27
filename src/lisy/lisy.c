@@ -12,6 +12,7 @@
 #include "lisy35.h"
 #include "lisy80.h"
 #include "lisy_w.h"
+#include "lisy_home.h"
 #include "utils.h"
 #include "hw_lib.h"
 #include "fadecandy.h"
@@ -34,6 +35,9 @@ int lisy_has24c04 = 1;
 int lisy_has_fadecandy = 0;
 //flag if lamp is mapped to LED, set in fileio
 t_lisy_lamp_to_led_map lisy_lamp_to_led_map[52];
+//table for coil lamp mapping fileio
+t_lisy_home_map lisy_home_coil_map[52];
+t_lisy_home_map lisy_home_lamp_map[52];
 
 //global var for debugging
 //typedef is defined in hw_lib.h

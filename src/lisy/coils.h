@@ -54,6 +54,7 @@ void lisy35_coil_read_mpu_dips(void);
 
 #define LISY_EXT_CMD_EEPROM_READ 0
 #define LISY_EXT_CMD_EEPROM_WRITE 1
+
 #define LISY35_EXT_CMD_AUX_BOARD_0 2  // no aux board
 #define LISY35_EXT_CMD_AUX_BOARD_1 3  // AS-2518-43 12 lamps
 #define LISY35_EXT_CMD_AUX_BOARD_2 4  // AS-2518-52 28 lamps
@@ -69,6 +70,14 @@ void lisy35_coil_read_mpu_dips(void);
 #define LISY35_READ_DIP_SWITCHES 14  //read dip switches and buffer value
 #define LISY35_GET_DIP_SWITCHES 15  //dip switches 1...4, need to be called four times
 
+#define LISYH_EXT_CMD_FIRST_SOLBOARD 2 //first solenoidboard (default))
+#define LISYH_EXT_CMD_SECOND_SOLBOARD 3 //second solenoidboard
+#define LISYH_EXT_CMD_LED_ROW_1 4
+#define LISYH_EXT_CMD_LED_ROW_2 5
+#define LISYH_EXT_CMD_LED_ROW_3 6
+#define LISYH_EXT_CMD_LED_ROW_4 7
+#define LISYH_EXT_CMD_LED_ROW_5 8
+#define LISYH_EXT_CMD_LED_ROW_6 9
 
 //special coil numbers
 #define LISY35_COIL_GREEN_LED 60

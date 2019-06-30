@@ -1,6 +1,13 @@
 #ifndef LISY_HOME_H
 #define LISY_HOME_H
 
+typedef struct
+{
+  unsigned char mapped_to;
+  unsigned char r, g, b;
+}
+t_lisy_home_map;
+
 int lisy_home_init_event(void);
 void lisy_home_event_handler( int id, int arg1, int arg2, char *str);
 

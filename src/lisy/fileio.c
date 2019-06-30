@@ -16,6 +16,7 @@
 #include "fadecandy.h"
 #include "opc.h"
 #include "utils.h"
+#include "lisy_home.h"
 #include "externals.h"
 
 
@@ -1295,4 +1296,88 @@ int  lisymini_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game)
 
   //give back the name and the number of the game
   if (found) return(line_no); else return(-1);
+}
+
+//read the csv file for lisy Home lamp & coil mapping /lisy partition
+//give -1 in case we had an error
+//fill structure 
+int  lisy_file_get_home_mappings(void)
+{
+ char buffer[1024];
+ char *line;
+ char file_name[80];
+ int no;
+ int iscoil;
+ int lamp_start, lamp_end;
+ int first_line = 1;
+ FILE *fstream;
+ int i,dum;
+
+
+//construct the filename
+//Lamp or Coil;LED=0|COIL=1;Number;Red;Green;Blue;Comment
+sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_MAPPING_FILE);
+
+ fstream = fopen(file_name,"r");
+   if(fstream == NULL)
+   {
+      fprintf(stderr,"LISY_Home: opening %s failed, using defaults\n",file_name);
+   }
+
+lamp_start=0; lamp_end=48; 
+//map to default 1:1
+for(i=lamp_start; i<=lamp_end;i++) 
+  { 
+     lisy_home_lamp_map[i].mapped_to = i;
+     lisy_home_lamp_map[i].r = 255;
+     lisy_home_lamp_map[i].g = 255;
+     lisy_home_lamp_map[i].b = 255;
+     lisy_home_coil_map[i].mapped_to = i;
+     lisy_home_coil_map[i].r = 0;
+     lisy_home_coil_map[i].g = 0;
+     lisy_home_coil_map[i].b = 0;
+  }
+
+
+   first_line = 1;
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     no = atoi(strtok(line, ";")); 	//lamp or coil number
+     if ( no > 48 ) continue; //skip line if lamp number is out of range
+     iscoil = atoi(strtok(line, ";")); 	//lamp or coil
+     if(iscoil)
+     {
+      lisy_home_coil_map[no].mapped_to = atoi(strtok(NULL, ";"));	
+      lisy_home_coil_map[no].r = atoi(strtok(NULL, ";"));	
+      lisy_home_coil_map[no].g = atoi(strtok(NULL, ";"));	
+      lisy_home_coil_map[no].b = atoi(strtok(NULL, ";"));	
+     }
+     else
+     {
+      lisy_home_lamp_map[no].mapped_to = atoi(strtok(NULL, ";"));	
+      lisy_home_lamp_map[no].r = atoi(strtok(NULL, ";"));	
+      lisy_home_lamp_map[no].g = atoi(strtok(NULL, ";"));	
+      lisy_home_lamp_map[no].b = atoi(strtok(NULL, ";"));	
+     }
+   } //while
+   fclose(fstream);
+/*
+   if ( ls80dbg.bitv.lamps )
+     {
+	fprintf(stderr,"active Fadecandy lamp - LED mapping: \n");
+	for(i=lamp_start; i<=lamp_end;i++) 
+  	{ 
+          if ( lisy_lamp_to_led_map[i].is_mapped )
+	   {
+		fprintf(stderr,"Lamp %d mapped ",i);
+		fprintf(stderr,"to LED %d ",lisy_lamp_to_led_map[i].mapled);
+		fprintf(stderr,"with RGB %d ",lisy_lamp_to_led_map[i].r);
+		fprintf(stderr," %d ",lisy_lamp_to_led_map[i].g);
+		fprintf(stderr," %d \n",lisy_lamp_to_led_map[i].b);
+	   }
+	}
+      }
+*/
+ return 0;
 }

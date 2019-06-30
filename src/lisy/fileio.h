@@ -78,6 +78,8 @@ int lisymini_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game);
 //fadecandy stuff
 int  lisy_file_get_led_mappings(unsigned char system);
 
+int  lisy_file_get_home_mappings(void);
+
 /* LISY80 stuff */
 #define LISY80_GAMES_CSV "/boot/lisy/lisy80/cfg/lisy80games.csv"
 #define LISY80_GAMES_7DIGIT_CSV "/boot/lisy/lisy80/cfg/lisy80games_7digit.csv"
@@ -111,6 +113,10 @@ int  lisy_file_get_led_mappings(unsigned char system);
 #define LISY35_FADECANDY_PATH "/boot/lisy/lisy35/fadecandy/"
 #define LISY35_FADECANDY_LAMP_FILE "_lisy35_fadecandy_lamps.csv"
 #define LISY35_FADECANDY_GI_FILE "_lisy35_fadecandy_GI.csv"
+
+/* LISY Home stuff */
+#define LISYH_MAPPING_PATH "/boot/lisy/lisyH/mapping/"
+#define LISYH_MAPPING_FILE "coils_and_lamps.csv"
 
 /* LISYMINI stuff */
 #define LISYMINI_GAMES_CSV "/boot/lisy/lisy_m/cfg/lisyminigames.csv"
