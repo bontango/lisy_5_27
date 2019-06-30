@@ -177,10 +177,20 @@ void lisy80_coil_sound_set( int sound)
 }
 
 //coil set via PIC I2C com
+//we do this or lisy1 & lisy80
+//for lisy_home we call lisy_home routine
+//because there may be a mapping
 void coil_coil_set( int coil, int action)
 {
 
-  //now do the setting
+   //eventhandler for LISY_HOME?
+   if ( lisy_hardware_ID == LISY_HW_ID_HOME)
+         {
+		lisy_home_event_handler( LISY_HOME_EVENT_COIL, coil, action, NULL);
+	 }
+   else
+     {
+        //now do the setting
 	--coil;	//we have only 6 bit, so we start at zero for coil 1
 
         // build control byte 
@@ -190,10 +200,7 @@ void coil_coil_set( int coil, int action)
 
         //write to PIC
         lisy80_write_byte_coil_pic(  mydata_coil.byte );
-
-   //eventhandler for LISY_HOME
-//   if ( lisy_hardware_ID == LISY_HW_ID_HOME)
-//		lisy_home_event_handler( LISY_HOME_EVENT_LAMP, coil, action, NULL);
+     }
 
 }
 

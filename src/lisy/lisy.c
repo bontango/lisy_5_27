@@ -16,6 +16,7 @@
 #include "hw_lib.h"
 #include "fadecandy.h"
 #include "lisyversion.h"
+#include "lisy.h"
 
 
 //global var for handling different hardware revisions
@@ -218,6 +219,7 @@ void lisy_sound_handler( unsigned char data )
 {
 
 //first tests
+if ( lisy_hardware_revision == LISY_HW_LISY_W)
   printf("RTH sound handler: %d\n",data);
 }
       

@@ -87,20 +87,10 @@ int lisy_home_init_event(void)
 }
 
 //lamp
-void lisy_home_lamp_event(int coil, int action)
+void lisy_home_coil_event(int coil, int action)
 {
 
-int ret;
-
-if ( coil == 1)
- {
-   printf(" -- RTH --- coil 1 action: %d\n",action);
- //Play our (pre loaded) sound file on separate channel
-  ret = Mix_PlayChannel( 1, lisy_H_sound[1], 0);
-  if(ret == -1) {
-         fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
-        }
- }
+   printf(" -- RTH --- coil %d event action: %d\n",coil,action);
 }
 
 
@@ -118,7 +108,7 @@ void lisy_home_event_handler( int id, int arg1, int arg2, char *str)
      {
 	case LISY_HOME_EVENT_INIT: sprintf(str_event_id,"LISY_HOME_EVENT_INIT"); break;
 	case LISY_HOME_EVENT_SOUND: sprintf(str_event_id,"LISY_HOME_EVENT_SOUND"); break;
-	case LISY_HOME_EVENT_SOLENOID: sprintf(str_event_id,"LISY_HOME_EVENT_SOLENOID"); break;
+	case LISY_HOME_EVENT_COIL: sprintf(str_event_id,"LISY_HOME_EVENT_COIL"); break;
 	case LISY_HOME_EVENT_SWITCH: sprintf(str_event_id,"LISY_HOME_EVENT_SWITCH"); break;
 	case LISY_HOME_EVENT_LAMP: sprintf(str_event_id,"LISY_HOME_EVENT_LAMP"); break;
 	case LISY_HOME_EVENT_DISPLAY: sprintf(str_event_id,"LISY_HOME_EVENT_DISPLAY"); break;
@@ -132,9 +122,9 @@ void lisy_home_event_handler( int id, int arg1, int arg2, char *str)
      {
 	case LISY_HOME_EVENT_INIT: lisy_home_init_event(); break;
 	//case LISY_HOME_EVENT_SOUND: sprintf(str_event_id,"LISY_HOME_EVENT_SOUND"); break;
-	//case LISY_HOME_EVENT_SOLENOID: sprintf(str_event_id,"LISY_HOME_EVENT_SOLENOID"); break;
+	//case LISY_HOME_EVENT_COIL: sprintf(str_event_id,"LISY_HOME_EVENT_COIL"); break;
 	//case LISY_HOME_EVENT_SWITCH: sprintf(str_event_id,"LISY_HOME_EVENT_SWITCH"); break;
-	case LISY_HOME_EVENT_LAMP: lisy_home_lamp_event(arg1, arg2); break;
+	case LISY_HOME_EVENT_COIL: lisy_home_coil_event(arg1, arg2); break;
 	//case LISY_HOME_EVENT_DISPLAY: sprintf(str_event_id,"LISY_HOME_EVENT_DISPLAY"); break;
      }
 
