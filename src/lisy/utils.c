@@ -24,6 +24,7 @@
 #include "displays.h"
 #include "utils.h"
 #include "fadecandy.h"
+#include "lisy_home.h"
 #include "externals.h"
 #include "lisy.h"
 

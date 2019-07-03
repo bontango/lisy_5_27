@@ -30,6 +30,7 @@
 #include "hw_lib.h"
 #include "fadecandy.h"
 #include "usbserial.h"
+#include "lisy_home.h"
 #include "externals.h"
 #include "lisy.h"
 

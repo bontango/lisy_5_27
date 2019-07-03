@@ -26,6 +26,7 @@ added pic eeprom routines bontango January 2018
 #include "displays.h"
 #include "coils.h"
 #include "fadecandy.h"
+#include "lisy_home.h"
 #include "externals.h"
 
 #define MAX_EEPROM_WRITE_RETRIES 30

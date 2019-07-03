@@ -995,3 +995,28 @@ void lisy35_sound_ext_sb_set( unsigned char value )
         lisy80_write_byte_coil_pic( mydata_coil.byte );
 }
 
+//lisy home, select solenoidboard
+void lisyh_coil_select_solenoid_driver(void)
+{
+
+    mydata_coil.bitv5.IS_CMD = 1;        //we are sending a command here
+    mydata_coil.bitv5.COMMAND = LS80COILCMD_EXT_CMD_ID;
+    mydata_coil.bitv5.EXT_CMD = LISYH_EXT_CMD_FIRST_SOLBOARD;
+
+    //write to PIC
+    lisy80_write_byte_coil_pic(  mydata_coil.byte );
+
+}
+
+//lisy home, select lampdriver
+void lisyh_coil_select_lamp_driver(void)
+{
+
+    mydata_coil.bitv5.IS_CMD = 1;        //we are sending a command here
+    mydata_coil.bitv5.COMMAND = LS80COILCMD_EXT_CMD_ID;
+    mydata_coil.bitv5.EXT_CMD = LISYH_EXT_CMD_LED_ROW_1;
+
+    //write to PIC
+    lisy80_write_byte_coil_pic(  mydata_coil.byte );
+
+}

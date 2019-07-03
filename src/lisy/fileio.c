@@ -1307,77 +1307,83 @@ int  lisy_file_get_home_mappings(void)
  char *line;
  char file_name[80];
  int no;
- int iscoil;
- int lamp_start, lamp_end;
+ int is_coil;
  int first_line = 1;
  FILE *fstream;
  int i,dum;
 
 
-//construct the filename
-//Lamp or Coil;LED=0|COIL=1;Number;Red;Green;Blue;Comment
-sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_MAPPING_FILE);
+//map to default 1:1
+for(i=0; i<=48;i++) 
+  { 
+     lisy_home_lamp_map[i].mapped_to_no = i;
+     lisy_home_lamp_map[i].mapped_is_coil = 0;
+     lisy_home_lamp_map[i].r = 255;
+     lisy_home_lamp_map[i].g = 255;
+     lisy_home_lamp_map[i].b = 255;
+   }
+for(i=0; i<=9;i++) 
+  { 
+     lisy_home_coil_map[i].mapped_to_no = i;
+     lisy_home_coil_map[i].mapped_is_coil = 1;
+  }
+
+//LAMPS construct the filename
+//Lamp ;LED=0|COIL=1;Number;Red;Green;Blue;Comment
+sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_LAMP_MAPPING_FILE);
 
  fstream = fopen(file_name,"r");
    if(fstream == NULL)
    {
-      fprintf(stderr,"LISY_Home: opening %s failed, using defaults\n",file_name);
+      fprintf(stderr,"LISY_Home: opening %s failed, using defaults for lamps\n",file_name);
    }
-
-lamp_start=0; lamp_end=48; 
-//map to default 1:1
-for(i=lamp_start; i<=lamp_end;i++) 
-  { 
-     lisy_home_lamp_map[i].mapped_to = i;
-     lisy_home_lamp_map[i].r = 255;
-     lisy_home_lamp_map[i].g = 255;
-     lisy_home_lamp_map[i].b = 255;
-     lisy_home_coil_map[i].mapped_to = i;
-     lisy_home_coil_map[i].r = 0;
-     lisy_home_coil_map[i].g = 0;
-     lisy_home_coil_map[i].b = 0;
-  }
-
 
    first_line = 1;
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)
-     no = atoi(strtok(line, ";")); 	//lamp or coil number
+     no = atoi(strtok(line, ";")); 	//lamp number
      if ( no > 48 ) continue; //skip line if lamp number is out of range
-     iscoil = atoi(strtok(line, ";")); 	//lamp or coil
-     if(iscoil)
-     {
-      lisy_home_coil_map[no].mapped_to = atoi(strtok(NULL, ";"));	
-      lisy_home_coil_map[no].r = atoi(strtok(NULL, ";"));	
-      lisy_home_coil_map[no].g = atoi(strtok(NULL, ";"));	
-      lisy_home_coil_map[no].b = atoi(strtok(NULL, ";"));	
-     }
-     else
-     {
-      lisy_home_lamp_map[no].mapped_to = atoi(strtok(NULL, ";"));	
-      lisy_home_lamp_map[no].r = atoi(strtok(NULL, ";"));	
-      lisy_home_lamp_map[no].g = atoi(strtok(NULL, ";"));	
-      lisy_home_lamp_map[no].b = atoi(strtok(NULL, ";"));	
-     }
+     lisy_home_lamp_map[no].mapped_is_coil = atoi(strtok(NULL, ";")); 	//lamp or coil
+     lisy_home_lamp_map[no].mapped_to_no = atoi(strtok(NULL, ";"));	
+     lisy_home_lamp_map[no].r = atoi(strtok(NULL, ";"));	
+     lisy_home_lamp_map[no].g = atoi(strtok(NULL, ";"));	
+     lisy_home_lamp_map[no].b = atoi(strtok(NULL, ";"));	
    } //while
    fclose(fstream);
+
+//COILS construct the filename
+//Coil;LED=0|COIL=1;Number;Comment
+sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_COIL_MAPPING_FILE);
+
+ fstream = fopen(file_name,"r");
+   if(fstream == NULL)
+   {
+      fprintf(stderr,"LISY_Home: opening %s failed, using defaults for coils\n",file_name);
+   }
+
+   first_line = 1;
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     no = atoi(strtok(line, ";")); 	//lamp number
+     if ( no > 9 ) continue; //skip line if lamp number is out of range
+     lisy_home_coil_map[no].mapped_is_coil = atoi(strtok(NULL, ";")); 	//lamp or coil
+     lisy_home_coil_map[no].mapped_to_no = atoi(strtok(NULL, ";"));	
+   } //while
+   fclose(fstream);
+
 /*
-   if ( ls80dbg.bitv.lamps )
-     {
-	fprintf(stderr,"active Fadecandy lamp - LED mapping: \n");
-	for(i=lamp_start; i<=lamp_end;i++) 
-  	{ 
-          if ( lisy_lamp_to_led_map[i].is_mapped )
-	   {
-		fprintf(stderr,"Lamp %d mapped ",i);
-		fprintf(stderr,"to LED %d ",lisy_lamp_to_led_map[i].mapled);
-		fprintf(stderr,"with RGB %d ",lisy_lamp_to_led_map[i].r);
-		fprintf(stderr," %d ",lisy_lamp_to_led_map[i].g);
-		fprintf(stderr," %d \n",lisy_lamp_to_led_map[i].b);
-	   }
-	}
-      }
+fprintf(stderr,"active LISY HOME mapping: \n");
+for(i=0; i<=47;i++)
+  {
+ printf("  map lamp number:%d TO %s number:%d\n",i,lisy_home_lamp_map[i].mapped_is_coil ? "coil" : "lamp", lisy_home_lamp_map[i].mapped_to_no);
+   }
+for(i=1; i<=9;i++)
+  {
+ printf("  map coil number:%d TO %s number:%d\n",i,lisy_home_coil_map[i].mapped_is_coil ? "coil" : "lamp", lisy_home_coil_map[i].mapped_to_no);
+  }
 */
+
  return 0;
 }

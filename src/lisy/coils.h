@@ -36,6 +36,8 @@ void lisy35_coil_set_extended_SB_type( unsigned char type);
 int lisy35_coil_get_mpu_dip(int dip_number);
 void lisy35_coil_read_mpu_dips(void);
 
+void lisyh_coil_select_solenoid_driver(void);
+void lisyh_coil_select_lamp_driver(void);
 
 /* pulse time for coils in milli sec */
 #define COIL_PULSE_TIME 150

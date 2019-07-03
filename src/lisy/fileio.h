@@ -116,7 +116,8 @@ int  lisy_file_get_home_mappings(void);
 
 /* LISY Home stuff */
 #define LISYH_MAPPING_PATH "/boot/lisy/lisyH/mapping/"
-#define LISYH_MAPPING_FILE "coils_and_lamps.csv"
+#define LISYH_LAMP_MAPPING_FILE "lamps.csv"
+#define LISYH_COIL_MAPPING_FILE "coils.csv"
 
 /* LISYMINI stuff */
 #define LISYMINI_GAMES_CSV "/boot/lisy/lisy_m/cfg/lisyminigames.csv"

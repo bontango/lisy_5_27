@@ -19,6 +19,7 @@
 #include "fadecandy.h"
 #include "opc.h"
 #include "utils.h"
+#include "lisy_home.h"
 #include "externals.h"
 #include "usbserial.h"
 

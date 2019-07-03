@@ -3,10 +3,18 @@
 
 typedef struct
 {
-  unsigned char mapped_to;
+  unsigned char mapped_to_no;
+  unsigned char mapped_is_coil;
   unsigned char r, g, b;
 }
-t_lisy_home_map;
+t_lisy_home_lamp_map;
+
+typedef struct
+{
+  unsigned char mapped_to_no;
+  unsigned char mapped_is_coil;
+}
+t_lisy_home_coil_map;
 
 int lisy_home_init_event(void);
 void lisy_home_event_handler( int id, int arg1, int arg2, char *str);

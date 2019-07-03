@@ -100,7 +100,9 @@ void lisy_home_coil_event(int coil, int action)
 
 int real_coil;
 int mycoil;
-unsigned int current_status = LISYH_EXT_CMD_FIRST_SOLBOARD; //RTH we need to add second board
+int org_is_coil = 0; //is the org deivce a coil?
+int map_is_coil = 0; //is the lamp/coil mapped to a coil?
+static unsigned int current_status = LISYH_EXT_CMD_FIRST_SOLBOARD; //RTH we need to add second board
 
 union two {
     unsigned char byte;
@@ -112,31 +114,15 @@ union two {
 
 
  //look for possible mapping
- if (coil <= 48) //it is a lamp
-  {
-    real_coil = lisy_home_lamp_map[coil].mapped_to;
-    //do we talk to the lampdriver currently?
-    if (  current_status != LISYH_EXT_CMD_LED_ROW_1)
-    {  //RTH need to be extended
-      coil_cmd2pic_noansw( LISYH_EXT_CMD_LED_ROW_1);
-      current_status != LISYH_EXT_CMD_LED_ROW_1;
-    }
-    //debug
-    if ( ls80dbg.bitv.lamps )
-    {
-      sprintf(debugbuf,"LISY HOME map lamp %d to %d",coil,real_coil);
-      lisy80_debug(debugbuf);
-    }
-   }
- else //it is a coil
-  {
-    //do we talk to the solenoiddriver currently?
-    if (  current_status != LISYH_EXT_CMD_FIRST_SOLBOARD)
-    {  //RTH need to be extended
-      coil_cmd2pic_noansw( LISYH_EXT_CMD_FIRST_SOLBOARD);
-      current_status != LISYH_EXT_CMD_FIRST_SOLBOARD;
-    }
-
+ if (coil <= 48) //org is a lamp
+ {
+    real_coil = lisy_home_lamp_map[coil].mapped_to_no;
+    map_is_coil = lisy_home_lamp_map[coil].mapped_is_coil;
+    org_is_coil = 0;
+ }
+ else //org is coil
+ {
+  org_is_coil = 1;
   //determine which coil we use
   switch( coil )
    {
@@ -161,19 +147,41 @@ union two {
     default: mycoil = 0;
                 break;
    }
+    real_coil = lisy_home_coil_map[mycoil].mapped_to_no;
+    map_is_coil = lisy_home_coil_map[mycoil].mapped_is_coil;
+  }
 
-    real_coil = lisy_home_coil_map[mycoil].mapped_to;
 
-  if ( ls80dbg.bitv.coils )
+ if (!map_is_coil) //the mapped device is a lamp
   {
-    sprintf(debugbuf,"LISY HOME map coil %d to %d",mycoil,real_coil);
+    //do we talk to the lampdriver currently?
+    if (  current_status != LISYH_EXT_CMD_LED_ROW_1)
+    {  //RTH need to be extended
+      lisyh_coil_select_lamp_driver();
+      current_status = LISYH_EXT_CMD_LED_ROW_1;
+    }
+   }
+ else //the mapped device is a coil
+  {
+    //do we talk to the solenoiddriver currently?
+    if (  current_status != LISYH_EXT_CMD_FIRST_SOLBOARD)
+    {  //RTH need to be extended
+      lisyh_coil_select_solenoid_driver();
+      current_status = LISYH_EXT_CMD_FIRST_SOLBOARD;
+    }
+  }
+
+
+  //debug
+  if ( ls80dbg.bitv.lamps | ls80dbg.bitv.coils )
+  {
+    sprintf(debugbuf,"LISY HOME:  map %s number:%d TO %s number:%d",org_is_coil ? "coil" : "lamp", coil ,map_is_coil ? "coil" : "lamp", real_coil);
     lisy80_debug(debugbuf);
   }
 
-  }
 
         //now do the setting
-        --coil; //we have only 6 bit, so we start at zero for coil 1
+        --real_coil; //we have only 6 bit, so we start at zero for coil 1
 
         // build control byte
         data.bitv.COIL = real_coil;
@@ -190,23 +198,6 @@ union two {
 //the eventhandler
 void lisy_home_event_handler( int id, int arg1, int arg2, char *str)
 {
-
-  if ( ls80dbg.bitv.basic )
-  {
-    char str_event_id[40];
-    switch(id)
-     {
-	case LISY_HOME_EVENT_INIT: sprintf(str_event_id,"LISY_HOME_EVENT_INIT"); break;
-	case LISY_HOME_EVENT_SOUND: sprintf(str_event_id,"LISY_HOME_EVENT_SOUND"); break;
-	case LISY_HOME_EVENT_COIL: sprintf(str_event_id,"LISY_HOME_EVENT_COIL"); break;
-	case LISY_HOME_EVENT_SWITCH: sprintf(str_event_id,"LISY_HOME_EVENT_SWITCH"); break;
-	case LISY_HOME_EVENT_LAMP: sprintf(str_event_id,"LISY_HOME_EVENT_LAMP"); break;
-	case LISY_HOME_EVENT_DISPLAY: sprintf(str_event_id,"LISY_HOME_EVENT_DISPLAY"); break;
-	default: sprintf(str_event_id,"unknown event: %d",id); break;
-     }
-    sprintf(debugbuf,"LISY HOME Event handler: %s",str_event_id);
-    lisy80_debug(debugbuf);
-  }
 
     switch(id)
      {

@@ -16,6 +16,7 @@
 #include "hw_lib.h"
 #include "utils.h"
 #include "fadecandy.h"
+#include "lisy_home.h"
 #include "externals.h"
 
 //globale var, used in most routines
