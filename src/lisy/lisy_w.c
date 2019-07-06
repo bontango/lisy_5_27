@@ -30,6 +30,15 @@
 //typedefs
 
 /*
+
+
+********   SYSTEM 11  *************
+const struct core_dispLayout s11_dispS11[] = {
+  DISP_SEG_7(0,0,CORE_SEG16),DISP_SEG_7(0,1,CORE_SEG16),
+  DISP_SEG_7(1,0,CORE_SEG8), DISP_SEG_7(1,1,CORE_SEG8),
+  {2,8,0,1,CORE_SEG7S},{2,10,8,1,CORE_SEG7S}, {2,2,20,1,CORE_SEG7S},{2,4,28,1,CORE_SEG7S}, {0}
+};
+
 ********   SYSTEM 7  *************
 from core.c
 #define DISP_SEG_7(row,col,type) {4*row,16*col,row*20+col*8+1,7,type}
@@ -315,6 +324,22 @@ void lisy_w_display_handler(void)
       if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
       else printf("%c",c);
     }
+
+UINT16 rt;
+    printf("\nPlayer3: ");
+    for(i=0; i<=6; i++) 
+    {
+      rt = mysegments.disp.player3[i];
+      printf("0x%04x ",rt);
+    }
+    printf("\nPlayer4: ");
+    for(i=0; i<=6; i++) 
+    {
+      rt = mysegments.disp.player4[i];
+      printf("0x%04x ",rt);
+    }
+
+/*RTH test
     printf("\nPlayer3: ");
     for(i=0; i<=6; i++) 
     {
@@ -329,6 +354,7 @@ void lisy_w_display_handler(void)
       if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
       else printf("%c",c);
     }
+*/
 
     printf("\nCredits: %c%c",my_seg2char(mysegments.disp.credits1),my_seg2char(mysegments.disp.credits2));
     printf("\nBalls: %c%c",my_seg2char(mysegments.disp.balls1),my_seg2char(mysegments.disp.balls2));
