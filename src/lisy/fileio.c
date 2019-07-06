@@ -1333,11 +1333,12 @@ for(i=0; i<=9;i++)
 sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_LAMP_MAPPING_FILE);
 
  fstream = fopen(file_name,"r");
-   if(fstream == NULL)
-   {
+  if(fstream == NULL)
+  {
       fprintf(stderr,"LISY_Home: opening %s failed, using defaults for lamps\n",file_name);
-   }
-
+  }
+  else
+  {
    first_line = 1;
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
@@ -1351,17 +1352,19 @@ sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_LAMP_MAPPING_FILE);
      lisy_home_lamp_map[no].b = atoi(strtok(NULL, ";"));	
    } //while
    fclose(fstream);
+  }
 
 //COILS construct the filename
 //Coil;LED=0|COIL=1;Number;Comment
 sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_COIL_MAPPING_FILE);
 
  fstream = fopen(file_name,"r");
-   if(fstream == NULL)
-   {
+  if(fstream == NULL)
+  {
       fprintf(stderr,"LISY_Home: opening %s failed, using defaults for coils\n",file_name);
-   }
-
+  }
+  else
+  {
    first_line = 1;
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
@@ -1372,6 +1375,7 @@ sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_COIL_MAPPING_FILE);
      lisy_home_coil_map[no].mapped_to_no = atoi(strtok(NULL, ";"));	
    } //while
    fclose(fstream);
+  }
 
 /*
 fprintf(stderr,"active LISY HOME mapping: \n");
