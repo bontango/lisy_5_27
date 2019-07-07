@@ -71,6 +71,11 @@ ret = lisy_file_get_home_mappings();
 
   // set volume to lisy_volume for all allocated channels
   Mix_Volume(-1, lisy_volume);
+  if ( ls80dbg.bitv.sound )
+  {
+    sprintf(debugbuf,"Info: lisy_volume is %d",lisy_volume);
+    lisy80_debug(debugbuf);
+  }
 
  //try to preload all sounds
  ret=-1; //we set it to 0 if at least one wav file could be loaded
@@ -90,6 +95,12 @@ ret = lisy_file_get_home_mappings();
         }
        }
  }
+
+  //RTH fix for now -> Test: play Introducing sound
+  ret = Mix_PlayChannel( 1, lisy_H_sound[1], 0);
+  if(ret == -1) {
+         fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
+        }
 
  return(ret);
 }
