@@ -35,6 +35,9 @@ int lisy_home_init_event(void)
 
 //we init sound, may be separate later
 
+/*
+RTH new, sound_init done by lisy80 with dip2 == ON
+
   int audio_rate = 44100;                 //Frequency of audio playback
   Uint16 audio_format = MIX_DEFAULT_FORMAT;       //Format of the audio we're playing
   int audio_channels = 2;                 //2 channels = stereo
@@ -54,7 +57,7 @@ ret = lisy_file_get_home_mappings();
     return -1;
   }
 
- /* Initialize only SDL Audio on default device */
+ // Initialize only SDL Audio on default device 
     if(SDL_Init(SDL_INIT_AUDIO) < 0)
     {
         return -1;
@@ -101,8 +104,12 @@ ret = lisy_file_get_home_mappings();
   if(ret == -1) {
          fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
         }
+*/
+// return(ret);
 
- return(ret);
+//RTH test, play sound 7 after starting
+lisy80_play_wav(7);
+return 0;
 }
 
 //lamp and coils injkl. mapping
