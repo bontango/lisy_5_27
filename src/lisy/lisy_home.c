@@ -33,6 +33,8 @@ Mix_Chunk *lisy_H_sound[32];
 int lisy_home_init_event(void)
 {
 
+ int ret;
+
 //check for fadecandy config -> do the mapping
 ret = lisy_file_get_home_mappings();
  if ( ret < 0 )
@@ -110,7 +112,7 @@ RTH new, sound_init done by lisy80 with dip2 == ON
 
 //RTH test, play sound 7 after starting
 lisy80_play_wav(7);
-return 0;
+return ret;
 }
 
 //lamp and coils injkl. mapping
