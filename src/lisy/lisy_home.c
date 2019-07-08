@@ -33,6 +33,14 @@ Mix_Chunk *lisy_H_sound[32];
 int lisy_home_init_event(void)
 {
 
+//check for fadecandy config -> do the mapping
+ret = lisy_file_get_home_mappings();
+ if ( ret < 0 )
+  {
+    fprintf(stderr,"Error: mapping for LISY Home error:%d\n",ret);
+    return -1;
+  }
+
 //we init sound, may be separate later
 
 /*
@@ -49,13 +57,6 @@ RTH new, sound_init done by lisy80 with dip2 == ON
  char wav_file_name[80];
 
 
-//check for fadecandy config -> do the mapping
-ret = lisy_file_get_home_mappings();
- if ( ret < 0 )
-  {
-    fprintf(stderr,"Error: mapping for LISY Home error:%d\n",ret);
-    return -1;
-  }
 
  // Initialize only SDL Audio on default device 
     if(SDL_Init(SDL_INIT_AUDIO) < 0)
