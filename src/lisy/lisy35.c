@@ -971,15 +971,14 @@ unsigned char sound_E;
 	  {
            //lisy35_coil_set_sound_select(sound_select); RTH 5.19: the pic does this for us
            //was there a move from 0->1 for sound select status?
-           if (( last_sound_select == 0) & ( sound_select == 1)) sound_int_occured = 1;
+           if (( last_sound_select == 0) & ( sound_select == 1)) 
+             { 
+              sound_int_occured = 1;
+              if ((ls80dbg.bitv.sound) | (ls80dbg.bitv.coils)) lisy80_debug("sound interrupt occured");
+  	     }
   	   last_sound_select = sound_select;
-           //debug?
-           if ((ls80dbg.bitv.sound) | (ls80dbg.bitv.coils))
-           {
-            sprintf(debugbuf,"switch solenoid/sound select line to:%s", (sound_select) ? "1: Sound activ" : "0: Solenoids activ");
-            lisy80_debug(debugbuf);
-           }
 	  }//sound_select
+
           //send sound_E
           //we only send this if it changed from last value and HW check is over
  	  if ( ( last_sound_E != sound_E ) & ( lisy35_bally_hw_check_finished ==1) )
