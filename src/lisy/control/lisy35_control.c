@@ -33,7 +33,7 @@
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     97
+#define LISY35control_SOFTWARE_SUB     98
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -1022,6 +1022,13 @@ void send_lamp2_infos( int sockfd )
    if (lamp[lamp_no]) sprintf(name,"L%02d_off",lamp_no); else sprintf(name,"L%02d_on",lamp_no);
    sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'\n%s\n%s\' /> </form>\n" \
 	,name,colorcode,"set ALL lamps","");
+     sendit( sockfd, buffer);
+   //special lamp 78, blinking lamps via thread
+   lamp_no = 78;
+   if (lamp[lamp_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+   if (lamp[lamp_no]) sprintf(name,"L%02d_off",lamp_no); else sprintf(name,"L%02d_on",lamp_no);
+   sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'\n%s\n%s\' /> </form>\n" \
+        ,name,colorcode,"ALL lamps blink","");
      sendit( sockfd, buffer);
    sprintf(buffer,"<br>\n");
    sendit( sockfd, buffer);
