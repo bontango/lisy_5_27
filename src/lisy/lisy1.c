@@ -33,7 +33,7 @@ t_stru_lisy1_games_csv lisy1_game;
 
 //global var for timing and speed
 int g_lisy1_throttle_val = 3000;
-double g_lisy1_clockscale_val = 0.5;
+double g_lisy1_clockscale_val = 1;
 
 //internal switch Matrix for system1, we need 7 elements
 //as pinmame internal starts with 1
@@ -168,13 +168,8 @@ int lisy1_get_gamename(char *gamename)
 
   //store throttle value from gamelist to global var
   g_lisy1_throttle_val = lisy1_game.throttle;
-  //give this info on screen
-  fprintf(stderr,"LISY1: Throttle value is %d\n",g_lisy1_throttle_val);
   //store clockscale value from gamelist to global var
   g_lisy1_clockscale_val = lisy1_game.clockscale;
-  //give this info on screen
-  fprintf(stderr,"LISY1: clockscale value is %f\n",g_lisy1_clockscale_val);
-
   //other infos are stored in global var
 
   return ret;
@@ -570,11 +565,9 @@ void lisy1TickleWatchdog( void )
 void lisy1_throttle(void)
 {
 static unsigned char  first = 1;
-static unsigned char  scaling_target_reached = 0;
 unsigned int now;
 int sleeptime;
 static unsigned int last;
-static double startscale = 0.5;
 
 
 if (first)
@@ -582,10 +575,32 @@ if (first)
   first = 0;
   //store start time first, which is number of microseconds since wiringPiSetup (wiringPI lib)
   last = micros();
- //set scale to startscale
- //cpunum_set_clockscale(0, startscale);
- cpunum_set_clockscale(0, g_lisy1_clockscale_val);
+  //print throttle value in debugmode
+  if ( ls80dbg.bitv.basic )
+   {
+   sprintf(debugbuf,"Throttle value is %d",g_lisy1_throttle_val);
+   lisy80_debug(debugbuf);
+   }
+
+ //do clockscaling if requested by file cfg
+ if ( g_lisy1_clockscale_val == 1)
+  {
+  //default value no setting
+  if ( ls80dbg.bitv.basic )
+   {
+   lisy80_debug("clock_scale default, no setting");
+   }
  }
+ else
+ {
+  cpunum_set_clockscale(0, g_lisy1_clockscale_val);
+  if ( ls80dbg.bitv.basic )
+   {
+   sprintf(debugbuf,"setting clock_scale to %f",g_lisy1_clockscale_val);
+   lisy80_debug(debugbuf);
+   }
+ }
+ }//first
 
 
  // if we are faster than throttle value which is per default 3000 usec (3 msec)
