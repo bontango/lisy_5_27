@@ -503,22 +503,21 @@ void lisy1_lamp_handler( int data, int isld)
         lisy80_debug(debugbuf);
        }
 
-       //do a nvram write each time the game over relay ( lamp[0]) is going to change (Game Over or Game start)
-       if ( (i + offset) == 0 )
-        {
-	   lisy_nvram_write_to_file();
-           //nvram_delayed_write = NVRAM_DELAY;
-           if ( ls80dbg.bitv.basic ) lisy80_debug("NVRAM delayed write initiaed by GAME OVER Relay");
-          }
-
        //remember
        lisy1_lamp[i+offset] = new_lamp[i];
+       //and set the lamp/coil
+       if ( new_lamp[i] ) lisy1_coil_set(i+1+offset, 1); else  lisy1_coil_set(i+1+offset, 0);
+
+
        //check special cases RTH: will need to moved ot an event handler
        //Q1==Game Over; Q2==Tilt; Q3==HGTD; Q4==Shoot Again fix for all system1
        switch( i+1+offset) //This is the transistor number
         {
          case 1: if ( Q1_first_time ) { Q1_first_time = 0; break; }
                  if ( new_lamp[i] && lisy1_has_own_sounds ) lisy1_play_wav(4);
+                 //do a nvram write each time the game over relay ( lamp[0]) is going to change (Game Over or Game start)
+	         lisy_nvram_write_to_file();
+                 if ( ls80dbg.bitv.basic ) lisy80_debug("NVRAM delayed write initiaed by GAME OVER Relay");
 	         break;
          case 2: if ( Q2_first_time ) { Q2_first_time = 0; break; }
                  if ( new_lamp[i] && lisy1_has_own_sounds ) lisy1_play_wav(5);
@@ -526,8 +525,6 @@ void lisy1_lamp_handler( int data, int isld)
         }
 
 
-       //and set the lamp/coil
-       if ( new_lamp[i] ) lisy1_coil_set(i+1+offset, 1); else  lisy1_coil_set(i+1+offset, 0);
     }
    }
 
