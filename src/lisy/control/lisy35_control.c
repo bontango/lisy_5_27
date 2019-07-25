@@ -193,6 +193,18 @@ void do_updatepath_set( char *buffer)
 
 }
 
+//do an update of lisy, local file
+void do_update_local( int sockfd, char *buffer)
+{
+
+ //we trust ASCII values
+ //the format here is 'U_'
+ //sprintf(update_path,"%s",&buffer[2]);
+
+ printf("buffer is : %s\n",buffer);
+
+}
+
 //set the hostname of the system and reboot
 void do_hostname_set( char *buffer)
 {
@@ -1447,7 +1459,9 @@ else  sprintf(buffer,"<p>\n<a href=\"./lisy35_sound.php\">Sound</a><br><br> \n")
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./hostname.php\">Set the hostname of the system</a><br><br> \n");
    sendit( sockfd, buffer);
-   sprintf(buffer,"<p>\n<a href=\"./update.php\">initiate update of the system</a><br><br> \n");
+   sprintf(buffer,"<p>\n<a href=\"./update.php\">update via internet </a><br><br> \n");
+   sendit( sockfd, buffer);
+   sprintf(buffer,"<p>\n<a href=\"./update_local.html\">update with local tgz file</a><br><br> \n");
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./upload_35.html\">upload new lamp, coil or switch configuration files</a><br><br> \n");
    sendit( sockfd, buffer);
@@ -1869,8 +1883,10 @@ int main(int argc, char *argv[])
      else if (buffer[0] == 'H') do_hostname_set(buffer);
      //with an uppercase 'U' we do try to initiate an update of lisy
      else if (buffer[0] == 'U') do_updatepath_set(buffer);
-     //with an uppercase 'X' we do try to initiate upload of csv files
+    //with an uppercase 'X' we do try to initiate upload of csv files
      else if (buffer[0] == 'X') { do_upload(newsockfd,buffer);close(newsockfd); }
+    //with an uppercase 'Y' we do update the system with clientfile
+     else if (buffer[0] == 'Y') { do_update_local(newsockfd,buffer);close(newsockfd); }
      //as default we print out what we got
      else fprintf(stderr,"Message: %s\n",buffer);
 
