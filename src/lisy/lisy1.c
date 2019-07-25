@@ -516,8 +516,7 @@ void lisy1_lamp_handler( int data, int isld)
          case 1: if ( Q1_first_time ) { Q1_first_time = 0; break; }
                  if ( new_lamp[i] && lisy1_has_own_sounds ) lisy1_play_wav(4);
                  //do a nvram write each time the game over relay ( lamp[0]) is going to change (Game Over or Game start)
-	         lisy_nvram_write_to_file();
-                 if ( ls80dbg.bitv.basic ) lisy80_debug("NVRAM delayed write initiaed by GAME OVER Relay");
+	         lisy1_nvram_delayed_write = NVRAM_DELAY;
 	         break;
          case 2: if ( Q2_first_time ) { Q2_first_time = 0; break; }
                  if ( new_lamp[i] && lisy1_has_own_sounds ) lisy1_play_wav(5);
@@ -546,6 +545,8 @@ void lisy1TickleWatchdog( void )
 	//lisy1_nvram_handler( 2, 0, 0);  
 	lisy_nvram_write_to_file();
 	lisy1_nvram_delayed_write = 0;
+        //debug
+        if ( ls80dbg.bitv.basic ) lisy80_debug("NVRAM delayed write done ");
        }
  }
  else // reset timer index 3

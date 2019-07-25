@@ -23,8 +23,6 @@ int lisy80_simulated_switch_reader( unsigned char *action );
 int lisy80_nvram_handler(int read_or_write, UINT8 *GTS80_pRAM);
 
 
-#define NVRAM_DELAY 500  //delay counter for nvram write
-
 #define LISY80_LEFTADV_SWITCH	6
 #define LISY80_TEST_SWITCH	7
 #define LISY80_RIGHTADV_SWITCH	16
