@@ -33,7 +33,7 @@
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     98
+#define LISY35control_SOFTWARE_SUB     99
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -194,14 +194,46 @@ void do_updatepath_set( char *buffer)
 }
 
 //do an update of lisy, local file
-void do_update_local( int sockfd, char *buffer)
+void do_update_local( int sockfd, char *what)
 {
 
- //we trust ASCII values
- //the format here is 'U_'
- //sprintf(update_path,"%s",&buffer[2]);
+ char *real_name,*tmp_name;
+ char *line;
+ char buffer[255];
+ int ret_val;
 
- printf("buffer is : %s\n",buffer);
+ //we trust ASCII values
+ //the format here is 'Y'
+ line = &what[1];
+
+ real_name = strtok(line, ";");
+ tmp_name = strtok(NULL, ";");
+
+ sprintf(buffer,"<a href=\"./index.php\">Back to LISY Homepage</a><br><br>");
+ sendit( sockfd, buffer);
+
+ sprintf(buffer,"WE WILL NOW do the System update<br><br>\n");
+ sendit( sockfd, buffer);
+
+ //set mode to read - write
+ sprintf(buffer,"setting system mode to read/write<br><br>\n");
+ sendit( sockfd, buffer);
+ system("/bin/mount -o remount,rw /boot");
+ system("/bin/mount -o remount,rw /");
+
+ //just unpack the lisy_update.tgz and execute install.sh from within
+ sprintf(buffer,"try to get extract the update file<br><br>\n");
+ sendit( sockfd, buffer);
+ sprintf(buffer,"/bin/tar -xzf %s -C /home/pi/update",tmp_name);
+ ret_val = system(buffer);
+
+ sprintf(buffer,"try to execute install.sh from within update pack<br><br>\n");
+ sendit( sockfd, buffer);
+ sprintf(buffer,"/bin/bash /home/pi/update/install.sh");
+ ret_val = system(buffer);
+
+ sprintf(buffer,"update done, you may want to reboot now<br><br>\n");
+ sendit( sockfd, buffer);
 
 }
 
@@ -1166,7 +1198,7 @@ void send_update_infos( int sockfd )
     //set mode to read - write
     sprintf(buffer,"setting system mode to read/write<br><br>\n");
     sendit( sockfd, buffer);
-    system("/bin/mount -o remount,rw /lisy");
+    system("/bin/mount -o remount,rw /boot");
     system("/bin/mount -o remount,rw /");
 
     //clean up /home/pi/update
@@ -1244,7 +1276,7 @@ void send_hostname_infos( int sockfd )
     //set mode to read - write
     sprintf(buffer,"setting system mode to read/write<br><br>\n");
     sendit( sockfd, buffer);
-    system("/bin/mount -o remount,rw /lisy");
+    system("/bin/mount -o remount,rw /boot");
     system("/bin/mount -o remount,rw /");
 
     //create new /etc/hosts
@@ -1459,9 +1491,9 @@ else  sprintf(buffer,"<p>\n<a href=\"./lisy35_sound.php\">Sound</a><br><br> \n")
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./hostname.php\">Set the hostname of the system</a><br><br> \n");
    sendit( sockfd, buffer);
-   sprintf(buffer,"<p>\n<a href=\"./update.php\">update via internet </a><br><br> \n");
+   sprintf(buffer,"<p>\n<a href=\"./update.php\">update System via internet </a><br><br> \n");
    sendit( sockfd, buffer);
-   sprintf(buffer,"<p>\n<a href=\"./update_local.html\">update with local tgz file</a><br><br> \n");
+   sprintf(buffer,"<p>\n<a href=\"./update_local.html\">update System with local tgz file</a><br><br> \n");
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./upload_35.html\">upload new lamp, coil or switch configuration files</a><br><br> \n");
    sendit( sockfd, buffer);
