@@ -33,7 +33,7 @@
 
 //the version
 #define LISY80control_SOFTWARE_MAIN    0
-#define LISY80control_SOFTWARE_SUB     23
+#define LISY80control_SOFTWARE_SUB     24
 
 
 //fake definiton needed in lisy_w
@@ -195,6 +195,50 @@ void do_updatepath_set( char *buffer)
  sprintf(update_path,"%s",&buffer[2]);
 
  printf("update path: %s\n",&buffer[2]);
+
+}
+
+//do an update of lisy, local file
+void do_update_local( int sockfd, char *what)
+{
+
+ char *real_name,*tmp_name;
+ char *line;
+ char buffer[255];
+ int ret_val;
+
+ //we trust ASCII values
+ //the format here is 'Y'
+ line = &what[1];
+
+ real_name = strtok(line, ";");
+ tmp_name = strtok(NULL, ";");
+
+ sprintf(buffer,"<a href=\"./index.php\">Back to LISY Homepage</a><br><br>");
+ sendit( sockfd, buffer);
+
+ sprintf(buffer,"WE WILL NOW do the System update<br><br>\n");
+ sendit( sockfd, buffer);
+
+ //set mode to read - write
+ sprintf(buffer,"setting system mode to read/write<br><br>\n");
+ sendit( sockfd, buffer);
+ system("/bin/mount -o remount,rw /boot");
+ system("/bin/mount -o remount,rw /");
+
+ //just unpack the lisy_update.tgz and execute install.sh from within
+ sprintf(buffer,"try to get extract the update file<br><br>\n");
+ sendit( sockfd, buffer);
+ sprintf(buffer,"/bin/tar -xzf %s -C /home/pi/update",tmp_name);
+ ret_val = system(buffer);
+
+ sprintf(buffer,"try to execute install.sh from within update pack<br><br>\n");
+ sendit( sockfd, buffer);
+ sprintf(buffer,"/bin/bash /home/pi/update/install.sh");
+ ret_val = system(buffer);
+
+ sprintf(buffer,"update done, you may want to reboot now<br><br>\n");
+ sendit( sockfd, buffer);
 
 }
 
@@ -851,7 +895,7 @@ void send_update_infos( int sockfd )
     //set mode to read - write
     sprintf(buffer,"setting system mode to read/write<br><br>\n");
     sendit( sockfd, buffer);
-    system("/bin/mount -o remount,rw /lisy");
+    system("/bin/mount -o remount,rw /boot");
     system("/bin/mount -o remount,rw /");
 
     //clean up /home/pi/update
@@ -925,7 +969,7 @@ void send_hostname_infos( int sockfd )
     //set mode to read - write
     sprintf(buffer,"setting system mode to read/write<br><br>\n");
     sendit( sockfd, buffer);
-    system("/bin/mount -o remount,rw /lisy");
+    system("/bin/mount -o remount,rw /boot");
     system("/bin/mount -o remount,rw /");
 
     //create new /etc/hosts
@@ -1138,7 +1182,9 @@ void send_home_infos( int sockfd )
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./hostname.php\">Set the hostname of the system</a><br><br> \n");
    sendit( sockfd, buffer);
-   sprintf(buffer,"<p>\n<a href=\"./update.php\">initiate update of the system</a><br><br> \n");
+   sprintf(buffer,"<p>\n<a href=\"./update.php\">update System via internet </a><br><br> \n");
+   sendit( sockfd, buffer);
+   sprintf(buffer,"<p>\n<a href=\"./update_local.html\">update System with local tgz file</a><br><br> \n");
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./upload.html\">upload new lamp, coil or switch configuration files</a><br><br> \n");
    sendit( sockfd, buffer);
@@ -1234,7 +1280,7 @@ void do_upload( int sockfd, char *what)
  //set mode to read - write
  sprintf(buffer,"setting system mode to read/write<br><br>\n");
  sendit( sockfd, buffer);
- system("/bin/mount -o remount,rw /lisy");
+ system("/bin/mount -o remount,rw /boot");
 
  sprintf(buffer,"we copy file to %s<br><br>\n",destination);
  sendit( sockfd, buffer);
@@ -1267,7 +1313,7 @@ void do_upload( int sockfd, char *what)
  //set mode to read only again
  sprintf(buffer,"setting system mode back to to read only<br><br>\n");
  sendit( sockfd, buffer);
- system("/bin/mount -o remount,ro /lisy");
+ system("/bin/mount -o remount,ro /boot");
 
  sprintf(buffer,"all done<br><br>\n");
  sendit( sockfd, buffer);
@@ -1495,6 +1541,8 @@ int main(int argc, char *argv[])
      else if (buffer[0] == 'U') do_updatepath_set(buffer);
      //with an uppercase 'X' we do try to initiate upload of csv files
      else if (buffer[0] == 'X') { do_upload(newsockfd,buffer);close(newsockfd); }
+     //with an uppercase 'Y' we do update the system with clientfile
+     else if (buffer[0] == 'Y') { do_update_local(newsockfd,buffer);close(newsockfd); }
      //as default we print out what we got
      else fprintf(stderr,"Message: %s\n",buffer);
 
