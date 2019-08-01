@@ -48,8 +48,11 @@ unsigned char lisy35_J4PIN8_is_strobe = 0;
 //from coils.c
 extern unsigned char lisy35_bally_hw_check_finished;
 
-//internal fpr lisy35.c to have an delayed nvram write
+//internal for lisy35.c 
+//to have an delayed nvram write
 static unsigned char want_to_write_nvram = 0;
+// switch to sound raw mode ( for special cfg 8 )
+static unsigned char lisy35_sound_raw = 0;
 
 //init SW portion of lisy35
 void lisy35_init( void )
@@ -601,6 +604,9 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J4PIN8(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
+	  //sound in cooked mode
+          lisy35_coil_set_sound_raw(0);
+	  lisy35_sound_raw = 0;
 	  break;
 	case 2: //six million dollar player5 & player6 strobe
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -608,6 +614,9 @@ void lisy35_set_variant(void)
 	  lisy35_display_set_variant(4);
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN8_is_strobe = 1;
+	  //sound in cooked mode
+          lisy35_coil_set_sound_raw(0);
+	  lisy35_sound_raw = 0;
 	  break;
 	case 3: //Fathom
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -616,6 +625,9 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN8_is_strobe = 1;
+	  //sound in cooked mode
+          lisy35_coil_set_sound_raw(0);
+	  lisy35_sound_raw = 0;
 	  break;
 	case 4: //Medusa
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -624,6 +636,9 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN5_is_strobe = 1;
 	  lisy35_J4PIN8_is_strobe = 1;
+	  //sound in cooked mode
+          lisy35_coil_set_sound_raw(0);
+	  lisy35_sound_raw = 0;
 	  break;
 	case 5: //Elektra & Pac Man
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -632,6 +647,9 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN8_is_strobe = 1;
+	  //sound in cooked mode
+          lisy35_coil_set_sound_raw(0);
+	  lisy35_sound_raw = 0;
 	  break;
 	case 6: //Vector
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -640,6 +658,9 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN5_is_strobe = 1;
 	  lisy35_J4PIN8_is_strobe = 1;
+	  //sound in cooked mode
+          lisy35_coil_set_sound_raw(0);
+	  lisy35_sound_raw = 0;
 	  break;
 	case 7: //Spectrum & centaur
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -648,6 +669,21 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN8(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN5_is_strobe = 1;
+	  //sound in cooked mode
+          lisy35_coil_set_sound_raw(0);
+	  lisy35_sound_raw = 0;
+	  break;
+	case 8: //Dolly Parton, Harlem, Paragon ; default with sound raw mode
+    	  fprintf(stderr,"Info: default with Sound RAW for %s\n",lisy35_game.long_name);
+	  //switch matrix default
+	  //display default
+	  //all outputs from coil pic to activate
+          lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
+          lisy35_coil_set_direction_J4PIN8(LISY35_PIC_PIN_OUTPUT);
+          lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
+	  //sound in raw mode because of timing
+          lisy35_coil_set_sound_raw(1);
+	  lisy35_sound_raw = 1;
 	  break;
 	default:
     	  fprintf(stderr,"Info: NO special config for %s\n set to default",lisy35_game.long_name);
@@ -657,6 +693,9 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J4PIN8(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
+	  //sound in cooked mode
+          lisy35_coil_set_sound_raw(0);
+	  lisy35_sound_raw = 0;
 	  break;
   }
 
@@ -701,7 +740,10 @@ void lisy35_set_variant(void)
      sprintf(debugbuf,"Info: LISY35 will use soundboard variant 0 (Chimes)");
      break;
     case LISY35_SB_STANDARD:
-     sprintf(debugbuf,"Info: LISY35 will use soundboard variant 1 (standard SB)");
+     if(lisy35_sound_raw)
+        sprintf(debugbuf,"Info: LISY35 will use soundboard variant 1 (standard SB in RAW Mode)");
+     else
+        sprintf(debugbuf,"Info: LISY35 will use soundboard variant 1 (standard SB)");
      break;
     case LISY35_SB_EXTENDED:
       if (core_gameData->hw.soundBoard == SNDBRD_BY51)
@@ -969,7 +1011,8 @@ unsigned char sound_E;
           //we only send this if it changed from last value
  	  if ( last_sound_select != sound_select )
 	  {
-           //lisy35_coil_set_sound_select(sound_select); RTH 5.19: the pic does this for us
+	   //set in sound_raw mode only
+           if (lisy35_sound_raw) lisy35_coil_set_sound_select(sound_select);
            //was there a move from 0->1 for sound select status?
            if (( last_sound_select == 0) & ( sound_select == 1)) 
              { 
@@ -1013,16 +1056,37 @@ unsigned char sound_E;
    //what soundboardvariant do we have
    if ( lisy35_game.soundboard_variant != LISY35_SB_EXTENDED)
    {
-    //send sound to PIC, which will handle timing
-    lisy35_sound_std_sb_set(data);
-    // reset int condition
-    sound_int_occured = 0;
-    //debug?
-    if ( ls80dbg.bitv.sound )
+    //do we have raw or cooked mode
+    if (lisy35_sound_raw)
     {
-      sprintf(debugbuf,"sound data(standard sb): 0x%02x)",16*last_sound_E + data);
-      lisy80_debug(debugbuf);
-    }
+     //send sound to PIC
+     lisy35_sound_std_sb_set(data);
+     //debug?
+     if ( ls80dbg.bitv.sound )
+      {
+       sprintf(debugbuf,"sound data(standard sb RAW mode): 0x%02x)",16*last_sound_E + data);
+       lisy80_debug(debugbuf);
+      }
+     count++; //count the bytes
+     if ( count == 2) //second byte, reset int condition
+     {
+     count = 0;
+     sound_int_occured = 0;
+     }
+    }//raw mode
+    else
+     {
+     //send sound to PIC, which will handle timing in cooked mode
+     lisy35_sound_std_sb_set(data);
+     // reset int condition
+     sound_int_occured = 0;
+     //debug?
+     if ( ls80dbg.bitv.sound )
+      {
+       sprintf(debugbuf,"sound data(standard sb): 0x%02x)",16*last_sound_E + data);
+       lisy80_debug(debugbuf);
+      }
+     }//cooked mode
    }//standard SB or chimes
    else
    {

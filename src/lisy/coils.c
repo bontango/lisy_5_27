@@ -829,6 +829,20 @@ void lisy35_coil_set_sound_select( unsigned char value)
 
 }
 
+//control the standard sound raw/cooked
+void lisy35_coil_set_sound_raw( unsigned char value)
+{
+
+        // build control byte
+        mydata_coil.bitv3.LAMP = LISY35_COIL_SOUNDRAW;  //special lamp
+        mydata_coil.bitv3.IS_CMD = 0;        //this is a lamp setting
+        mydata_coil.bitv3.ACTION = value;
+
+        //write to PIC
+        lisy80_write_byte_coil_pic(  mydata_coil.byte );
+
+}
+
 //set the type of teh extended SB installed
 // 0 sets to 2581-51 (default)
 // 1 sets to S&T 

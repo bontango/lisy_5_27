@@ -38,6 +38,7 @@ void lisy35_coil_read_mpu_dips(void);
 
 void lisyh_coil_select_solenoid_driver(void);
 void lisyh_coil_select_lamp_driver(void);
+void lisy35_coil_set_sound_raw( unsigned char value);
 
 /* pulse time for coils in milli sec */
 #define COIL_PULSE_TIME 150
@@ -84,7 +85,7 @@ void lisyh_coil_select_lamp_driver(void);
 //special coil numbers
 #define LISY35_COIL_GREEN_LED 60
 #define LISY35_COIL_SOUNDSELECT 61
-//#define FREE 62
+#define LISY35_COIL_SOUNDRAW 62
 #define LISY35_COIL_LAMPBOARD 63
 
 //the aux lampdriverboards variants
