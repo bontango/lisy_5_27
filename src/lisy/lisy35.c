@@ -604,9 +604,6 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J4PIN8(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
-	  //sound in cooked mode
-          lisy35_coil_set_sound_raw(0);
-	  lisy35_sound_raw = 0;
 	  break;
 	case 2: //six million dollar player5 & player6 strobe
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -614,9 +611,6 @@ void lisy35_set_variant(void)
 	  lisy35_display_set_variant(4);
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN8_is_strobe = 1;
-	  //sound in cooked mode
-          lisy35_coil_set_sound_raw(0);
-	  lisy35_sound_raw = 0;
 	  break;
 	case 3: //Fathom
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -625,9 +619,6 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN8_is_strobe = 1;
-	  //sound in cooked mode
-          lisy35_coil_set_sound_raw(0);
-	  lisy35_sound_raw = 0;
 	  break;
 	case 4: //Medusa
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -636,9 +627,6 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN5_is_strobe = 1;
 	  lisy35_J4PIN8_is_strobe = 1;
-	  //sound in cooked mode
-          lisy35_coil_set_sound_raw(0);
-	  lisy35_sound_raw = 0;
 	  break;
 	case 5: //Elektra & Pac Man
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -647,9 +635,6 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN8_is_strobe = 1;
-	  //sound in cooked mode
-          lisy35_coil_set_sound_raw(0);
-	  lisy35_sound_raw = 0;
 	  break;
 	case 6: //Vector
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -658,9 +643,6 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN5_is_strobe = 1;
 	  lisy35_J4PIN8_is_strobe = 1;
-	  //sound in cooked mode
-          lisy35_coil_set_sound_raw(0);
-	  lisy35_sound_raw = 0;
 	  break;
 	case 7: //Spectrum & centaur
     	  fprintf(stderr,"Info: SPECIAL config for %s\n",lisy35_game.long_name);
@@ -669,9 +651,6 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN8(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
 	  lisy35_J4PIN5_is_strobe = 1;
-	  //sound in cooked mode
-          lisy35_coil_set_sound_raw(0);
-	  lisy35_sound_raw = 0;
 	  break;
 	case 8: //Dolly Parton, Harlem, Paragon ; default with sound raw mode
     	  fprintf(stderr,"Info: default with Sound RAW for %s\n",lisy35_game.long_name);
@@ -693,9 +672,6 @@ void lisy35_set_variant(void)
           lisy35_coil_set_direction_J4PIN5(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J4PIN8(LISY35_PIC_PIN_OUTPUT);
           lisy35_coil_set_direction_J1PIN8(LISY35_PIC_PIN_OUTPUT);
-	  //sound in cooked mode
-          lisy35_coil_set_sound_raw(0);
-	  lisy35_sound_raw = 0;
 	  break;
   }
 
