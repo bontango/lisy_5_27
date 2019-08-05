@@ -76,17 +76,17 @@ t_stru_lisymini_games_csv lisymini_game;
 
 //global avr for sound optuions
 t_stru_lisy80_sounds_csv lisy80_sound_stru[32];
+
 //global var for all switches
-unsigned char lisy_switches[80];
+unsigned char lisy_switches[81];
 //global var for all lamps
-unsigned char lisy_lamps[52];
+unsigned char lisy_lamps[120];
 //global var for all sounds
 unsigned char lisy_sounds[32];
 //global vars for all coils
-unsigned char lisy_coils[10];
+unsigned char lisy_coils[20];
 
 //global var for mpfserver
-unsigned char isSYS1;
 unsigned char lisy_display_chars[7] = { 0,0,0,0,0,0 };
 
 /* Start with the empty list */
@@ -165,6 +165,7 @@ unsigned char read_next_string(int sockfd, char *content)
 }
 
 //read next string and set display 
+//HW_TAG LISY_S_DISP_0 .. 6
 void set_display(int number, char *value)
 {
  char display_str[25];
@@ -176,46 +177,61 @@ if (ls80dbg.bitv.displays)
  }
 
  //we just take the string and cut it to the rigth length, no further checking
- if (isSYS1)
+ switch (lisy_hardware_revision)
  {
-   if ( number == 0 )
-   {
-     sprintf(display_str,"%4s",value);
-     display_show_str( 0, display_str);
-   }
-   else
-   {
-     sprintf(display_str,"%6s",value);
-     display_show_str( number, display_str);
-   }
- }//system1
- else
- {
-   if (lisy80_game.is80B)
-   {
-     //only display number1 and 2 here, 20chars per display (which is in fact one display)
-     sprintf(display_str,"%20s",value);
-     if ( number == 1 ) display_send_row_torow( display_str, 0, 1 );
-     if ( number == 2 ) display_send_row_torow( display_str, 1, 0 );
-   }//80B
-   else
-   {
- 	if ( number == 0 )
- 	{
-   	sprintf(display_str,"%4s",value);
-   	display_show_str( 0, display_str);
- 	}
- 	else
- 	{
-   	if (( lisy80_game.type_from_csv[5] == 'A') && ( number < 5))  sprintf(display_str,"%7s",value); //80A has 7digit for 1-4
-   	   else sprintf(display_str,"%6s",value); //RTH: with v21 wehad a 7s here ??
-   	display_show_str( number, display_str);
- 	}
-  }//80 and 80A
- }//system80
+	case LISY_HW_LISY1:
+   		if ( number == 0 )
+   		{
+     		sprintf(display_str,"%4s",value);
+     		display_show_str( 0, display_str);
+   		}
+   		else
+   		{
+     		sprintf(display_str,"%6s",value);
+     		display_show_str( number, display_str);
+   		}
+	        break;
+        case LISY_HW_LISY35:
+                if ( number == 0 )
+                {
+                sprintf(display_str,"%4s",value);
+                display35_show_str( 0, display_str);
+                }
+                else
+                {
+                sprintf(display_str,"%6s",value);
+                display35_show_str( number, display_str);
+                }
+                break;
+	case LISY_HW_LISY80:
+   		if (lisy80_game.is80B)
+   		{
+     		//only display number1 and 2 here, 20chars per display (which is in fact one display)
+     		sprintf(display_str,"%20s",value);
+     		if ( number == 1 ) display_send_row_torow( display_str, 0, 1 );
+     		if ( number == 2 ) display_send_row_torow( display_str, 1, 0 );
+   		}//80B
+  		 else
+   		{
+ 			if ( number == 0 )
+ 			{
+   			sprintf(display_str,"%4s",value);
+   			display_show_str( 0, display_str);
+ 			}
+ 			else
+ 			{
+   			if (( lisy80_game.type_from_csv[5] == 'A') && ( number < 5))  sprintf(display_str,"%7s",value); //80A has 7digit for 1-4
+   	   		else sprintf(display_str,"%6s",value); //RTH: with v21 wehad a 7s here ??
+   			display_show_str( number, display_str);
+ 			}
+  		}//80 and 80A
+	        break;
+ }
 }
 
-//play a sound via the Gottlieb hardware
+//play a sound via the connected hardware
+//HW_TAG LISY_S_PLAY_SOUND
+//LISY35 stabndard SB only at the moment
 void play_sound(unsigned char code, unsigned char sound_no)
 {
 
@@ -225,8 +241,18 @@ if (ls80dbg.bitv.sound)
   lisy80_debug(debugbuf);
  }
 
-  if (isSYS1) lisy1_sound_set(sound_no);
-  else lisy80_sound_set(sound_no);
+ switch (lisy_hardware_revision)
+ {
+        case LISY_HW_LISY1:
+  		lisy1_sound_set(sound_no);
+		break;
+        case LISY_HW_LISY35:
+  		lisy35_sound_std_sb_set( sound_no );
+		break;
+        case LISY_HW_LISY80:
+  		lisy80_sound_set(sound_no);
+		break;
+ }
 }
 
 
@@ -315,6 +341,7 @@ if (ls80dbg.bitv.coils)
 //check for updated switches
 // get changed switches - return byte "bit7 is status; 0..6 is number"
 // 127 means no change since last call"
+//HW_TAG 
 unsigned char check_switch(void)
 {
 
@@ -331,24 +358,26 @@ unsigned char check_switch(void)
 //set to default
 my_switch.byte = 0;
 
- if (isSYS1)
+ switch (lisy_hardware_revision)
  {
-    my_switch.bitv.switchno = lisy1_switch_reader( &action );
-    //SLAM handling is reverse in lisy1, meaning 0 is CLOSED
-    //we suppress processing of SLAM Switch actions with option slam active
-    if ( (my_switch.bitv.switchno == 76) && (ls80opt.bitv.slam == 1)) return 127; //no change
-
-    //NOTE: system has has 8*5==40 switches in maximum, counting 00..04;10...14; ...
-    //we use 'internal strobe 6' to handle special switches in the same way ( SLAM=06,OUTHOLE=16,RESET=26 )
-
-  } //system1
-  else 
-  {
-    my_switch.bitv.switchno = lisy80_switch_reader( &action );
-  }//system80
+        case LISY_HW_LISY1:
+    		my_switch.bitv.switchno = lisy1_switch_reader( &action );
+    		//SLAM handling is reverse in lisy1, meaning 0 is CLOSED
+    		//we suppress processing of SLAM Switch actions with option slam active
+    		if ( (my_switch.bitv.switchno == 76) && (ls80opt.bitv.slam == 1)) return 127; //no change
+    		//NOTE: system has has 8*5==40 switches in maximum, counting 00..04;10...14; ...
+    		//we use 'internal strobe 6' to handle special switches in the same way ( SLAM=06,OUTHOLE=16,RESET=26 )
+		break;
+        case LISY_HW_LISY35:
+    		my_switch.bitv.switchno = lisy35_switch_reader( &action );
+		break;
+        case LISY_HW_LISY80:
+    		my_switch.bitv.switchno = lisy80_switch_reader( &action );
+		break;
+  }
 
   //valid for all systems
-     if (my_switch.bitv.switchno < 80) {
+     if (my_switch.bitv.switchno < 81) {
         if ( action ) lisy_switches[my_switch.bitv.switchno] = my_switch.bitv.status = 0;
 		 else lisy_switches[my_switch.bitv.switchno] = my_switch.bitv.status =  1;
 	if (ls80dbg.bitv.switches)
@@ -362,9 +391,12 @@ my_switch.byte = 0;
 }
 
 //set lamp to on or off
-//in lisy we do lamp_set with coil_set
+//in lisy1 & 80 we do lamp_set with coil_set
+//HW_TAG LISY_S_LAMP_ON LISY_S_LAMP_OFF
 void set_lamp( int no, int action)
 {
+
+  unsigned char active_lampdriver_board;
 
 if (ls80dbg.bitv.lamps)
  {
@@ -372,46 +404,70 @@ if (ls80dbg.bitv.lamps)
   lisy80_debug(debugbuf);
  }
 
- if (isSYS1)
+ switch (lisy_hardware_revision)
  {
-  if (action == 2)  //pulse
-    {
-     //now pulse the lamp
-     lisy1_coil_set(no,1);
-     usleep(COIL_PULSE_TIME);
-     lisy1_coil_set(no,0);
-     }
-   else //on or off
-     {
-       lisy_lamps[no] = action;
-       lisy1_coil_set(no,action);
-     }
- }//system1
- else
- {
-   //we have to add 1 to the lamp as lisy80 starts with lamp 1
-   //and mpf starts (correctly) with 0
-   no++;
+        case LISY_HW_LISY1:
+  		if (action == 2)  //pulse
+    		{
+     		//now pulse the lamp
+     		lisy1_coil_set(no,1);
+     		usleep(COIL_PULSE_TIME);
+     		lisy1_coil_set(no,0);
+     		}
+   		else //on or off
+     		{
+       		lisy_lamps[no] = action;
+      		lisy1_coil_set(no,action);
+     		}
+		break;
+        case LISY_HW_LISY35:
+		if(no > 59)
+		{
+		 active_lampdriver_board = 1; //second board
+		 no = no - 59;
+		}
+		else active_lampdriver_board = 0;
 
-  if (action == 2)  //pulse
-    {
-     //now pulse the lamp
-     lisy80_coil_set(no,1);
-     usleep(COIL_PULSE_TIME);
-     lisy80_coil_set(no,0);
-     }
-   else //on or off
-     {
-       lisy_lamps[no] = action;
-       lisy80_coil_set(no,action);
-     }
- }//system80
+  		if (action == 2)  //pulse
+    		{
+     		//now pulse the lamp
+     		lisy35_lamp_set( active_lampdriver_board, no, 1);
+     		usleep(COIL_PULSE_TIME);
+     		lisy35_lamp_set( active_lampdriver_board, no, 0);
+     		}
+   		else //on or off
+     		{
+       		lisy_lamps[no - (active_lampdriver_board * 59)] = action;
+     		lisy35_lamp_set( active_lampdriver_board, no, action);
+     		}
+		break;
+        case LISY_HW_LISY80:
+   		//we have to add 1 to the lamp as lisy80 starts with lamp 1
+   		//and mpf starts (correctly) with 0
+   		no++;
+
+  		if (action == 2)  //pulse
+    		{
+     		//now pulse the lamp
+     		lisy80_coil_set(no,1);
+     		usleep(COIL_PULSE_TIME);
+     		lisy80_coil_set(no,0);
+     		}
+   		else //on or off
+     		{
+       		lisy_lamps[no] = action;
+       		lisy80_coil_set(no,action);
+     		}
+		break;
+ }
 
 }//set_lamp
 
 
 
 //set coil to on, off or do pulse (action == 2)
+//HW_TAG LISY_S_SOL_ON LISY_S_SOL_OFF LISY_S_PULSE_SOL
+//RTH: todo: set pulsetime for lisy80 & 35
 int set_coil( int no, int action)
 {
  int coil;
@@ -436,94 +492,113 @@ if (ls80dbg.bitv.coils)
   lisy80_debug(debugbuf);
  }
 
-if (isSYS1)
+ switch (lisy_hardware_revision)
  {
+        case LISY_HW_LISY1:
+ 		//calculate rigth transistor
+ 		switch(no)
+   		{
+        		case 1: coil=Q_OUTH;
+                		break;
+        		case 2: coil=Q_KNOCK;
+                		break;
+        		case 3: coil=Q_TENS;
+                		break;
+        		case 4: coil=Q_HUND;
+               		 break;
+        		case 5: coil=Q_TOUS;
+                		break;
+        		case 6: coil=Q_SYS1_SOL6;
+                		break;
+        		case 7: coil=Q_SYS1_SOL7;
+                		break;
+        		case 8: coil=Q_SYS1_SOL8;
+                		break;
+        		default: return 2;
+                 		break;
+   		}
+  		if (action == 0)  //off
+    		{
+      		lisy_coils[no] = action;
+      		lisy1_coil_set(coil,0);
+    		}
+  		else if (action == 1)  //on
+    		{
+      		lisy_coils[no] = action;
+      		lisy1_coil_set(coil,1);
+    		}
+  		else if (action == 2)  //pulse
+    		{
+     		//now pulse the coil
+     		lisy1_coil_set(coil,1);
+     		usleep(lisy1_coil_min_pulse_time[coil]);
+     		lisy1_coil_set(coil,0);
+     		}
+             	break;
+        case LISY_HW_LISY35:
+                if (action == 0)  //off
+                {
+                lisy_coils[no] = action;
+                lisy35_coil_set(coil,0);
+                }
+                else if (action == 1)  //on
+                {
+                lisy_coils[no] = action;
+                lisy35_coil_set(coil,1);
+                }
+                else if (action == 2)  //pulse
+                {
+                //now pulse the coil
+                lisy35_coil_set(coil,1);
+     		usleep(COIL_PULSE_TIME);
+                lisy35_coil_set(coil,0);
+                }
+             	break;
+        case LISY_HW_LISY80:
+ 		//calculate rigth transistor
+ 		switch(no)
+   		{
+        		case 1: coil=Q_SOL1;
+                		break;
+        		case 2: coil=Q_SOL2;
+                		break;
+        		case 3: coil=Q_SOL3;
+                		break;
+        		case 4: coil=Q_SOL4;
+                		break;
+        		case 5: coil=Q_SOL5;
+                		break;
+        		case 6: coil=Q_SOL6;
+                		break;
+        		case 7: coil=Q_SOL7;
+                		break;
+        		case 8: coil=Q_SOL8;
+                		break;
+        		case 9: coil=Q_SOL9;
+                		break;
+        		default: return 2;
+                 		break;
+   		}
 
- //calculate rigth transistor
- switch(no)
-   {
-        case 1: coil=Q_OUTH;
-                break;
-        case 2: coil=Q_KNOCK;
-                break;
-        case 3: coil=Q_TENS;
-                break;
-        case 4: coil=Q_HUND;
-                break;
-        case 5: coil=Q_TOUS;
-                break;
-        case 6: coil=Q_SYS1_SOL6;
-                break;
-        case 7: coil=Q_SYS1_SOL7;
-                break;
-        case 8: coil=Q_SYS1_SOL8;
-                break;
-        default: return 2;
-                 break;
-   }
-  if (action == 0)  //off
-    {
-      lisy_coils[no] = action;
-      lisy1_coil_set(coil,0);
-    }
-  else if (action == 1)  //on
-    {
-      lisy_coils[no] = action;
-      lisy1_coil_set(coil,1);
-    }
-  else if (action == 2)  //pulse
-    {
-     //now pulse the coil
-     lisy1_coil_set(coil,1);
-     usleep(lisy1_coil_min_pulse_time[coil]);
-     lisy1_coil_set(coil,0);
-     }
- }//system1
-else
- {
- //calculate rigth transistor
- switch(no)
-   {
-        case 1: coil=Q_SOL1;
-                break;
-        case 2: coil=Q_SOL2;
-                break;
-        case 3: coil=Q_SOL3;
-                break;
-        case 4: coil=Q_SOL4;
-                break;
-        case 5: coil=Q_SOL5;
-                break;
-        case 6: coil=Q_SOL6;
-                break;
-        case 7: coil=Q_SOL7;
-                break;
-        case 8: coil=Q_SOL8;
-                break;
-        case 9: coil=Q_SOL9;
-                break;
-        default: return 2;
-                 break;
-   }
-
-  if (action == 0)  //off
-    {
-      lisy_coils[no] = action;
-      lisy80_coil_set(coil,0);
-    }
-  else if (action == 1)  //on
-    {
-      lisy_coils[no] = action;
-      lisy80_coil_set(coil,1);
-    }
-  else if (action == 2)  //pulse
-    {
-     //now pulse the coil
-     lisy80_coil_set(coil,1);
-     usleep(COIL_PULSE_TIME);
-     lisy80_coil_set(coil,0);
-     }
- }//system80
+  		if (action == 0)  //off
+    		{
+      		lisy_coils[no] = action;
+      		lisy80_coil_set(coil,0);
+    		}
+  		else if (action == 1)  //on
+    		{
+      		lisy_coils[no] = action;
+      		lisy80_coil_set(coil,1);
+    		}
+  		else if (action == 2)  //pulse
+    		{
+     		//now pulse the coil
+     		lisy80_coil_set(coil,1);
+     		usleep(COIL_PULSE_TIME);
+     		lisy80_coil_set(coil,0);
+     		}
+             	break;
+ }//switch
  return 0;
 }
 
@@ -634,14 +709,12 @@ int main(int argc, char *argv[])
     //show up on calling terminal
     sprintf(s_mpf_software_version,"%02d.%03d ",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
     printf("This is MPF Server for LISY by bontango, Version %s (%s)\n",s_mpf_software_version,socket_mode ? "socket mode" : "serial mode");
-
-
+    printf("we are running on HW revision: %d\n",lisy_hardware_revision);
 
     //set HW
-    if ( lisy_hardware_revision == 100 ) isSYS1 = 1; else isSYS1 = 0;
 
     //determine HW and set HW specific values
-    if ( isSYS1 )
+    if ( lisy_hardware_revision == LISY_HW_LISY1  )
 	{
 	 strcpy( lisy_hw.lisy_hw,"LISY1");
 	 lisy_hw.no_lamps = 36;
@@ -656,7 +729,7 @@ int main(int argc, char *argv[])
 	 lisy_display_chars[3] = 6;
 	 lisy_display_chars[4] = 6;
 	}
-    else 
+    else if ( lisy_hardware_revision == LISY_HW_LISY80  )
 	{
 	 strcpy( lisy_hw.lisy_hw,"LISY80");
 	 lisy_hw.no_lamps = 52;
@@ -694,14 +767,38 @@ int main(int argc, char *argv[])
 	  lisy_display_chars[6] = 6;
 	 }
 	}
+    else if ( lisy_hardware_revision == LISY_HW_LISY35  )
+	{
+	 strcpy( lisy_hw.lisy_hw,"LISY35");
+	 lisy_hw.no_lamps = 64;
+         lisy_hw.no_sol = 16;
+	 lisy_hw.no_sounds = 32;
+	 lisy_hw.no_disp = 7;
+	 lisy_hw.no_switches = 80;  //8*8 Matrix
+	 //strcpy( lisy_hw.game_info,lisy1_game.rom_id);  RTH to be done
+	 lisy_display_chars[0] = 4;
+	 lisy_display_chars[1] = 7;
+	 lisy_display_chars[2] = 7;
+	 lisy_display_chars[3] = 7;
+	 lisy_display_chars[4] = 7;
+	 lisy_display_chars[5] = 7;
+	 lisy_display_chars[6] = 7;
+
+        }
+    else 
+	{
+	 fprintf(stderr,"Hardware revision %d not supported\n",lisy_hardware_revision);
+	 exit (1);
+        }
 
    //init global vars; all switches supposed to be open, which means value 0 for MPF
    for (i=0; i<80; i++) lisy_switches[i] = 0;
    //init internal lamp vars as well
-   for(i=0; i<=47; i++) lisy_lamps[i] = 0;
-   for(i=48; i<=51; i++) lisy_lamps[i] = 1; //reversed lamps 44,45,46,47 lisy80 only
+   for(i=0; i<=119; i++) lisy_lamps[i] = 0;
+   if ( lisy_hardware_revision == LISY_HW_LISY80  )
+      { for(i=48; i<=51; i++) lisy_lamps[i] = 1; } //reversed lamps 44,45,46,47 lisy80 only
    //init internal coil vars as well
-   for(i=0; i<=9; i++) lisy_coils[i] = 0;
+   for(i=0; i<=19; i++) lisy_coils[i] = 0;
 
 /*
     //init lisy1 or lisy80
@@ -805,21 +902,27 @@ int main(int argc, char *argv[])
 
     //send something to the displays
     sprintf(cur_version,"v%d.%d",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
-    if ( isSYS1 )
-	{
-   	 //system1
-     	 display_show_str( 1, "LISY1 "); 
-    	 display_show_str( 2, "MPFser"); 
-    	 display_show_str( 3, cur_version); 
-    	 display_show_str( 4, "WAIT  "); 
-        }
-     else
-	{
-   	 //no system80B at the moment
-     	 display_show_str( 1, "LISY80A"); 
-    	 display_show_str( 2, "MPFserv"); 
-    	 display_show_str( 3, cur_version); 
-    	 display_show_str( 4, "WAIT   "); 
+    switch (lisy_hardware_revision)
+    {
+        case LISY_HW_LISY1:
+     	 	display_show_str( 1, "LISY1 "); 
+    	 	display_show_str( 2, "MPFser"); 
+    	 	display_show_str( 3, cur_version); 
+    	 	display_show_str( 4, "WAIT  "); 
+		break;
+        case LISY_HW_LISY80:
+   	 	//no system80B at the moment
+     	 	display_show_str( 1, "LISY80A"); 
+    	 	display_show_str( 2, "MPFserv"); 
+    	 	display_show_str( 3, cur_version); 
+    	 	display_show_str( 4, "WAIT   "); 
+		break;
+        case LISY_HW_LISY35:
+     	 	display35_show_str( 1, "115435 "); //'LISY35'
+    	 	display35_show_str( 2, "377    "); //????
+    	 	display35_show_str( 3, cur_version); 
+    	 	display35_show_str( 4, "1111   "); 
+		break;
         }
        
 
@@ -886,7 +989,7 @@ int main(int argc, char *argv[])
      switch(code)
      {
 	//info, parameter none
-	case  LISY_G_HW               :       //get connected LISY hardware - return "LISY1" or "LISY80"
+	case  LISY_G_HW               :       //get connected LISY hardware - return "LISY1";"LISY80" or "LISY35"
 		send_back_string(newsockfd,code,lisy_hw.lisy_hw);
 		break;
 	case  LISY_G_LISY_VER         :       //get LISY Version - return String
