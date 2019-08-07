@@ -377,7 +377,7 @@ my_switch.byte = 0;
   }
 
   //valid for all systems
-     if (my_switch.bitv.switchno < 81) {
+     if (my_switch.bitv.switchno < 80) {
         if ( action ) lisy_switches[my_switch.bitv.switchno] = my_switch.bitv.status = 0;
 		 else lisy_switches[my_switch.bitv.switchno] = my_switch.bitv.status =  1;
 	if (ls80dbg.bitv.switches)
@@ -651,7 +651,6 @@ int main(int argc, char *argv[])
      unsigned char code;
      unsigned char parameter;
      struct sockaddr_in serv_addr, cli_addr;
-     int i;
      //unsigned char action;
      struct stru_lisy_hw lisy_hw;
      unsigned char socket_mode;
@@ -791,51 +790,8 @@ int main(int argc, char *argv[])
 	 exit (1);
         }
 
-   //init global vars; all switches supposed to be open, which means value 0 for MPF
-   for (i=0; i<80; i++) lisy_switches[i] = 0;
-   //init internal lamp vars as well
-   for(i=0; i<=119; i++) lisy_lamps[i] = 0;
-   if ( lisy_hardware_revision == LISY_HW_LISY80  )
-      { for(i=48; i<=51; i++) lisy_lamps[i] = 1; } //reversed lamps 44,45,46,47 lisy80 only
-   //init internal coil vars as well
-   for(i=0; i<=19; i++) lisy_coils[i] = 0;
 
-/*
-    //init lisy1 or lisy80
-    if ( lisy_hardware_revision == 100 )  //lisy1
-	lisy1_init();
-    else if ( ( lisy_hardware_revision == 311 ) || ( lisy_hardware_revision == 320 ))  //lisy80
-	lisy80_init();
-    else
-	{
-    		fprintf(stderr,"Fatal ERROR: Unknown Hardware\n");
-		exit(1);
-	}
-
-    //show green ligth for now, lisy80 is running
-    lisy80_set_red_led(0);
-    lisy80_set_yellow_led(0);
-    lisy80_set_green_led(1);
-
-  //check for coil min_pulse parameter
-  //option is active if value is either 0 or 1
-  fprintf(stderr,"Info: checking for Coil min pulse time extension config\n");
-  //first try to read coil opts, for current game
-  if ( lisy1_file_get_coilopts() < 0 )
-   {
-     fprintf(stderr,"Info: no coil opts file; or error occured, using defaults\n");
-   }
-  else
-   {
-     fprintf(stderr,"Info: coil opt file read OK, min pulse time set\n");
-
-     if ( ls80dbg.bitv.coils) {
-     int i;
-     for(i=0; i<=7; i++)
-       fprintf(stderr,"coil No [%d]: %d msec minimum pulse time\n",i,lisy1_coil_min_pulse_time[i]);
-    }
-   }
-*/
+   printf("HW is %s\n",lisy_hw.lisy_hw);
 
 
    //switches, initial state
@@ -1094,6 +1050,10 @@ int main(int argc, char *argv[])
 	case  LISY_G_STAT_SW          :      //get status of switch# - return byte "0=OFF; 1=ON; 2=Error"
 		parameter = read_next_byte(newsockfd,code);
 		send_back_byte(newsockfd,code,lisy_switches[parameter]);
+		if (ls80dbg.bitv.switches)
+   		{   sprintf(debugbuf,"get status of switch %d",parameter);
+       		    lisy80_debug(debugbuf);
+   		}
 		break;
 	case  LISY_G_CHANGED_SW       :      //get changed switches - return byte "bit7 is status; 0..6 is number"
 					     // "127 means no change since last call"
