@@ -35,6 +35,10 @@ t_stru_lisy35_games_csv lisy35_game;
 //global var for timing and speed
 int g_lisy35_throttle_val = 5000;
 
+//global var for sound options
+unsigned char lisy35_has_soundcard = 0;  //there is a pHat soundcard installed
+unsigned char lisy35_has_own_sounds = 0;  //play own sounds rather then usinig piname sound emulation
+
 //internal switch Matrix for system1, we need 7 elements
 //as pinmame internal starts with 1
 //swMatrix 6 for SLAM and other special switches
@@ -74,6 +78,32 @@ void lisy35_init( void )
 
  //show the 'boot' message
  display_show_boot_message_lisy35(s_lisy_software_version);
+
+ //check sound options
+ if ( ls80opt.bitv.JustBoom_sound )
+   {
+     lisy35_has_soundcard = 1;
+     if ( ls80dbg.bitv.sound) lisy80_debug("internal soundcard to be activated");
+     //do we want to use pinamme sounds?
+     if ( ls80opt.bitv.test )
+      {
+       if ( ls80dbg.bitv.sound) lisy80_debug("we try to use pinmame sounds");
+      }
+      else
+      {
+        lisy35_has_own_sounds = 1;
+        if ( ls80dbg.bitv.sound) lisy80_debug("we try to use our own sounds");
+      }
+   }
+
+ // try say something about LISY80 if soundcard is installed
+ if ( lisy35_has_soundcard )
+ {
+  //set volume according to poti
+  lisy_adjust_volume();
+  sprintf(debugbuf,"/bin/echo \"Welcome to LISY 35 Version %s\" | /usr/bin/festival --tts",s_lisy_software_version);
+  system(debugbuf);
+ }
 
  //show green ligth for now, lisy1 is running
  lisy80_set_red_led(0);
