@@ -569,6 +569,9 @@ if (first)
   lisy35_set_soundboard_variant();
  }
 
+ //if hw_check is not finished run with full speed, will reduce booting time
+ if ( !lisy35_bally_hw_check_finished ) return;
+
  //do some usefull stuff
  //do we need to write to nvram?
  if ( want_to_write_nvram )
