@@ -1,6 +1,6 @@
 #close outhole
-#./a.out 127.0.0.1 108
-#sleep 1
+./a.out 127.0.0.1 108
+sleep 1
 #insert coin
 ./a.out 127.0.0.1 111
 sleep 1
@@ -9,3 +9,8 @@ sleep 1
 ./a.out 127.0.0.1 106
 sleep 1
 ./a.out 127.0.0.1 6
+#open outhole
+./a.out 127.0.0.1 8
+#sleep 3
+#close saucer
+#./a.out 127.0.0.1 105
