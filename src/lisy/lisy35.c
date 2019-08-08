@@ -439,8 +439,11 @@ void lisy35_lamp_handler( int blanking, int board, int input, int inhibit)
     {
 	case NO_AUX_BOARD:
         //sanity check
+        if ( ls80dbg.bitv.basic )
+        {
 	   sprintf(debugbuf,"input:%d out of range lamphandler board 1 but no AUX board",input);
 	   lisy80_debug(debugbuf);
+        }
 	   //signal that error
            lisy80_set_red_led(1);
 	   break;
@@ -482,8 +485,11 @@ void lisy35_lamp_handler( int blanking, int board, int input, int inhibit)
    	   if ( inhibit & 0x08 ) { index = input + 45; lamp2[index] = 1; }
 	    break;
 	default:
+        if ( ls80dbg.bitv.basic )
+        {
            sprintf(debugbuf,"unknow type of Aux board:%d",lisy35_game.aux_lamp_variant);
            lisy80_debug(debugbuf);
+        }
 	   //signal that error
            lisy80_set_red_led(1);
 	   break;
