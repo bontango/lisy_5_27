@@ -105,7 +105,7 @@ void lisy35_init( void )
   system(debugbuf);
  }
 
- //show green ligth for now, lisy1 is running
+ //show green ligth for now, lisy35 is running
  lisy80_set_red_led(0);
  lisy80_set_yellow_led(0);
  lisy80_set_green_led(1);
@@ -441,6 +441,8 @@ void lisy35_lamp_handler( int blanking, int board, int input, int inhibit)
         //sanity check
 	   sprintf(debugbuf,"input:%d out of range lamphandler board 1 but no AUX board",input);
 	   lisy80_debug(debugbuf);
+	   //signal that error
+           lisy80_set_red_led(1);
 	   break;
 	case AS_2518_43_12_LAMPS:
            //check index
@@ -482,6 +484,8 @@ void lisy35_lamp_handler( int blanking, int board, int input, int inhibit)
 	default:
            sprintf(debugbuf,"unknow type of Aux board:%d",lisy35_game.aux_lamp_variant);
            lisy80_debug(debugbuf);
+	   //signal that error
+           lisy80_set_red_led(1);
 	   break;
     }
   } // second board
