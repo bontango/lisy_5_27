@@ -846,13 +846,31 @@ void toggle_dp_led (void)
 }
 
 //set the LEDs of the 'traffic ligth'
+//red LED is used for error signaling
+//only set if status changed
 void lisy80_set_red_led( int value )
 {
  int dum;
- if ( lisy_hardware_revision == 311) dum = LISY80_HW311_LED_RED; 
- else if ( lisy_hardware_revision == LISY_HW_LISY_W) dum = LISY_MINI_LED_RED; 
- else  dum = LISY80_HW320_LED_RED;
- digitalWrite (dum, value);
+ static unsigned char first = 1;
+ static unsigned int status;
+
+ if (first)
+ {
+   first = 0;
+   // make status != value
+   status = value+1;
+ } 
+
+ //only set if status changed
+ if ( status != value)
+ {
+  if ( lisy_hardware_revision == 311) dum = LISY80_HW311_LED_RED; 
+  else if ( lisy_hardware_revision == LISY_HW_LISY_W) dum = LISY_MINI_LED_RED; 
+  else  dum = LISY80_HW320_LED_RED;
+
+  digitalWrite (dum, value);
+  status = value;
+ }
 }
 
 void lisy80_set_yellow_led( int value )
