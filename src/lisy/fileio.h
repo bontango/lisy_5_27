@@ -55,6 +55,13 @@ typedef struct
   unsigned char st_a_catchup;  // sound will be queued andplayd later when device is available
 } t_stru_lisy80_sounds_csv;
 
+typedef struct 
+{
+  unsigned char can_be_interrupted;  // if this sound can be interrupted be others
+  unsigned char loop;  // sound needs to be playd in a 'loop' (e.g. background sound)
+  unsigned char st_a_catchup;  // sound will be queued andplayd later when device is available
+} t_stru_lisy35_sounds_csv;
+
 int lisy80_file_get_gamename(t_stru_lisy80_games_csv *lisy80_game);
 int lisy80_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filename );
 unsigned char lisy80_file_get_onedip( int dip_nr, char *dip_comment, char *dip_setting_filenamee, int re_init );
@@ -72,6 +79,7 @@ int lisy35_file_get_gamename(t_stru_lisy35_games_csv *lisy35_game);
 int lisy35_file_get_mpudips( int switch_nr, int debug, char *dip_setting_filename );
 unsigned char lisy35_file_get_onedip( int dip_nr, char *dip_comment, char *dip_setting_filenamee, int re_init );
 int lisy35_file_write_dipfile( int mode, char *line );
+int  lisy35_file_get_soundopts(void);
 
 int lisymini_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game);
 
@@ -113,6 +121,8 @@ int  lisy_file_get_home_mappings(void);
 #define LISY35_FADECANDY_PATH "/boot/lisy/lisy35/fadecandy/"
 #define LISY35_FADECANDY_LAMP_FILE "_lisy35_fadecandy_lamps.csv"
 #define LISY35_FADECANDY_GI_FILE "_lisy35_fadecandy_GI.csv"
+#define LISY35_SOUND_PATH "/boot/lisy/lisy35/sounds/"
+#define LISY35_SOUND_FILE "_lisy35_sounds.csv"
 
 /* LISY Home stuff */
 #define LISYH_MAPPING_PATH "/boot/lisy/lisyH/mapping/"

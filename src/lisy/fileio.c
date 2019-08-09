@@ -1038,6 +1038,42 @@ int  lisy80_file_get_soundopts(void)
   return 0;
 }
 
+//read the csv file for sound opts on /lisy partition
+//give -1 in case we had an error
+//fill structure stru_lisy35_sound_csv
+int  lisy35_file_get_soundopts(void)
+{
+
+ char buffer[1024];
+ char *line;
+ char sound_file_name[80];
+ int sound_no;
+ int first_line = 1;
+ FILE *fstream;
+
+ //construct the filename; using global var lisy35_gamenr
+ sprintf(sound_file_name,"%s%03d%s",LISY35_SOUND_PATH,lisy35_game.gamenr,LISY35_SOUND_FILE);
+
+ fstream = fopen(sound_file_name,"r");
+   if(fstream == NULL)
+   {
+      fprintf(stderr,"\n LISY35: opening %s failed ",sound_file_name);
+      return -1;
+   }
+
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     sound_no = atoi(strtok(line, ";")); 	//sound number
+     lisy35_sound_stru[sound_no].can_be_interrupted = atoi(strtok(NULL, ";"));	
+     lisy35_sound_stru[sound_no].loop = atoi(strtok(NULL, ";"));	
+     lisy35_sound_stru[sound_no].st_a_catchup = atoi(strtok(NULL, ";"));	
+   } //while
+   fclose(fstream);
+
+  return 0;
+}
+
 //read the csv file for coil opts on /lisy partition for lisy1
 //give -1 in case we had an error
 //fill structure stru_lisy1_coil_csv

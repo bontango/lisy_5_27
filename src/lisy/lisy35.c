@@ -38,6 +38,7 @@ int g_lisy35_throttle_val = 5000;
 //global var for sound options
 unsigned char lisy35_has_soundcard = 0;  //there is a pHat soundcard installed
 unsigned char lisy35_has_own_sounds = 0;  //play own sounds rather then usinig piname sound emulation
+t_stru_lisy35_sounds_csv lisy35_sound_stru[256];
 
 //internal switch Matrix for system1, we need 7 elements
 //as pinmame internal starts with 1
@@ -96,7 +97,7 @@ void lisy35_init( void )
       }
    }
 
- // try say something about LISY80 if soundcard is installed
+ // try say something about LISY35 if soundcard is installed
  if ( lisy35_has_soundcard )
  {
   //set volume according to poti
@@ -110,7 +111,44 @@ void lisy35_init( void )
  lisy80_set_yellow_led(0);
  lisy80_set_green_led(1);
 
+ //init own sounds if requested
+ if ( lisy35_has_own_sounds )
+ {
+  //first try to read sound opts, as we NEED them
+  if ( lisy35_file_get_soundopts() < 0 )
+   {
+     fprintf(stderr,"no sound opts file; sound init failed, sound emulation disabled\n");
+     lisy35_has_own_sounds = 0;
+   }
+  else
+   {
+     fprintf(stderr,"info: sound opt file read OK\n");
+
+     if ( ls80dbg.bitv.sound) {
+     int i;
+     for(i=1; i<=31; i++)
+       fprintf(stderr,"Sound[%d]: %d %d %d \n",i,lisy35_sound_stru[i].can_be_interrupted,
+                        lisy35_sound_stru[i].loop,
+                        lisy35_sound_stru[i].st_a_catchup);
+    }
+   }
+ }
+
+ if ( lisy35_has_own_sounds )
+ {
+  //now open soundcard, and init soundstream
+  if ( lisy35_sound_stream_init() < 0 )
+   {
+     fprintf(stderr,"sound init failed, sound emulation disabled\n");
+     lisy35_has_own_sounds = 0;
+   }
+ else
+   fprintf(stderr,"info: sound init done\n");
+ }
+
 }
+
+
 
 //read the csv file on /lisy partition and the DIP switch setting
 //give back gamename accordently and line number
@@ -1099,6 +1137,8 @@ unsigned char sound_E;
      lisy35_sound_std_sb_set(data);
      // reset int condition
      sound_int_occured = 0;
+     //JustBoom Sound? we may want to play wav files here
+     if ( lisy35_has_own_sounds ) lisy35_play_wav(16*last_sound_E + data);
      //debug?
      if ( ls80dbg.bitv.sound )
       {

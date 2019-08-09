@@ -27,7 +27,7 @@ Mix_Chunk *lisysound[32];
 
 
 /*
- * open sound device and set parameters
+ * open sound device and set parameters LISY80 Version
  */
 int lisy80_sound_stream_init(void)
 {
@@ -66,6 +66,61 @@ int lisy80_sound_stream_init(void)
        if ( i==16) continue;
        //construct the filename, according to game_nr
        sprintf(wav_file_name,"%s%03d/%d.wav",LISY80_SOUND_PATH,lisy80_game.gamenr,i);
+       //put 'loop' fix to zero for now
+       lisysound[i] = Mix_LoadWAV(wav_file_name);
+       if(lisysound[i] == NULL) {
+                fprintf(stderr,"Unable to load WAV file: %s\n", Mix_GetError());
+        }
+ 	else if ( ls80dbg.bitv.sound )
+  	{
+   	  sprintf(debugbuf,"preload file:%s as sound number %d",wav_file_name,i);
+   	  lisy80_debug(debugbuf);
+  	}
+     } // for i
+
+
+ return 0;
+}
+
+/*
+ * open sound device and set parameters LISY35 Version
+ * RTH fix number of mappings at the moment
+ */
+int lisy35_sound_stream_init(void)
+{
+
+  int audio_rate = 44100;                 //Frequency of audio playback
+  Uint16 audio_format = MIX_DEFAULT_FORMAT;       //Format of the audio we're playing
+  int audio_channels = 2;                 //2 channels = stereo
+  int audio_buffers = 2048;               //Size of the audio buffers in memory
+
+ int i;
+ char wav_file_name[80];
+
+
+ /* Initialize only SDL Audio on default device */
+    if(SDL_Init(SDL_INIT_AUDIO) < 0)
+    {
+        return -1;
+    }
+
+  //Initialize SDL_mixer with our chosen audio settings
+  if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) {
+            printf("Unable to initialize audio: %s\n", Mix_GetError());
+            return(-1);
+        }
+
+  // allocate 31 mixing channels
+  Mix_AllocateChannels(31);
+
+  // set volume to lisy_volume for all allocated channels
+  Mix_Volume(-1, lisy_volume);
+
+    //try to preload all sounds
+    for( i=1; i<=29; i++)
+     {
+       //construct the filename, according to game_nr
+       sprintf(wav_file_name,"%s%03d/%d.wav",LISY35_SOUND_PATH,lisy35_game.gamenr,i);
        //put 'loop' fix to zero for now
        lisysound[i] = Mix_LoadWAV(wav_file_name);
        if(lisysound[i] == NULL) {
@@ -196,6 +251,28 @@ void lisy80_play_wav(int sound_no)
    else lisy80_sound_stream_status = LISY80_SOUND_STATUS_RUNNING_PROTECTED;
  last_sound_played = sound_no;
 
+}
+
+/*
+ * LISY35 new sound request
+ * RTH minimal implementation yet
+ */
+void lisy35_play_wav(int sound_no)
+{
+
+ int ret;
+
+ if ( ls80dbg.bitv.sound )
+  {
+   sprintf(debugbuf,"lisy35_play_wav: want to play sound number: %d",sound_no);
+   lisy80_debug(debugbuf);
+  }
+
+  //Play our (pre loaded) sound file on separate channel
+  ret = Mix_PlayChannel( sound_no, lisysound[sound_no], 0);
+  if(ret == -1) {
+         fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
+        }
 }
 
 /*
