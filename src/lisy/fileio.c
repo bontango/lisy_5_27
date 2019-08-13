@@ -1046,8 +1046,9 @@ int  lisy35_file_get_soundopts(void)
 
  char buffer[1024];
  char *line;
+ char *str;
  char sound_file_name[80];
- int sound_no;
+ int sound_no,i;
  int first_line = 1;
  FILE *fstream;
 
@@ -1061,13 +1062,18 @@ int  lisy35_file_get_soundopts(void)
       return -1;
    }
 
+ //init soundnumber to 0
+ for ( i=0; i<=255; i++) lisy35_sound_stru[i].soundnumber = 0;
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)
-     sound_no = atoi(strtok(line, ";")); 	//sound number
-     lisy35_sound_stru[sound_no].can_be_interrupted = atoi(strtok(NULL, ";"));	
-     lisy35_sound_stru[sound_no].loop = atoi(strtok(NULL, ";"));	
-     lisy35_sound_stru[sound_no].st_a_catchup = atoi(strtok(NULL, ";"));	
+     str = strdup(strtok(line, ";"));   //sound number in hex
+     sound_no = strtol(str, NULL, 16); // to be converted
+     //sound_no = atoi(strtok(line, ";")); 	//sound number
+     lisy35_sound_stru[sound_no].soundnumber = sound_no;   // != 0 if mapped
+     lisy35_sound_stru[sound_no].path = strdup(strtok(NULL, ";"));	//path to soundfile
+     lisy35_sound_stru[sound_no].name = strdup(strtok(NULL, ";"));	//name of soundfile
+     lisy35_sound_stru[sound_no].option = atoi(strtok(NULL, ";"));	//option
    } //while
    fclose(fstream);
 

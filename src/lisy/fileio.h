@@ -57,9 +57,10 @@ typedef struct
 
 typedef struct 
 {
-  unsigned char can_be_interrupted;  // if this sound can be interrupted be others
-  unsigned char loop;  // sound needs to be playd in a 'loop' (e.g. background sound)
-  unsigned char st_a_catchup;  // sound will be queued andplayd later when device is available
+  int soundnumber; //(pinmame) number of sound
+  char *path;  //path to soundfile
+  char *name;   //name of soundfile
+  int option;  //option
 } t_stru_lisy35_sounds_csv;
 
 int lisy80_file_get_gamename(t_stru_lisy80_games_csv *lisy80_game);

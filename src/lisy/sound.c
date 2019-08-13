@@ -23,7 +23,7 @@
 static int lisy80_sound_stream_status = LISY80_SOUND_STATUS_IDLE;
 
 //our pointers to preloaded sounds
-Mix_Chunk *lisysound[32];   
+Mix_Chunk *lisysound[257];   
 
 
 /*
@@ -111,16 +111,18 @@ int lisy35_sound_stream_init(void)
         }
 
   // allocate 31 mixing channels
-  Mix_AllocateChannels(31);
+  Mix_AllocateChannels(256);
 
   // set volume to lisy_volume for all allocated channels
   Mix_Volume(-1, lisy_volume);
 
     //try to preload all sounds
-    for( i=1; i<=29; i++)
+    for( i=1; i<=255; i++)
      {
-       //construct the filename, according to game_nr
-       sprintf(wav_file_name,"%s%03d/%d.wav",LISY35_SOUND_PATH,lisy35_game.gamenr,i);
+       if ( lisy35_sound_stru[i].soundnumber != 0)
+       {
+       //construct the filename, according to options red from csv file
+       sprintf(wav_file_name,"/boot/%s/%s.wav",lisy35_sound_stru[i].path,lisy35_sound_stru[i].name);
        //put 'loop' fix to zero for now
        lisysound[i] = Mix_LoadWAV(wav_file_name);
        if(lisysound[i] == NULL) {
@@ -131,6 +133,7 @@ int lisy35_sound_stream_init(void)
    	  sprintf(debugbuf,"preload file:%s as sound number %d",wav_file_name,i);
    	  lisy80_debug(debugbuf);
   	}
+      }// if soundnumber != 0
      } // for i
 
 
@@ -264,15 +267,18 @@ void lisy35_play_wav(int sound_no)
 
  if ( ls80dbg.bitv.sound )
   {
-   sprintf(debugbuf,"lisy35_play_wav: want to play sound number: %d",sound_no);
+   sprintf(debugbuf,"lisy35_play_wav: want to play sound number: %d mapped to sound:%d",sound_no,lisy35_sound_stru[sound_no].soundnumber);
    lisy80_debug(debugbuf);
   }
 
   //Play our (pre loaded) sound file on separate channel
+  if ( lisy35_sound_stru[sound_no].soundnumber != 0)
+  {
   ret = Mix_PlayChannel( sound_no, lisysound[sound_no], 0);
   if(ret == -1) {
          fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
         }
+  }
 }
 
 /*

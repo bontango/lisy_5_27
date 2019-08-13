@@ -126,10 +126,13 @@ void lisy35_init( void )
 
      if ( ls80dbg.bitv.sound) {
      int i;
-     for(i=1; i<=31; i++)
-       fprintf(stderr,"Sound[%d]: %d %d %d \n",i,lisy35_sound_stru[i].can_be_interrupted,
-                        lisy35_sound_stru[i].loop,
-                        lisy35_sound_stru[i].st_a_catchup);
+     for(i=1; i<=255; i++)
+     {
+       if ( lisy35_sound_stru[i].soundnumber != 0 )
+       fprintf(stderr,"Sound[%d]: %s %s %d \n",i,lisy35_sound_stru[i].path,
+                        lisy35_sound_stru[i].name,
+                        lisy35_sound_stru[i].option);
+     }
     }
    }
  }
@@ -1160,7 +1163,8 @@ unsigned char sound_E;
     //we got second nybble, send with first nybble both to PIC
     lisy35_sound_ext_sb_set(first_nybble); //LSB
     lisy35_sound_ext_sb_set(data); //MSB
-
+     //JustBoom Sound? we may want to play wav files here
+     if ( lisy35_has_own_sounds ) lisy35_play_wav(16*data + first_nybble);
     //debug?
     if ( ls80dbg.bitv.sound )
     {
