@@ -33,7 +33,7 @@
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     99
+#define LISY35control_SOFTWARE_SUB     100
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -1509,13 +1509,24 @@ else  sprintf(buffer,"<p>\n<a href=\"./lisy35_sound.php\">Sound</a><br><br> \n")
 void send_software_infos( int sockfd )
 {
      char buffer[256];
+     char versionstring[256];
      int dum;
+     FILE *fp;
 
    //get installed version of lisy
-   unsigned char sw_main,sw_sub,commit;
-   lisy_get_sw_version( &sw_main, &sw_sub, &commit);
-   sprintf(buffer,"LISY Version: %d.%d-%d<br>\n",sw_main,sw_sub,commit);
+   // Open the command for reading.
+  fp = popen("/usr/local/bin/lisy -lisyversion", "r");
+  if (fp == NULL) {
+   sprintf(buffer,"LISY Version: unknown(internal error)\n");
    sendit( sockfd, buffer);
+  }
+  else
+  {
+   fgets(versionstring, sizeof(versionstring)-1, fp);
+   sprintf(buffer,"LISY Version: %s<br>\n",versionstring);
+   sendit( sockfd, buffer);
+   pclose(fp);
+  }
 
    //init switch pic and get Software version
    dum = lisy80_switch_pic_init();
