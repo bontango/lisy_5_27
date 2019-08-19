@@ -356,6 +356,7 @@ int lisy_get_position(void)
 
 
 //set new volume in case postion of poti have changed
+//give back setting made (in percent)
 int lisy_adjust_volume(void)
 {
   static int first = 1;
@@ -391,7 +392,7 @@ int lisy_adjust_volume(void)
      sprintf(debugbuf,"/usr/bin/amixer sset Digital %d\%%",amix_volume);
      system(debugbuf);
     // first setting, we announce here the volume setting
-     sprintf(debugbuf,"/bin/echo \"Volume set to %d percent\" | /usr/bin/festival --tts",amix_volume);
+    // sprintf(debugbuf,"/bin/echo \"Volume set to %d percent\" | /usr/bin/festival --tts",amix_volume);
      system(debugbuf);
      if ( ls80dbg.bitv.sound)
      {
@@ -425,7 +426,7 @@ int lisy_adjust_volume(void)
 
   }
 
-  return(1);
+  return(amix_volume);
 
 }
 
