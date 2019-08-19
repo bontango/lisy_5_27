@@ -1074,6 +1074,7 @@ int  lisy35_file_get_soundopts(void)
      lisy35_sound_stru[sound_no].path = strdup(strtok(NULL, ";"));	//path to soundfile
      lisy35_sound_stru[sound_no].name = strdup(strtok(NULL, ";"));	//name of soundfile
      lisy35_sound_stru[sound_no].option = atoi(strtok(NULL, ";"));	//option
+     lisy35_sound_stru[sound_no].comment = strdup(strtok(NULL, ";"));	//comment
    } //while
    fclose(fstream);
 

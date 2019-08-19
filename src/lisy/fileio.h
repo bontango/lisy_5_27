@@ -61,6 +61,7 @@ typedef struct
   char *path;  //path to soundfile
   char *name;   //name of soundfile
   int option;  //option
+  char *comment;   //comment
 } t_stru_lisy35_sounds_csv;
 
 int lisy80_file_get_gamename(t_stru_lisy80_games_csv *lisy80_game);
