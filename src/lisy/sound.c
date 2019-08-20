@@ -407,6 +407,9 @@ int lisy_adjust_volume(void)
     if( (diff = abs(old_position - position )) > 300)
     {
      lisy_volume = sdl_volume; //set global var for SDL
+     amix_volume = (sdl_volume*100) / 128;
+     sprintf(debugbuf,"/usr/bin/amixer sset Digital %d\%%",amix_volume);
+     system(debugbuf);
      if ( ls80dbg.bitv.sound)
      {
       sprintf(debugbuf,"new Volume setting initiated: %d",sdl_volume);
@@ -426,7 +429,7 @@ int lisy_adjust_volume(void)
 
   }
 
-  return(amix_volume);
+  return(sdl_volume*100) / 128;
 
 }
 
