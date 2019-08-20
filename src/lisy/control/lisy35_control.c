@@ -18,6 +18,7 @@
 #include <wiringPi.h>
 #include <pthread.h>
 #include "../lisy35.h"
+#include "../lisy_home.h"
 #include "../fileio.h"
 #include "../hw_lib.h"
 #include "../displays.h"
@@ -29,11 +30,12 @@
 #include "../lisy.h"
 #include "../lisyversion.h"
 #include "../fadecandy.h"
+#include "../externals.h"
 
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     100
+#define LISY35control_SOFTWARE_SUB     101
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -181,6 +183,38 @@ void do_sound_set( char *buffer)
 }
 
 
+//set options for soundcard control
+void do_soption_set( char *buffer)
+{
+
+ int selection;
+
+ //we trust ASCII values
+ //the format here is 'Px_'
+ selection = buffer[1]-48;
+
+
+printf("RTH do_soundoption_set %s\n",buffer);
+
+
+ switch(selection)
+  {
+	case 1:  //say it
+	 if ( buffer[3] != '\0') {
+		 sprintf(debugbuf,"/bin/echo \"%s\" | /usr/bin/festival --tts",&buffer[3]);
+                 system(debugbuf);
+		}
+
+	break;
+	case 2:  //play the sound
+	 if ( buffer[3] != '\0') lisy35_play_wav(atoi(&buffer[3]));
+	break;
+
+  }
+}
+
+
+
 //do an update of lisy
 void do_updatepath_set( char *buffer)
 {
@@ -200,7 +234,6 @@ void do_update_local( int sockfd, char *what)
  char *real_name,*tmp_name;
  char *line;
  char buffer[255];
- int ret_val;
 
  //we trust ASCII values
  //the format here is 'Y'
@@ -225,12 +258,12 @@ void do_update_local( int sockfd, char *what)
  sprintf(buffer,"try to get extract the update file<br><br>\n");
  sendit( sockfd, buffer);
  sprintf(buffer,"/bin/tar -xzf %s -C /home/pi/update",tmp_name);
- ret_val = system(buffer);
+ system(buffer);
 
  sprintf(buffer,"try to execute install.sh from within update pack<br><br>\n");
  sendit( sockfd, buffer);
  sprintf(buffer,"/bin/bash /home/pi/update/install.sh");
- ret_val = system(buffer);
+ system(buffer);
 
  sprintf(buffer,"update done, you may want to reboot now<br><br>\n");
  sendit( sockfd, buffer);
@@ -1185,6 +1218,78 @@ void send_cont_solenoid_infos( int sockfd )
 
 
 }
+
+
+void send_soption_infos( int sockfd )
+{
+  char buffer[256];
+  char str[256];
+  char message1[80];
+  char message2[80];
+  int i;
+  FILE *fp;
+  static int first = 1;
+
+
+  //we do this only once
+  if(first)
+  {
+
+  //first try to read sound opts, as we NEED them
+  if ( lisy35_file_get_soundopts() < 0 )
+     sprintf(message1,"error: no sound opts file; sound init failed<br>\n");
+  else
+     sprintf(message1,"info: sound opt file read OK<br>\n");
+  //now open soundcard, and init soundstream
+  if ( lisy35_sound_stream_init() < 0 )
+     sprintf(message2,"error: sound init failed, sound emulation disabled<br>\n");
+ else
+   sprintf(message2,"info: sound init done<br>\n");
+
+  }//first call
+
+
+  //start with some header
+  // lets aplay give us the soundcards known to the system
+  fp = popen("/usr/bin/aplay -l", "r");
+  
+   while ( fgets(str, sizeof(str)-1, fp) != NULL)
+   {
+     sprintf(buffer,"%s<br>\n",str);
+     sendit( sockfd, buffer);
+   }
+   pclose(fp);
+
+  //start with some header
+  sendit( sockfd, "<br>");
+  sendit( sockfd, message1);
+  sendit( sockfd, message2);
+  //set volume according to poti
+  sprintf(buffer,"<br>info: Volume set to %d percent<br><br>\n",lisy_adjust_volume());
+  sendit( sockfd, buffer);
+
+  sprintf(buffer,"<p>  Say this text: <input type=\"text\" name=\"P1\" size=\"100\" maxlength=\"250\" value=\"\" /></p>");
+  sendit( sockfd, buffer);
+  sprintf(buffer,"<p>  Play that sound (decimal soundnumber): <input type=\"number\" max=\"255\" name=\"P2\" size=\"3\" maxlength=\"3\" value=\"\" /></p>");
+  sendit( sockfd, buffer);
+  sprintf(buffer,"<p><input type=\"submit\" /></p> ");
+  sendit( sockfd, buffer);
+
+  //print the sound mapping
+  sendit( sockfd, "<br>these are the sound mappings: [hex][dec]<br>\n");
+     for(i=1; i<=255; i++)
+     {
+       if ( lisy35_sound_stru[i].soundnumber != 0 )
+       {
+       sprintf(buffer,"[0x%02x] [%d]: %s/%s.wav %d %s<br>",i,i,lisy35_sound_stru[i].path,
+                        lisy35_sound_stru[i].name,
+                        lisy35_sound_stru[i].option,
+                        lisy35_sound_stru[i].comment);
+       sendit( sockfd, buffer);
+       }
+     }
+}
+
 void send_update_infos( int sockfd )
 {
   char buffer[256];
@@ -1484,6 +1589,8 @@ void send_home_infos( int sockfd )
 if( lisy35_game.soundboard_variant == 2)
    sprintf(buffer,"<p>\n<a href=\"./lisy35_sound_ext.php\">Sound</a><br><br> \n");
 else  sprintf(buffer,"<p>\n<a href=\"./lisy35_sound.php\">Sound</a><br><br> \n");
+   sendit( sockfd, buffer);
+   sprintf(buffer,"<p>\n<a href=\"./lisy_soundoption.php\">Control (optional) LISY onboard soundcard</a><br><br> \n");
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisy1_nvram.php\">NVRAM Information</a><br><br> \n");
    sendit( sockfd, buffer);
@@ -1904,6 +2011,8 @@ int main(int argc, char *argv[])
      else if ( strcmp( buffer, "hostname") == 0) { send_hostname_infos(newsockfd); close(newsockfd); }
      //provide simple input field for initiating update
      else if ( strcmp( buffer, "update") == 0) { send_update_infos(newsockfd); close(newsockfd); }
+     //provide simple input field for for controlling optional LISY soundcard
+     else if ( strcmp( buffer, "soption") == 0) { send_soption_infos(newsockfd); close(newsockfd); }
      //should we exit?
      else if ( strcmp( buffer, "exit") == 0) do_exit = 1;
      //we interpret all Messages with an uppercase 'V' as dip settings
@@ -1930,6 +2039,8 @@ int main(int argc, char *argv[])
      else if (buffer[0] == 'X') { do_upload(newsockfd,buffer);close(newsockfd); }
     //with an uppercase 'Y' we do update the system with clientfile
      else if (buffer[0] == 'Y') { do_update_local(newsockfd,buffer);close(newsockfd); }
+    //with an uppercase 'P' we control the sound oPtion
+     else if (buffer[0] == 'P') { do_soption_set(buffer); }
      //as default we print out what we got
      else fprintf(stderr,"Message: %s\n",buffer);
 
