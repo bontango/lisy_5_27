@@ -699,11 +699,23 @@ int main(int argc, char *argv[])
     //slave when S1-dip3 (watchdog/Ball Save) is set to on
 
      if (strncmp(argv[2],"master",6) == 0 )
- 	 socket_mode=1;
+        {
+         strcpy(lisy_env.variant,"MPF master");
+ 	 socket_mode=1; //master has always socket mode
+        }
      else
        {
- 	 if ( ls80opt.bitv.watchdog  ) socket_mode=1;
+ 	 if ( ls80opt.bitv.watchdog  ) 
+          {
+           strcpy(lisy_env.variant,"MPF client socket");
+           socket_mode=1;
+          }
+         else
+           strcpy(lisy_env.variant,"MPF client serial");
        }
+
+    //collect latest informations and start the lisy logger
+    lisy_logger();
 
     //show up on calling terminal
     sprintf(s_mpf_software_version,"%02d.%03d ",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
