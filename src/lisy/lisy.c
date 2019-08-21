@@ -20,6 +20,9 @@
 #include "lisy.h"
 
 
+//global strcut, the lisy environment
+t_stru_lisy_env lisy_env;
+
 //global var for handling different hardware revisions
 //set in lisy_hwlib_init
 int lisy_hardware_revision;
@@ -78,6 +81,21 @@ void lisy_hw_init(int lisy_variant)
 {
 
 unsigned char dum;
+
+//init LISY environment struct
+  strcpy(lisy_env.variant,"unknown");  // string LISY variant 1,80,35,williams,mini,atari ...
+  lisy_env.selection = 0; //game selection, usally via S2
+  strcpy(lisy_env.gamename,"unknown");  // game name mame fromat (8 chars)
+  strcpy(lisy_env.long_name,"unknown");  // game name from csv
+  lisy_env.throttle = 0;  // throttle value
+  lisy_env.clockscale = 0;  // clockscale value
+  lisy_env.disp_sw_ver = 0; //Display PIC Software version
+  lisy_env.coil_sw_ver = 0; //Coil PIC Software version
+  lisy_env.switch_sw_ver = 0; //Coil PIC Software version
+  strcpy(lisy_env.gitversion,GITVERSION);    //LISY Softwareversion git format
+  lisy_env.has_soundcard = 0; //do we have a soundcard?
+  lisy_env.has_own_sounds = 0;  //do we want to play pinmame sounds?
+
 
 //store start time in global var
 gettimeofday(&lisy_start_t,(struct timezone *)0);
@@ -215,6 +233,7 @@ void lisy_get_sw_version( unsigned char *sw_main, unsigned char *sw_sub, unsigne
  *sw_main = atoi(strtok(gitversion, "."));
  *sw_sub = atoi(strtok(NULL, "-"));
  *commit = atoi(strtok(NULL, "-"));
+
 
 }
 

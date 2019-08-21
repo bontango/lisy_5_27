@@ -149,6 +149,11 @@ void lisy35_init( void )
    fprintf(stderr,"info: sound init done\n");
  }
 
+ //collect latest informations and start the lisy logger
+ lisy_env.has_soundcard = lisy35_has_soundcard;
+ lisy_env.has_own_sounds = lisy35_has_own_sounds;
+ lisy_logger();
+
 }
 
 
@@ -177,6 +182,15 @@ int lisy35_get_gamename(char *gamename)
     sprintf(debugbuf,"Info: LISY35 Throttle value is %d for this game",g_lisy35_throttle_val);
     lisy80_debug(debugbuf);
     }
+
+  //other infos are stored in global var
+  //store what we know already
+  strcpy(lisy_env.variant,"LISY35");
+  lisy_env.selection = ret;
+  strcpy(lisy_env.gamename,lisy35_game.gamename);
+  strcpy(lisy_env.long_name,lisy35_game.long_name);
+  lisy_env.throttle = lisy35_game.throttle;
+  lisy_env.clockscale = 0; //not used
 
   return ret;
 }

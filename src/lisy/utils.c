@@ -443,3 +443,25 @@ int lisy_udp_switch_reader( unsigned char *action, unsigned char do_only_init  )
 
  return 0;
 }
+
+//the lisy logger
+void lisy_logger(void)
+{
+ char str[255];
+ sprintf(str,"nice /usr/local/bin/lisylogger \"%s;%d;%s;%s;%d;%f;%d;%d;%d;%s;%d;%d\"",
+  lisy_env.variant,  // string LISY variant 1,80,35,williams,mini,atari ...
+  lisy_env.selection, //game selection, usally via S2
+  lisy_env.gamename,  // game name mame fromat (8 chars)
+  lisy_env.long_name,  // game name from csv
+  lisy_env.throttle,  // throttle value
+  lisy_env.clockscale,  // clockscale value
+  lisy_env.disp_sw_ver, //Display PIC Software version
+  lisy_env.coil_sw_ver, //Coil PIC Software version
+  lisy_env.switch_sw_ver, //Coil PIC Software version
+  lisy_env.gitversion,    //LISY Softwareversion git format
+  lisy_env.has_soundcard, //do we have a soundcard?
+  lisy_env.has_own_sounds );  //do we want to play pinmame sounds?
+
+  system(str);
+
+}

@@ -3,6 +3,23 @@
 
 //Version 3.x
 
+//lets collect information about the running hard & software in one place
+typedef struct
+{
+  char variant[20];  // string LISY variant 1,80,35,williams,mini,atari ...
+  int selection; //game selection, usally via S2
+  char gamename[10];  // game name mame fromat (8 chars)
+  char long_name[40];  // game name from csv
+  int throttle;  // throttle value
+  double clockscale;  // clockscale value
+  int disp_sw_ver; //Display PIC Software version
+  int coil_sw_ver; //Coil PIC Software version
+  int switch_sw_ver; //Coil PIC Software version
+  char gitversion[40];    //LISY Softwareversion git format
+  unsigned char has_soundcard; //do we have a soundcard?
+  unsigned char has_own_sounds;  //do we want to play pinmame sounds?
+} t_stru_lisy_env;
+
 //global struct for debug messaging or not, set in lisy80_init
 typedef union {
     unsigned char byte;

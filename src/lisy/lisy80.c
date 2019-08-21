@@ -239,6 +239,10 @@ void lisy80_init( void )
      if ( lisy_home_init_event() < 0)
        fprintf(stderr,"LISY HOME init failed, sound emulation disabled\n");
    }
+ //collect latest informations and start the lisy logger
+ lisy_env.has_soundcard = lisy80_has_soundcard;
+ lisy_env.has_own_sounds = lisy80_has_own_sounds;
+ lisy_logger();
 
 }  //lisy80_init
 
@@ -1011,6 +1015,14 @@ int lisy80_get_gamename(char *gamename)
   fprintf(stderr,"LISY80: Throttle value is %d\n",g_lisy80_throttle_val);
 
   //other infos are stored in global var
+  //store what we know already
+  strcpy(lisy_env.variant,"LISY80");
+  lisy_env.selection = ret;
+  strcpy(lisy_env.gamename,lisy80_game.gamename);
+  strcpy(lisy_env.long_name,lisy80_game.long_name);
+  lisy_env.throttle = lisy80_game.throttle;
+  lisy_env.clockscale = 0; //not used
+
 
   return ret;
 }

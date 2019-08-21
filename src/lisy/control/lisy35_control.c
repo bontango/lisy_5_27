@@ -193,10 +193,6 @@ void do_soption_set( char *buffer)
  //the format here is 'Px_'
  selection = buffer[1]-48;
 
-
-printf("RTH do_soundoption_set %s\n",buffer);
-
-
  switch(selection)
   {
 	case 1:  //say it
@@ -1874,6 +1870,9 @@ int main(int argc, char *argv[])
     //init coils
     lisy35_coil_init( );
 
+    //collect latest informations and start the lisy logger
+    strcpy(lisy_env.variant,"LISY35_control");
+    lisy_logger();
 
     //init internal lamp vars as well
     for(i=0; i<=59; i++) lamp[i] = 0;

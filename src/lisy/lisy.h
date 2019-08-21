@@ -8,6 +8,7 @@ extern ls80dbg_t ls80dbg;
 extern ls80opt_t ls80opt;
 extern int lisy_time_to_quit_flag;
 extern struct timeval lisy_start_t;
+extern t_stru_lisy_env lisy_env;
 
 int lisy_time_to_quit(void);
 void lisy_shutdown(void);
@@ -17,6 +18,7 @@ void lisy_nvram_write_to_file( void );
 void lisy_get_sw_version( unsigned char *sw_main, unsigned char *sw_sub, unsigned char *commit);
 
 void lisy_sound_handler( unsigned char data );
+
 
 #define NVRAM_DELAY 500  //delay counter for nvram write
 

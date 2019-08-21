@@ -233,6 +233,8 @@ void lisy_hwlib_init( void )
 
  //get Software version, TODO: to be checked
  disp_sw_ver = display_get_sw_version();
+ //store it global
+ lisy_env.disp_sw_ver = disp_sw_ver;
  if (ls80dbg.bitv.basic)
  {
    sprintf(debugbuf,"Software Display PIC has version %d.%d",disp_sw_ver/100, disp_sw_ver%100);
@@ -268,7 +270,9 @@ void lisy_hwlib_init( void )
         lisy80_error(5);
 
  //get Software version, TODO: to be checked
-   coil_sw_ver = coil_get_sw_version();
+ coil_sw_ver = coil_get_sw_version();
+ //store it global
+ lisy_env.coil_sw_ver = coil_sw_ver;
  if (ls80dbg.bitv.basic)
  {
    sprintf(debugbuf,"Software Coil PIC has version %d.%d",coil_sw_ver/100, coil_sw_ver%100);
@@ -322,7 +326,9 @@ void lisy_hwlib_init( void )
  //now init switch pic and get Software version, debug options and 'some' S1 DIPs
  //for LISY35 we have a separate routine ( lisy35_switch_pic_init() )
  //which is called from main.c via 'lisy35_set_variant' in addition
-   switch_sw_ver = lisy80_switch_pic_init();
+ switch_sw_ver = lisy80_switch_pic_init();
+ //store it global
+ lisy_env.switch_sw_ver = switch_sw_ver;
    if (ls80dbg.bitv.basic)
    {
      sprintf(debugbuf,"Software Switch PIC has version %d.%d",switch_sw_ver/100, switch_sw_ver%100);

@@ -147,7 +147,12 @@ void lisy1_init( void )
  else
    fprintf(stderr,"info: sound init done\n");
  }
-
+ 
+ //collect latest informations and start the lisy logger
+ lisy_env.has_soundcard = lisy1_has_soundcard;
+ lisy_env.has_own_sounds = lisy1_has_own_sounds;
+ lisy_logger();
+ 
 }
 
 //read the csv file on /lisy partition and the DIP switch setting
@@ -171,6 +176,14 @@ int lisy1_get_gamename(char *gamename)
   //store clockscale value from gamelist to global var
   g_lisy1_clockscale_val = lisy1_game.clockscale;
   //other infos are stored in global var
+
+  //store what we know already
+  strcpy(lisy_env.variant,"LISY1");
+  lisy_env.selection = ret;
+  strcpy(lisy_env.gamename,lisy1_game.gamename);
+  strcpy(lisy_env.long_name,lisy1_game.long_name);
+  lisy_env.throttle = lisy1_game.throttle;
+  lisy_env.clockscale = lisy1_game.clockscale;
 
   return ret;
 }

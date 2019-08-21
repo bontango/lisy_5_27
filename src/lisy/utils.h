@@ -25,6 +25,9 @@ void my_itoa(int value, char* str, int base);
 
 int lisy_udp_switch_reader( unsigned char *action, unsigned char do_only_init  );
 
+void lisy_logger(void);
+
+
 
 #define LISY80_BUFFER_FAIL     0
 #define LISY80_BUFFER_SUCCESS  1
