@@ -187,7 +187,8 @@ void do_sound_set( char *buffer)
 void do_soption_set( char *buffer)
 {
 
- int selection;
+ int selection, i;
+ static int sound;
 
  //we trust ASCII values
  //the format here is 'Px_'
@@ -200,10 +201,23 @@ void do_soption_set( char *buffer)
 		 sprintf(debugbuf,"/bin/echo \"%s\" | /usr/bin/festival --tts",&buffer[3]);
                  system(debugbuf);
 		}
-
 	break;
 	case 2:  //play the sound
-	 if ( buffer[3] != '\0') lisy35_play_wav(atoi(&buffer[3]));
+	 if ( buffer[3] != '\0') 
+		{
+		  lisy35_play_wav(atoi(&buffer[3]));
+ 		  sound = atoi(&buffer[3]); //store the sound
+		}
+	break;
+	case 3:  //play the soundrange
+	 if ( buffer[3] != '\0')
+	   { 
+		for(i=sound+1; i<=atoi(&buffer[3]); i++) 
+		   {
+		    sleep(2);
+		    lisy35_play_wav(i);
+		   }
+		}
 	break;
 
   }
@@ -1266,7 +1280,9 @@ void send_soption_infos( int sockfd )
 
   sprintf(buffer,"<p>  Say this text: <input type=\"text\" name=\"P1\" size=\"100\" maxlength=\"250\" value=\"\" /></p>");
   sendit( sockfd, buffer);
-  sprintf(buffer,"<p>  Play that sound (decimal soundnumber): <input type=\"number\" max=\"255\" name=\"P2\" size=\"3\" maxlength=\"3\" value=\"\" /></p>");
+  sprintf(buffer,"<p>  Play from sound (decimal soundnumber): <input type=\"number\" max=\"255\" name=\"P2\" size=\"3\" maxlength=\"3\" value=\"\" /></p>");
+  sendit( sockfd, buffer);
+  sprintf(buffer,"<p>  to sound (decimal soundnumber): <input type=\"number\" max=\"255\" name=\"P3\" size=\"3\" maxlength=\"3\" value=\"\" /></p>");
   sendit( sockfd, buffer);
   sprintf(buffer,"<p><input type=\"submit\" /></p> ");
   sendit( sockfd, buffer);
