@@ -369,7 +369,7 @@ my_switch.byte = 0;
     		//we use 'internal strobe 6' to handle special switches in the same way ( SLAM=06,OUTHOLE=16,RESET=26 )
 		break;
         case LISY_HW_LISY35:
-    		my_switch.bitv.switchno = lisy35_switch_reader( &action );
+    		my_switch.bitv.switchno = lisy35_switch_reader( &action ) + 1; //we start with switch#1 for LISY35
 		break;
         case LISY_HW_LISY80:
     		my_switch.bitv.switchno = lisy80_switch_reader( &action );
