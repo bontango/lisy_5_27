@@ -807,7 +807,7 @@ int main(int argc, char *argv[])
 	{
 	 strcpy( lisy_hw.lisy_hw,"LISY35");
 	 lisy_hw.no_lamps = 64;
-         lisy_hw.no_sol = 16;
+         lisy_hw.no_sol = 19;
 	 lisy_hw.no_sounds = 32;
 	 lisy_hw.no_disp = 7;
 	 lisy_hw.no_switches = 80;  //8*8 Matrix
