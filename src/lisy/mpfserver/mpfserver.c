@@ -639,6 +639,28 @@ int mpf_set_interface_attribs(int fd, int speed)
     return 0;
 }
 
+/*
+  display string on display
+  mpf version supporting all LISY variants
+*/
+void mpf_display_show_str( int display, char *data)
+{
+    switch (lisy_hardware_revision)
+    {
+        case LISY_HW_LISY1:
+                display_show_str( display, data);
+                break;
+        case LISY_HW_LISY80:
+                //no system80B at the moment
+                display_show_str( display, data);
+                break;
+        case LISY_HW_LISY35:
+                display35_show_str( display, data);
+                break;
+        }
+}
+
+
 
 //main prg
 int main(int argc, char *argv[])
@@ -650,7 +672,7 @@ int main(int argc, char *argv[])
      char cur_version[8]; //current version for display
      unsigned char code;
      unsigned char parameter;
-     struct sockaddr_in serv_addr, cli_addr;
+     struct sockaddr_in serv_addr, cli_addr, *myip;
      //unsigned char action;
      struct stru_lisy_hw lisy_hw;
      unsigned char socket_mode;
@@ -659,12 +681,15 @@ int main(int argc, char *argv[])
      //dirent vars
      DIR *d;
      struct dirent *dir;
-     int len,res;
+     int n,len,res;
      char file_with_path[512];
      char lisy_gamename[20];
      char lisy_variant[20];
      unsigned char sw_main,sw_sub,commit;
-
+     struct ifreq ifa;
+     char *line;
+     char ip_interface[10];
+     char ip_adr_str[20];
 
      //it is serial or lan(socket)  mode
      if ( (argc != 3) || ( (strncmp(argv[2],"slave",5) != 0 ) && (strncmp(argv[2],"master",6) != 0 )))
@@ -692,7 +717,7 @@ int main(int argc, char *argv[])
     //set values to be returned to mpf
     lisy_get_sw_version( &sw_main, &sw_sub, &commit);
     sprintf(lisy_hw.lisy_ver,"%d.%02d ",sw_main,sw_sub);
-    sprintf(lisy_hw.api_ver,"%d.%02d ",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
+    strcpy(lisy_hw.api_ver,LISY_API_VERSION_STR);
 
     //determine if we are in socket mode
     //master has socket mode always
@@ -802,9 +827,37 @@ int main(int argc, char *argv[])
 	 exit (1);
         }
 
+   //debug?
+   if (ls80dbg.bitv.basic)
+    {
+      sprintf(debugbuf,"HW is %s\n",lisy_hw.lisy_hw);
+      lisy80_debug(debugbuf);
+      }
 
-   printf("HW is %s\n",lisy_hw.lisy_hw);
-
+    //send something to the displays
+    sprintf(cur_version,"v%d.%d",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
+    switch (lisy_hardware_revision)
+    {
+        case LISY_HW_LISY1:
+                display_show_str( 1, "LISY1 ");
+                display_show_str( 2, "MPFser");
+                display_show_str( 3, cur_version);
+                display_show_str( 4, "WAIT  ");
+                break;
+        case LISY_HW_LISY80:
+                //no system80B at the moment
+                display_show_str( 1, "LISY80A");
+                display_show_str( 2, "MPFserv");
+                display_show_str( 3, cur_version);
+                display_show_str( 4, "WAIT   ");
+                break;
+        case LISY_HW_LISY35:
+                display35_show_str( 1, "115435 "); //'LISY35'
+                display35_show_str( 2, "377    "); //????
+                display35_show_str( 3, cur_version);
+                display35_show_str( 4, "1111   ");
+                break;
+        }
 
    //switches, initial state
    //now via check_switch for all systems
@@ -868,31 +921,6 @@ int main(int argc, char *argv[])
  }//if has_sound
 
 
-    //send something to the displays
-    sprintf(cur_version,"v%d.%d",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
-    switch (lisy_hardware_revision)
-    {
-        case LISY_HW_LISY1:
-     	 	display_show_str( 1, "LISY1 "); 
-    	 	display_show_str( 2, "MPFser"); 
-    	 	display_show_str( 3, cur_version); 
-    	 	display_show_str( 4, "WAIT  "); 
-		break;
-        case LISY_HW_LISY80:
-   	 	//no system80B at the moment
-     	 	display_show_str( 1, "LISY80A"); 
-    	 	display_show_str( 2, "MPFserv"); 
-    	 	display_show_str( 3, cur_version); 
-    	 	display_show_str( 4, "WAIT   "); 
-		break;
-        case LISY_HW_LISY35:
-     	 	display35_show_str( 1, "115435 "); //'LISY35'
-    	 	display35_show_str( 2, "377    "); //????
-    	 	display35_show_str( 3, cur_version); 
-    	 	display35_show_str( 4, "1111   "); 
-		break;
-        }
-       
 
    //are we in 'socket mode'?
    if (socket_mode)
@@ -901,6 +929,46 @@ int main(int argc, char *argv[])
      sockfd = socket(AF_INET, SOCK_STREAM, 0);
      if (sockfd < 0) 
         error("ERROR opening socket");
+
+    //try to find out our IP on eth0
+     strcpy (ifa.ifr_name, "eth0");
+     strcpy (ip_interface, "ETH0"); //upercase for message
+     if((n=ioctl(sockfd, SIOCGIFADDR, &ifa)) != 0)
+      {
+        //no IP on eth0, we try wlan0 now
+        strcpy (ifa.ifr_name, "wlan0");
+        strcpy (ip_interface, "WLAN0"); //upercase for message
+        n=ioctl(sockfd, SIOCGIFADDR, &ifa);
+      }
+
+     if(n) //no IP found
+     {
+        strcpy (ifa.ifr_name, "noip");
+       //construct the message
+        fprintf(stderr,"Bally NO IP");
+        mpf_display_show_str( 1, "127   ");
+        mpf_display_show_str( 2, "0     ");
+        mpf_display_show_str( 3, "0     ");
+        mpf_display_show_str( 4, "1     ");
+     }
+     else //we found an IP
+     {
+      myip = (struct sockaddr_in*)&ifa.ifr_addr;
+        //get teh pouinter to teh Ip address
+        line = inet_ntoa(myip->sin_addr);
+        //store the ip address string for debugging
+	strcpy(ip_adr_str,line);
+        //split the ip to four displays and store value for display routine
+        sprintf(buffer,"%-6s",strtok(line, "."));
+        mpf_display_show_str( 1, buffer); 
+        sprintf(buffer,"%-6s",strtok(NULL, "."));
+        mpf_display_show_str( 2, buffer); 
+        sprintf(buffer,"%-6s",strtok(NULL, "."));
+        mpf_display_show_str( 3, buffer);
+        sprintf(buffer,"%-6s",strtok(NULL, "."));
+        mpf_display_show_str( 4, buffer);
+     }
+
 
      //we want to to send the packets right away, no delay
      //if ( setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (int[]){1}, sizeof(int)) != 0)
@@ -936,7 +1004,7 @@ int main(int argc, char *argv[])
     if(socket_mode)
     {
      //welcome message
-     printf("mpf socket server for LISY v%d.%d  we listen at port 5963\n",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB);
+     printf("mpf socket server for LISY v%d.%d  we listen on %s at port 5963\n",MPFSERVER_SOFTWARE_MAIN,MPFSERVER_SOFTWARE_SUB,ip_adr_str);
      //wait and listen
      newsockfd = accept(sockfd, 
                  (struct sockaddr *) &cli_addr, 
