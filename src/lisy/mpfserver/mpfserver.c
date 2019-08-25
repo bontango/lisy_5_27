@@ -370,6 +370,8 @@ my_switch.byte = 0;
 		break;
         case LISY_HW_LISY35:
     		my_switch.bitv.switchno = lisy35_switch_reader( &action ) + 1; //we start with switch#1 for LISY35
+		//reverse logic for bally
+		if (action) action = 0; else action = 1;
 		break;
         case LISY_HW_LISY80:
     		my_switch.bitv.switchno = lisy80_switch_reader( &action );
