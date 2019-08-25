@@ -1215,6 +1215,8 @@ void send_cont_solenoid_infos( int sockfd )
    send_basic_infos(sockfd);
      sprintf(buffer,"push button to switch solenoid OFF or ON  Yellow solenoids are ON<br><br>\n");
      sendit( sockfd, buffer);
+     sprintf(buffer,"Note: numbering is 16 .. 19 here, which might be different from what you as numbering in bally solenoid test<br><br>\n");
+     sendit( sockfd, buffer);
 
    //send all the continuous solenoids together with the status
    //Name for LISY35 starts with 1 rather then zero, we have only four
@@ -1222,7 +1224,7 @@ void send_cont_solenoid_infos( int sockfd )
     {
      if (cont_sol[sol_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
      if (cont_sol[sol_no]) sprintf(name,"O%02d_off",sol_no); else sprintf(name,"O%02d_on",sol_no);
-     sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'O%02d\n%s\n%s\' /> </form>\n",name,colorcode,sol_no,coil_description_line1[sol_no+15],coil_description_line2[sol_no+15]);
+     sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'%02d \n%s\n%s\' /> </form>\n",name,colorcode,sol_no+15,coil_description_line1[sol_no+15],coil_description_line2[sol_no+15]);
      sendit( sockfd, buffer);
     }
 
