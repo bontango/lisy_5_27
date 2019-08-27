@@ -538,6 +538,8 @@ if (ls80dbg.bitv.coils)
      		}
              	break;
         case LISY_HW_LISY35:
+		//here is coil == no
+		coil = no;
                 if (action == 0)  //off
                 {
                 lisy_coils[no] = action;
@@ -552,7 +554,7 @@ if (ls80dbg.bitv.coils)
                 {
                 //now pulse the coil
                 lisy35_coil_set(coil,1);
-     		usleep(COIL_PULSE_TIME);
+     		delay(COIL_PULSE_TIME);
                 lisy35_coil_set(coil,0);
                 }
              	break;
@@ -596,7 +598,7 @@ if (ls80dbg.bitv.coils)
     		{
      		//now pulse the coil
      		lisy80_coil_set(coil,1);
-     		usleep(COIL_PULSE_TIME);
+     		delay(COIL_PULSE_TIME);
      		lisy80_coil_set(coil,0);
      		}
              	break;
@@ -663,6 +665,80 @@ void mpf_display_show_str( int display, char *data)
 }
 
 
+ //dirty, dirty dirty
+ //as we do not have a running pinmame
+ //we need to identify the soundboard of the game
+ //by searching the gamename in by35games.c
+ void lisy35_set_soundboard_var(void)
+ {
+
+  FILE *fstream;
+  char *line;
+  char buffer[1024];  
+  char *game_name_from_file;
+  char *soundBoard_name_from_file;
+
+  unsigned char no_match = 1;
+
+  //lets filter the information we needed
+  //with this cmmand we have a comma separated line
+  //first field is gamename
+  //sixt filed is Soundboard
+  //filter games with INITGAME which are either with Chimes or normal soundbaord
+  //system("/bin/grep 'INITGAME(' /home/pi/lisy/src/wpc/by35games.c |  awk -F'(' '{print $2$3}' >/tmp/bontango");
+  //RTH new: prepared file in lisy35 folder on /boot
+
+
+  //now open first filtered file
+  fstream = fopen("/boot/lisy/lisy35/control/by35games","r");
+   if(fstream == NULL)
+   {
+      fprintf(stderr,"\n LISY35_control: opening %s failed ","/boot/lisy/lisy35/control/by35games");
+      core_gameData->hw.soundBoard = 0;
+      return;
+   }
+
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     game_name_from_file = strdup(strtok(line, ","));
+     strdup(strtok(NULL, ",")); //skip
+     strdup(strtok(NULL, ",")); //skip
+     strdup(strtok(NULL, ",")); //skip
+     strdup(strtok(NULL, ",")); //skip
+     soundBoard_name_from_file = strdup(strtok(NULL, ","));
+     //do we have a match?
+     if ( strncmp( lisy35_game.gamename, game_name_from_file, strlen(lisy35_game.gamename)) == 0) 
+       { 
+         if ( strncmp( soundBoard_name_from_file, "0", 1) == 0) lisy35_game.soundboard_variant = LISY35_SB_CHIMES;
+          else lisy35_game.soundboard_variant = LISY35_SB_STANDARD;
+	 no_match = 0; 
+	 break;
+       }
+   } //while
+   fclose(fstream);
+
+  //must be game with INITGAME2 which are with extended soundbaord
+  if (no_match) lisy35_game.soundboard_variant = LISY35_SB_EXTENDED; 
+
+  //debug?
+   if ( ls80dbg.bitv.basic )
+   {
+    switch(lisy35_game.soundboard_variant)
+    {
+    case LISY35_SB_CHIMES:
+     sprintf(debugbuf,"Info: LISY35 will use soundboard variant 0 (Chimes)");
+     break;
+    case LISY35_SB_STANDARD:
+     sprintf(debugbuf,"Info: LISY35 will use soundboard variant 1 (standard SB)");
+     break;
+    case LISY35_SB_EXTENDED:
+     sprintf(debugbuf,"Info: LISY35 will use soundboard variant 2 (EXTENDED SB)");
+     break;
+    }
+    lisy80_debug(debugbuf);
+   }
+ }
+
 
 //main prg
 int main(int argc, char *argv[])
@@ -714,6 +790,24 @@ int main(int argc, char *argv[])
 
     //use the init functions from lisy.c
     lisy_init();
+
+    //do init according to hardware
+    switch (lisy_hardware_revision)
+    {
+      //  case LISY_HW_LISY1:
+      //          break;
+      //  case LISY_HW_LISY80:
+      //          break;
+        case LISY_HW_LISY35:
+		//init lamps
+    		lisy35_lamp_init( );
+    		//init coils
+    		lisy35_coil_init( );
+		//set soundboard variant
+		lisy35_set_soundboard_var();
+                break;
+        }
+
 
 
     //set values to be returned to mpf
