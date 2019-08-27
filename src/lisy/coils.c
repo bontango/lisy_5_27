@@ -344,6 +344,11 @@ void lisy35_coil_set ( int coil, int action)
 				{
 				  if ( action == 1) lisy35_mom_coil_set(coil-1);
 				   else lisy35_mom_coil_set(15);
+    			     	if (  ls80dbg.bitv.coils )
+    				{
+     				 sprintf(debugbuf,"momentary solenoids: %d %s\n",coil-1, action ? "ON" : "OFF");
+     				 lisy80_debug(debugbuf);
+     				}
 				}	
 			break;
 		       case 16:
