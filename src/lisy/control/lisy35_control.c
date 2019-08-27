@@ -35,7 +35,7 @@
 
 //the version
 #define LISY35control_SOFTWARE_MAIN    0
-#define LISY35control_SOFTWARE_SUB     101
+#define LISY35control_SOFTWARE_SUB     102
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
