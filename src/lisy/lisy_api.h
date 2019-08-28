@@ -11,7 +11,7 @@
 #define	LISY_G_NO_SOL		4 	//get number of soleneoids - return byte
 #define	LISY_G_NO_SOUNDS	5	//get number of sounds - return byte
 #define	LISY_G_NO_DISP		6	//get number of displays - return byte
-#define	LISY_G_DISP_DETAIL	7	//get display details - return string TBD
+#define	LISY_G_DISP_DETAIL	7	//get display details
 #define	LISY_G_GAME_INFO	8	//get game info - return string 'Gottlieb internal number/char'
 #define	LISY_G_NO_SW		9	//get number of switches - return byte
 
@@ -19,6 +19,8 @@
 #define	LISY_G_STAT_LAMP	10	//get status of lamp # - return byte "0=OFF; 1=ON; 2=Error"
 #define	LISY_S_LAMP_ON		11	//set lamp # to ON - return none
 #define	LISY_S_LAMP_OFF		12	//set lamp # to OFF - return none
+#define	LISY_FADE_MOD_LIGHTS	13	//fade number of modern lights
+#define	LISY_G_NO_MOD_LIGHTS	19	//get number of modern lights
 
 //solenoids, parameter byte
 #define	LISY_G_STAT_SOL		20	//get status of solenoid # - return byte "0=OFF; 1=ON; 2=Error"
@@ -26,6 +28,8 @@
 #define	LISY_S_SOL_OFF		22	//set solenoid # to OFF - return none
 #define	LISY_S_PULSE_SOL	23	//pulse solenoid# - return none
 #define	LISY_S_PULSE_TIME	24	//set pulse time for solenoid# 1-byte integer ( 0 - 255 )
+#define	LISY_S_RECYCLE_TIME	25	//set recycle time for solenoid# 1-byte integer ( 0 - 255 )
+#define	LISY_S_SOL_PULSE_PWM    26	//Pulse solenoid and then enable solenoid with PWM
 
 //displays, parameter string
 #define	LISY_S_DISP_0		30	//set display 0 (status) to string - return none
@@ -35,7 +39,6 @@
 #define	LISY_S_DISP_4		34	//set display 4 to string - return none
 #define	LISY_S_DISP_5		35	//set display 5 to string - return none
 #define	LISY_S_DISP_6		36	//set display 6 to string - return none
-#define	LISY_G_DISP_CH		37	//get possible number of characters of display#
 
 //switches, parameter byte/none
 #define	LISY_G_STAT_SW		40	//get status of switch# - return byte "0=OFF; 1=ON; 2=Error"
@@ -48,8 +51,8 @@
 #define	LISY_S_TEXT_TO_SPEECH	53	//say the text - option(1byte) + string 'text'
 #define	LISY_S_SET_VOLUME	54	//sound volume in percent
 
-//RTH pre API 0.09
-#define	LISY_S_SET_HWRULE	0x3C	//Configure Hardware Rule for Solenoid
+//special rules
+#define LISY_S_SET_HWRULE       0x3C    //Configure Hardware Rule for Solenoid
 
 //general, parameter none
 #define	LISY_INIT		100	//init/reset LISY - return byte 0=OK, >0 Errornumber Errornumbers TBD

@@ -65,7 +65,8 @@ void lisy_nvram_write_to_file( void ) {  }
 //lisy pulse mod extension
 //int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
 //int lisy80_coil_min_pulse_mod = 0; //deaktivated by default
-extern int lisy1_coil_min_pulse_time[8];
+extern int lisy1_coil_min_pulse_time[8]; //not used at the moment
+unsigned char lisy_coil_pulse_time[20];
 
 
 //global var for internal game_name structure, set by  lisy35_file_get_gamename in main
@@ -85,6 +86,14 @@ unsigned char lisy_lamps[120];
 unsigned char lisy_sounds[32];
 //global vars for all coils
 unsigned char lisy_coils[20];
+//glabal struct for HW rules
+struct
+{
+  unsigned char is_set;
+  unsigned char pulse_time;
+  unsigned char solenoid;
+}
+hw_rule_for_switch[81];
 
 //global var for mpfserver
 unsigned char lisy_display_chars[7] = { 0,0,0,0,0,0 };
@@ -323,11 +332,8 @@ void set_coil_pulsetime(int sockfd, int number )
 
  unsigned char value;
 
-if (ls80dbg.bitv.basic) lisy80_debug("LISY_S_PULSE_TIME\n");
-
-
  read(sockfd,&value,1);
- lisy1_coil_min_pulse_time[number-1] = value;
+ lisy_coil_pulse_time[number] = value;
 
 if (ls80dbg.bitv.coils)
  {
@@ -337,6 +343,28 @@ if (ls80dbg.bitv.coils)
 
 
 }
+
+//do autofire
+void autofire( unsigned char sw)
+{
+
+  //pulse the coil
+  //LISY35 only at the moment
+  if (lisy_hardware_revision == LISY_HW_LISY35)
+  {
+      lisy35_coil_set(hw_rule_for_switch[sw].solenoid,1);
+      delay(hw_rule_for_switch[sw].pulse_time);
+      lisy35_coil_set(hw_rule_for_switch[sw].solenoid,0);
+
+ if (ls80dbg.bitv.basic)
+ {
+   sprintf(debugbuf,"HW rule switch %d, autofire  solenoid:%d pulse %d\n",sw,hw_rule_for_switch[sw].solenoid,hw_rule_for_switch[sw].pulse_time);
+   lisy80_debug(debugbuf);
+  }
+ }
+}
+
+
 
 //check for updated switches
 // get changed switches - return byte "bit7 is status; 0..6 is number"
@@ -387,6 +415,10 @@ my_switch.byte = 0;
 	  sprintf(debugbuf,"MPF switch changed: %d: status:%d\n",my_switch.bitv.switchno,my_switch.bitv.status);
 	  lisy80_debug(debugbuf);
 	 }
+
+   //autofire section
+   if( hw_rule_for_switch[my_switch.bitv.switchno].is_set & (action == 0) ) autofire( my_switch.bitv.switchno );
+
 	return my_switch.byte;
         }
  return 127; //no change
@@ -533,7 +565,7 @@ if (ls80dbg.bitv.coils)
     		{
      		//now pulse the coil
      		lisy1_coil_set(coil,1);
-     		usleep(lisy1_coil_min_pulse_time[coil]);
+     		delay(lisy_coil_pulse_time[coil]);
      		lisy1_coil_set(coil,0);
      		}
              	break;
@@ -554,7 +586,7 @@ if (ls80dbg.bitv.coils)
                 {
                 //now pulse the coil
                 lisy35_coil_set(coil,1);
-     		delay(COIL_PULSE_TIME);
+     		delay(lisy_coil_pulse_time[coil]);
                 lisy35_coil_set(coil,0);
                 }
              	break;
@@ -598,7 +630,7 @@ if (ls80dbg.bitv.coils)
     		{
      		//now pulse the coil
      		lisy80_coil_set(coil,1);
-     		delay(COIL_PULSE_TIME);
+     		delay(lisy_coil_pulse_time[coil]);
      		lisy80_coil_set(coil,0);
      		}
              	break;
@@ -739,6 +771,80 @@ void mpf_display_show_str( int display, char *data)
    }
  }
 
+//send display details
+unsigned char send_disp_detail(int sockfd, unsigned char display)
+{
+
+ unsigned char disp_type = 5; //fixed at the moment
+ unsigned char disp_num_segments;
+
+ disp_num_segments = lisy_display_chars[display];
+
+ write(sockfd,&disp_type,1);
+ write(sockfd,&disp_num_segments,1);
+
+   if ( ls80dbg.bitv.basic )
+   {
+    sprintf(debugbuf,"queried display number:%d; send back type:%d,with  %d segments",display,disp_type,disp_num_segments);
+    lisy80_debug(debugbuf);
+   }
+
+}
+
+
+//set HW rule for solenoid
+unsigned char set_hw_rule(int sockfd, unsigned char sol)
+{
+  unsigned char sw1;
+  unsigned char sw2;
+  unsigned char sw3;
+  unsigned char pulse_time;
+  unsigned char pulse_pwm_power;
+  unsigned char hold_pwm_power;
+  unsigned char sw1_flag;
+  unsigned char sw2_flag;
+  unsigned char sw3_flag;
+
+  read(sockfd,&sw1,1);
+  read(sockfd,&sw2,1);
+  read(sockfd,&sw3,1);
+  read(sockfd,&pulse_time,1);
+  read(sockfd,&pulse_pwm_power,1);
+  read(sockfd,&hold_pwm_power,1);
+  read(sockfd,&sw1_flag,1);
+  read(sockfd,&sw2_flag,1);
+  read(sockfd,&sw3_flag,1);
+
+  //for autofire only at the moment, flags to be ignored
+  if(sw1 < 80)
+  {
+  hw_rule_for_switch[sw1].is_set = 1;
+  hw_rule_for_switch[sw1].pulse_time = pulse_time;
+  hw_rule_for_switch[sw1].solenoid = sol;
+  }
+/*
+  hw_rule_for_switch[sw2].is_set = 1;
+  hw_rule_for_switch[sw2].pulse_time = pulse_time;
+  hw_rule_for_switch[sw2].solenoid = sol;
+  hw_rule_for_switch[sw3].is_set = 1;
+  hw_rule_for_switch[sw3].pulse_time = pulse_time;
+  hw_rule_for_switch[sw3].solenoid = sol;
+*/
+
+ if (ls80dbg.bitv.basic)
+ {
+  sprintf(debugbuf,"Set HW rule for solenoid:%d\n",sol); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"Switch1:%d\n",sw1); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"Switch2:%d\n",sw2); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"Switch3:%d\n",sw3); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"pulse time:%d\n",pulse_time); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"pulse_pwm_power:%d\n",pulse_pwm_power); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"hold_pwm_power:%d\n",hold_pwm_power); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"sw1_flag:%d\n",sw1_flag); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"sw2_flag:%d\n",sw2_flag); lisy80_debug(debugbuf);
+  sprintf(debugbuf,"sw3_flag:%d\n",sw3_flag); lisy80_debug(debugbuf);
+ }
+}
 
 //main prg
 int main(int argc, char *argv[])
@@ -749,7 +855,7 @@ int main(int argc, char *argv[])
      char buffer[256];
      char cur_version[8]; //current version for display
      unsigned char code;
-     unsigned char parameter;
+     unsigned char parameter, dum;
      struct sockaddr_in serv_addr, cli_addr, *myip;
      //unsigned char action;
      struct stru_lisy_hw lisy_hw;
@@ -759,7 +865,7 @@ int main(int argc, char *argv[])
      //dirent vars
      DIR *d;
      struct dirent *dir;
-     int n,len,res;
+     int i,n,len,res;
      char file_with_path[512];
      char lisy_gamename[20];
      char lisy_variant[20];
@@ -846,6 +952,7 @@ int main(int argc, char *argv[])
     //set HW
 
     //determine HW and set HW specific values
+    //RTH todo put that somewhere else
     if ( lisy_hardware_revision == LISY_HW_LISY1  )
 	{
 	 strcpy( lisy_hw.lisy_hw,"LISY1");
@@ -907,7 +1014,7 @@ int main(int argc, char *argv[])
 	 lisy_hw.no_sounds = 32;
 	 lisy_hw.no_disp = 7;
 	 lisy_hw.no_switches = 80;  //8*8 Matrix
-	 //strcpy( lisy_hw.game_info,lisy1_game.rom_id);  RTH to be done
+	 strcpy( lisy_hw.game_info,"000");  //RTH to be done
 	 lisy_display_chars[0] = 4;
 	 lisy_display_chars[1] = 7;
 	 lisy_display_chars[2] = 7;
@@ -922,6 +1029,11 @@ int main(int argc, char *argv[])
 	 fprintf(stderr,"Hardware revision %d not supported\n",lisy_hardware_revision);
 	 exit (1);
         }
+
+
+   //init internale vars
+   for (i=0; i<=lisy_hw.no_sol; i++) lisy_coil_pulse_time[i] = 150; //150msec pulsetime by default
+   for (i=0; i<=lisy_hw.no_sol; i++) hw_rule_for_switch[i].is_set =0;
 
    //debug?
    if (ls80dbg.bitv.basic)
@@ -1133,6 +1245,9 @@ int main(int argc, char *argv[])
 	case  LISY_G_NO_LAMPS         :       //get number of lamps - return byte
 		send_back_byte(newsockfd,code,lisy_hw.no_lamps);
 		break;
+	case  LISY_G_NO_MOD_LIGHTS    :       //get number of modern lights - return byte ( 0 fix for LISY)
+		send_back_byte(newsockfd,code,0);
+		break;
 	case  LISY_G_NO_SOL           :       //get number of soleneoids - return byte
 		send_back_byte(newsockfd,code,lisy_hw.no_sol);
 		break;
@@ -1142,8 +1257,9 @@ int main(int argc, char *argv[])
 	case  LISY_G_NO_DISP          :       //get number of displays - return byte
 		send_back_byte(newsockfd,code,lisy_hw.no_disp);
 		break;
-	case  LISY_G_DISP_DETAIL      :       //get display details - return string RTH: TBD
-		send_back_string(newsockfd,code,"TBD");
+	case  LISY_G_DISP_DETAIL      :       //get display details
+		parameter = read_next_byte(newsockfd,code); //this is the displaynumber queried
+		send_disp_detail(newsockfd,parameter);
 		break;
 	case  LISY_G_GAME_INFO        :       //get game info - return string 'Gottlieb internal number/char'
 		send_back_string(newsockfd,code,lisy_hw.game_info);
@@ -1164,6 +1280,13 @@ int main(int argc, char *argv[])
 	case  LISY_S_LAMP_OFF         :      //set lamp # to OFF - return none
 		parameter = read_next_byte(newsockfd,code);
 		set_lamp( parameter, 0);
+		break;
+	case  LISY_FADE_MOD_LIGHTS    :      //fade number of modern lights - return none fake, we do not support that
+		dum = read_next_byte(newsockfd,code); //index
+		dum = read_next_byte(newsockfd,code); //fade time
+		dum = read_next_byte(newsockfd,code); //fade time
+		parameter = read_next_byte(newsockfd,code); //number of ligts to fade
+		for (i=0; i<parameter; i++) dum = read_next_byte(newsockfd,code); //read all values
 		break;
 
 	//solenoids, parameter byte
@@ -1187,49 +1310,62 @@ int main(int argc, char *argv[])
 		parameter = read_next_byte(newsockfd,code);
 		set_coil_pulsetime( newsockfd,parameter );
 		break;
+	case  LISY_S_RECYCLE_TIME     :       //set recycle time for solenoid# 1-byte ( 0 - 255 ) RTH: TBD
+		dum = read_next_byte(newsockfd,code); //index
+		dum = read_next_byte(newsockfd,code); //recycle time
+		break;
+	case  LISY_S_SOL_PULSE_PWM     :        //Pulse solenoid and then enable solenoid with PWM RTH: TBD
+		dum = read_next_byte(newsockfd,code); //index
+		dum = read_next_byte(newsockfd,code); //pulse time
+		dum = read_next_byte(newsockfd,code); //Pulse PWM power
+		dum = read_next_byte(newsockfd,code); //Hold PWM power
+		break;
 
 	//displays, parameter string
 	case  LISY_S_DISP_0           :      //set display 0 (status) to string - return none
+		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
 		read_next_string(newsockfd,buffer);
 		set_display(0,buffer);
 		break;
 	case  LISY_S_DISP_1           :      //set display 1 to string - return none
+		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
 		read_next_string(newsockfd,buffer);
 		set_display(1,buffer);
 		break;
 	case  LISY_S_DISP_2           :      //set display 2 to string - return none
+		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
 		read_next_string(newsockfd,buffer);
 		set_display(2,buffer);
 		break;
 	case  LISY_S_DISP_3           :      //set display 3 to string - return none
+		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
 		read_next_string(newsockfd,buffer);
 		set_display(3,buffer);
 		break;
 	case  LISY_S_DISP_4           :      //set display 4 to string - return none
+		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
 		read_next_string(newsockfd,buffer);
 		set_display(4,buffer);
 		break;
 	case  LISY_S_DISP_5           :      //set display 5 to string - return none
+		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
 		read_next_string(newsockfd,buffer);
 		set_display(5,buffer);
 		break;
 	case  LISY_S_DISP_6           :      //set display 6 to string - return none
+		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
 		read_next_string(newsockfd,buffer);
 		set_display(6,buffer);
-		break;
-	case  LISY_G_DISP_CH          :      //get possible number of characters of display#
-		parameter = read_next_byte(newsockfd,code);
-		send_back_byte(newsockfd,code,lisy_display_chars[parameter]);
 		break;
 
 	//switches, parameter byte/none
 	case  LISY_G_STAT_SW          :      //get status of switch# - return byte "0=OFF; 1=ON; 2=Error"
 		parameter = read_next_byte(newsockfd,code);
-		send_back_byte(newsockfd,code,lisy_switches[parameter]);
 		if (ls80dbg.bitv.switches)
    		{   sprintf(debugbuf,"get status of switch %d",parameter);
        		    lisy80_debug(debugbuf);
    		}
+		send_back_byte(newsockfd,code,lisy_switches[parameter]);
 		break;
 	case  LISY_G_CHANGED_SW       :      //get changed switches - return byte "bit7 is status; 0..6 is number"
 					     // "127 means no change since last call"
@@ -1256,6 +1392,12 @@ int main(int argc, char *argv[])
 	case  LISY_S_SET_VOLUME       :      //sound volume in percent
 		parameter = read_next_byte(newsockfd,code);
 		set_volume(parameter);
+		break;
+
+	//special
+	case  LISY_S_SET_HWRULE       :      //Configure Hardware Rule for Solenoid
+		parameter = read_next_byte(newsockfd,code); //this is the solenoid number
+		set_hw_rule(newsockfd,parameter);
 		break;
 
 	//general, parameter none
