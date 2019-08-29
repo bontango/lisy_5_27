@@ -240,11 +240,12 @@ if (ls80dbg.bitv.displays)
 
 //play a sound via the connected hardware
 //HW_TAG LISY_S_PLAY_SOUND
-//LISY35 stabndard SB only at the moment
 void play_sound(unsigned char code, unsigned char sound_no)
 {
 
-if (ls80dbg.bitv.sound)
+  unsigned char lsb,msb;
+
+ if (ls80dbg.bitv.sound)
  {
   sprintf(debugbuf,"MPF received play sound command:%d to play sound %d\n",code,sound_no);
   lisy80_debug(debugbuf);
@@ -256,7 +257,25 @@ if (ls80dbg.bitv.sound)
   		lisy1_sound_set(sound_no);
 		break;
         case LISY_HW_LISY35:
-  		lisy35_sound_std_sb_set( sound_no );
+	   switch(lisy35_game.soundboard_variant)
+		{
+		case LISY35_SB_CHIMES: //chimes, just pulse coil
+                  lisy35_coil_set(sound_no,1);
+                  delay(lisy_coil_pulse_time[sound_no]);
+                  lisy35_coil_set(sound_no,0);
+		break;
+		case  LISY35_SB_STANDARD:
+  		  lisy35_sound_std_sb_set( sound_no );
+		break;
+		case  LISY35_SB_EXTENDED:
+		   //calculate lsb.msb for output
+		   lsb = sound_no%16;
+		   msb = sound_no/16;
+		   //send it
+		   lisy35_sound_ext_sb_set(lsb); //LSB
+		   lisy35_sound_ext_sb_set(msb); //MSB
+		break;
+		}
 		break;
         case LISY_HW_LISY80:
   		lisy80_sound_set(sound_no);
