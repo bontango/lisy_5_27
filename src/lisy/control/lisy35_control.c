@@ -938,12 +938,12 @@ void send_sound_infos( int sockfd )
    send_basic_infos(sockfd);
 
 
-if( lisy35_game.soundboard_variant == 0)
+if( lisy35_game.soundboard_variant == LISY35_SB_CHIMES)
 {
      sprintf(buffer,"this game uses Chimes, please use Solenoids to test sound<br><br>\n");
      sendit( sockfd, buffer);
 }
-else if( lisy35_game.soundboard_variant == 1) //standard SB
+else if( lisy35_game.soundboard_variant == LISY35_SB_STANDARD) //standard SB
 {
      sprintf(buffer,"push button to send specific sound<br><br>\n");
      sendit( sockfd, buffer);
@@ -964,7 +964,7 @@ for(j=0; j<=7; j++)
    sendit( sockfd, buffer);
   }
 }
-else if( lisy35_game.soundboard_variant == 2)
+else if( lisy35_game.soundboard_variant == LISY35_SB_EXTENDED)
 {
 
   if ( ext_sound_no[0] != ' ')  //there was a setting of soundcard command
