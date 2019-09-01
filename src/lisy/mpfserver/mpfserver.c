@@ -126,7 +126,10 @@ void send_back_string(int sockfd,unsigned char code,char *str)
 //send back byte
 void send_back_byte(int sockfd,unsigned char code,unsigned char answer)
 {
-  write(sockfd,&answer,1);
+  if ( write(sockfd,&answer,1) != 1)
+  {
+   fprintf(stderr,"send_back_byte: could not write to socket\n");
+  }
 
  if (ls80dbg.bitv.basic)
  {
@@ -170,18 +173,34 @@ unsigned char read_next_string(int sockfd, char *content)
   i++;
   } while ( nextbyte != '\0');
 
+}
+
+//read next n bytes, store into string content and add trailing \0
+unsigned char read_next_n_bytes(int sockfd, int n,  char *content)
+{
+
+  unsigned char nextbyte;
+  int i=0;
+
+ do {
+  read(sockfd,&nextbyte,1);
+  content[i] = nextbyte;
+  i++;
+  } while ( i < n);
+ //add trailing \0
+ content[i] = '\0';
 
 }
 
 //read next string and set display 
 //HW_TAG LISY_S_DISP_0 .. 6
-void set_display(int number, char *value)
+void set_display(int number, int code, int no_of_bytes, char *value)
 {
  char display_str[25];
 
 if (ls80dbg.bitv.displays)
  {
-  sprintf(debugbuf,"received set command for display %d: \"%s\" \n",number,value);
+  sprintf(debugbuf,"received set command for display %d: \"%s\" (%d bytes) \n",number,value,no_of_bytes);
   lisy80_debug(debugbuf);
  }
 
@@ -791,7 +810,7 @@ void mpf_display_show_str( int display, char *data)
  }
 
 //send display details
-unsigned char send_disp_detail(int sockfd, unsigned char display)
+unsigned char send_disp_detail(int sockfd, int code, unsigned char display)
 {
 
  unsigned char disp_type = 5; //fixed at the moment
@@ -799,14 +818,15 @@ unsigned char send_disp_detail(int sockfd, unsigned char display)
 
  disp_num_segments = lisy_display_chars[display];
 
- write(sockfd,&disp_type,1);
- write(sockfd,&disp_num_segments,1);
 
    if ( ls80dbg.bitv.basic )
    {
     sprintf(debugbuf,"queried display number:%d; send back type:%d,with  %d segments",display,disp_type,disp_num_segments);
     lisy80_debug(debugbuf);
    }
+
+ send_back_byte(sockfd,code,disp_type);
+ send_back_byte(sockfd,code,disp_num_segments);
 
 }
 
@@ -1278,7 +1298,7 @@ int main(int argc, char *argv[])
 		break;
 	case  LISY_G_DISP_DETAIL      :       //get display details
 		parameter = read_next_byte(newsockfd,code); //this is the displaynumber queried
-		send_disp_detail(newsockfd,parameter);
+		send_disp_detail(newsockfd,code,parameter);
 		break;
 	case  LISY_G_GAME_INFO        :       //get game info - return string 'Gottlieb internal number/char'
 		send_back_string(newsockfd,code,lisy_hw.game_info);
@@ -1342,39 +1362,39 @@ int main(int argc, char *argv[])
 
 	//displays, parameter string
 	case  LISY_S_DISP_0           :      //set display 0 (status) to string - return none
-		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
-		read_next_string(newsockfd,buffer);
-		set_display(0,buffer);
+		parameter = read_next_byte(newsockfd,code); //lenght byte
+		read_next_n_bytes(newsockfd, parameter, buffer);
+		set_display(0,code,parameter,buffer);
 		break;
 	case  LISY_S_DISP_1           :      //set display 1 to string - return none
-		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
-		read_next_string(newsockfd,buffer);
-		set_display(1,buffer);
+		parameter = read_next_byte(newsockfd,code); //lenght byte
+		read_next_n_bytes(newsockfd, parameter, buffer);
+		set_display(1,code,parameter,buffer);
 		break;
 	case  LISY_S_DISP_2           :      //set display 2 to string - return none
-		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
-		read_next_string(newsockfd,buffer);
-		set_display(2,buffer);
+		parameter = read_next_byte(newsockfd,code); //lenght byte
+		read_next_n_bytes(newsockfd, parameter, buffer);
+		set_display(2,code,parameter,buffer);
 		break;
 	case  LISY_S_DISP_3           :      //set display 3 to string - return none
-		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
-		read_next_string(newsockfd,buffer);
-		set_display(3,buffer);
+		parameter = read_next_byte(newsockfd,code); //lenght byte
+		read_next_n_bytes(newsockfd, parameter, buffer);
+		set_display(3,code,parameter,buffer);
 		break;
 	case  LISY_S_DISP_4           :      //set display 4 to string - return none
-		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
-		read_next_string(newsockfd,buffer);
-		set_display(4,buffer);
+		parameter = read_next_byte(newsockfd,code); //lenght byte
+		read_next_n_bytes(newsockfd, parameter, buffer);
+		set_display(4,code,parameter,buffer);
 		break;
 	case  LISY_S_DISP_5           :      //set display 5 to string - return none
-		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
-		read_next_string(newsockfd,buffer);
-		set_display(5,buffer);
+		parameter = read_next_byte(newsockfd,code); //lenght byte
+		read_next_n_bytes(newsockfd, parameter, buffer);
+		set_display(5,code,parameter,buffer);
 		break;
 	case  LISY_S_DISP_6           :      //set display 6 to string - return none
-		//parameter = read_next_byte(newsockfd,code); //lenght byte, ignorted at the moment, we trust 0 byte
-		read_next_string(newsockfd,buffer);
-		set_display(6,buffer);
+		parameter = read_next_byte(newsockfd,code); //lenght byte
+		read_next_n_bytes(newsockfd, parameter, buffer);
+		set_display(6,code,parameter,buffer);
 		break;
 
 	//switches, parameter byte/none

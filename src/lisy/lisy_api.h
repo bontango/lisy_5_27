@@ -1,7 +1,7 @@
 #ifndef LISY_API_H
 #define LISY_API_H
 
-#define LISY_API_VERSION_STR	"0.08"
+#define LISY_API_VERSION_STR	"0.09"
 
 //info, parameter none
 #define	LISY_G_HW		0	//get connected LISY hardware -	return "LISY1" or "LISY80"
