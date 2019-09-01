@@ -33,6 +33,7 @@ unsigned char serialexist = 0;
 FILE *f_usbserial;
 #define USB_SERIAL_DEVICE "/dev/ttyGS0"
 unsigned char usbserialexist = 0;
+unsigned char soundcardexists = 0;
 
 
 //log the message to the console
@@ -40,21 +41,17 @@ unsigned char usbserialexist = 0;
 void log_message(char *str)
 {
 
- //char system_str[255];
+ char system_str[255];
 
  printf("%s\n",str);
  if (serialexist) fprintf(f_serial,"%s\n",str);
  if (usbserialexist) fprintf(f_usbserial,"%s\n",str);
 
- //sprintf(system_str,"/bin/echo \"%s\" | /usr/bin/festival --tts",str);
- //system(system_str);
- //sprintf(system_str,"/bin/echo \"%s\" > /dev/ttyGS0",str);
- //system(system_str);
-
-  //send header line
-//  fprintf(fstream,"Switch;ON_or_OFF;comment (%s) mame-ROM:%s.zip\n",lisy80_game.long_name, lisy80_game.gamename);
-
-
+ if (soundcardexists)
+ {
+   sprintf(system_str,"/bin/echo \"%s\" | /usr/bin/festival --tts",str);
+   system(system_str);
+ }
 
 }
 
@@ -290,7 +287,8 @@ pinMode ( LED1, OUTPUT);
 pinMode ( LED2, OUTPUT);
 pinMode ( LED3, OUTPUT);
 set_leds(0);
-
+//set MCLR port of switchpic (0)  to input to not interfere with picpgm port
+pinMode ( 0, INPUT);
 }
 
 
@@ -302,6 +300,7 @@ int i, ret, status, counts;
 int lisy_variant = LISY35;
 int selected_PIC;
 char message[255];
+FILE *fp;
 
 
 
@@ -311,11 +310,18 @@ char message[255];
 init_gpios();
 
 
-//check if we have a soundcard
-//ret = system("aplay -l");
 
-//ret = system("/bin/echo \"hallo\" | /usr/bin/festival --tts");
-//printf("festival says:%d\n",ret);
+  // soundcards known to the system
+  fp = fopen("/proc/asound/cards","r");
+  //read the first line
+  if ( fgets(message, sizeof(message)-1, fp) != NULL)
+   {
+     if ( strncmp("--- no soundcards ---",message,12) == 0)
+        fprintf(stderr,"no soundcard detected\n");
+     else
+	soundcardexists = 1;
+   }
+   pclose(fp);
 
 //check if serial devices exist
 if ( ( f_serial = fopen(SERIAL_DEVICE,"r+")) != NULL ) serialexist = 1;
