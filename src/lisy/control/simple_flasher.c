@@ -31,8 +31,8 @@ FILE *f_serial;
 #define SERIAL_DEVICE "/dev/serial0"
 unsigned char serialexist = 0;
 FILE *f_usbserial;
-#define USB_SERIAL_DEVICE "/dev/ttyGS0"
-unsigned char usbserialexist = 0;
+//#define USB_SERIAL_DEVICE "/dev/ttyGS0"
+//unsigned char usbserialexist = 0;
 unsigned char soundcardexists = 0;
 
 
@@ -43,9 +43,9 @@ void log_message(char *str)
 
  char system_str[255];
 
- printf("%s\n",str);
  if (serialexist) fprintf(f_serial,"%s\n",str);
- if (usbserialexist) fprintf(f_usbserial,"%s\n",str);
+   else printf("%s\n",str);
+ //if (usbserialexist) fprintf(f_usbserial,"%s\n",str);
 
  if (soundcardexists)
  {
@@ -326,13 +326,13 @@ init_gpios();
 //check if serial devices exist
 if ( ( f_serial = fopen(SERIAL_DEVICE,"r+")) != NULL ) serialexist = 1;
   else fprintf(stderr,"problem open serial console\n");
-
+/*
 if ( ( f_usbserial = fopen(USB_SERIAL_DEVICE,"r+")) != NULL ) 
   {
    usbserialexist = 1;
    log_message("usb serial device successfully opened");
   }
-  
+ */ 
 
 sprintf(message,"simple_flasher Version %s started",VERSION);
 log_message(message);
