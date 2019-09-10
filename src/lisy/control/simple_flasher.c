@@ -10,7 +10,7 @@
 #include <wiringPi.h>
 #include "../utils.h"
 
-#define VERSION "1.0"
+#define VERSION "1.1"
 
 #define TESTSWITCH 22
 #define DIP2 12
@@ -25,6 +25,7 @@
 #define LISY35 3
 //environment
 #define PIC_DIR "/boot/lisy/picpgm/"
+#define ONE_SHOT_DIR "/boot/lisy/picpgm/one_shot/"
 
 //global vars
 FILE *f_serial;
@@ -266,6 +267,8 @@ switch (selected_PIC)
 
  sprintf(system_str,"/usr/bin/picpgm -p %s >/tmp/picpgm_output",file_to_prg);
  ret_val = system(system_str);
+ sprintf(message,"returnvalue of picpgm was:%d\n",ret_val);
+ log_message(message);
 
  return ret_val;
 
@@ -291,6 +294,48 @@ set_leds(0);
 pinMode ( 0, INPUT);
 }
 
+//look if one_shot-file exists
+//if no, give back zero
+//if yes, give back number of files found  and filename of last file found
+int one_shot_file_exists(char *one_shot_file)
+{
+  DIR *d;
+  struct dirent *dir;
+  char str[255];
+  int i = 0;
+  int no_of_files = 0;
+
+
+  d = opendir(PIC_DIR);
+
+  //read the whole dir
+  d = opendir(ONE_SHOT_DIR);
+
+  if (d)
+    {
+        while ((dir = readdir(d)) != NULL)
+        {
+             {
+                //check for .hex extension
+                if (strlen(dir->d_name) >= 5)
+                  {
+                    strcpy(str,dir->d_name);
+                    printf("check: %s\n",str);
+                    if (strncmp( &str[strlen(str)-4],".hex",4) == 0)
+                        {
+                         strcpy(one_shot_file,dir->d_name);
+                         printf("match: %s\n",one_shot_file);
+                         ++i;
+                        }//match
+                  } //strlen >= 5
+             }
+        }
+        no_of_files = i;
+        closedir(d);
+     }
+
+ return(no_of_files);
+}
 
 int main (int argc, char *argv[])
 {
@@ -300,6 +345,7 @@ int i, ret, status, counts;
 int lisy_variant = LISY35;
 int selected_PIC;
 char message[255];
+char one_shot_file[255];
 FILE *fp;
 
 
@@ -352,6 +398,48 @@ do {
 } while ( ( status = get_switch_status(TESTSWITCH) ) == PIN_NOT_PRESSED );
 
 //switch pressed (long or short)
+
+//look if we have a '.hex' file in ONE_SHOT_DIR
+//if yes, start programming right away
+if (one_shot_file_exists(one_shot_file))
+{
+ char file_to_prg[255];
+ int ret_val;
+ char system_str[255];
+
+ sprintf(message,"hex file name is %s",one_shot_file);
+ log_message(message);
+ log_message("start programming right away");
+ //construct filename with path for picpgm
+ sprintf(file_to_prg,"%s%s",ONE_SHOT_DIR,one_shot_file);
+do
+{
+ sprintf(system_str,"/usr/bin/picpgm -p %s >/tmp/picpgm_output",file_to_prg);
+ ret_val = system(system_str);
+ sprintf(message,"returnvalue of picpgm was:%d\n",ret_val);
+ log_message(message);
+    if (ret_val)
+     {
+       init_gpios();
+       flash_red_led();
+       log_message("programming PIC failed\n");
+       set_led(LED3);
+     }
+    else
+     {
+       init_gpios();
+       flash_green_led();
+       log_message("programming PIC successful\n");
+       set_led(LED1);
+     }
+
+   //wait for testswitch press for next try
+   while((get_switch_status(TESTSWITCH)) == PIN_NOT_PRESSED) ;
+  } while(1); //endless loop
+}
+else log_message("INFO: no one shot file found");
+
+
 //set LEDs to 0
 ctrl_leds(0);
 
