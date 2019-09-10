@@ -19,6 +19,9 @@
 #define LED1 4 //green LED
 #define LED2 5 //yellow LED
 #define LED3 14 //red LED
+#define GREEN_LED 1
+#define YELLOW_LED 2
+#define RED_LED 3
 //the variants
 #define LISY1 1
 #define LISY80 2
@@ -423,14 +426,14 @@ do
        init_gpios();
        flash_red_led();
        log_message("programming PIC failed\n");
-       set_led(LED3);
+       set_led(RED_LED);
      }
     else
      {
        init_gpios();
        flash_green_led();
        log_message("programming PIC successful\n");
-       set_led(LED1);
+       set_led(GREEN_LED);
      }
 
    //wait for testswitch press for next try
