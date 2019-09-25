@@ -239,7 +239,8 @@ static char status[5] = "    ";
      printf("Player 2:%s\n",player[1]);
      printf("Player 3:%s\n",player[2]);
      printf("Player 4:%s\n",player[3]);
-     printf("Status:%s\n",status);
+     printf("credits:%c%c\n",status[3],status[2]);
+     printf("Ball in play:%c%c\n",status[1],status[0]);
      }
 }
 

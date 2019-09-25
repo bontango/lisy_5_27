@@ -243,6 +243,18 @@ if ( value != myvalue[index] )
     //remember
     myvalue[index] = value;
 
+/* from gts1games.c
+static core_tLCDLayout sys1_disp[] = {
+  {0, 0,12,6,CORE_SEG9}, {0,16,18,6,CORE_SEG9},
+  {2, 0, 0,6,CORE_SEG9}, {2,16, 6,6,CORE_SEG9},
+  {4,16,40,2,CORE_SEG7}, {4, 8,32,2,CORE_SEG7},
+  {0}
+};
+core.h :
+struct core_dispLayout {
+  UINT16 top, left, start, length, type;
+*/
+
   switch(index) //we need to recalculate index each time as it has the reverse order for LISY1 compared with LISY80
    {
      case 12 ... 17: //system1 player 1 
