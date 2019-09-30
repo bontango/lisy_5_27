@@ -76,6 +76,7 @@ static char status[5] = "    ";
   //with 6digit support just store value for possible debugging
   
   //check if first digit of status display should be set
+  /* RTH need to be tested Thierry ??
   if ( ( display == 0)  & ( digit == 1))
   {
     //is second digit is not zero suppress setting '0'
@@ -85,7 +86,7 @@ static char status[5] = "    ";
 	return;
      }
   }
-
+ */
 
   if (!ls80opt.bitv.sevendigit )
   {
