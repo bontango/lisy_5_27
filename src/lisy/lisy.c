@@ -19,7 +19,6 @@
 #include "lisyversion.h"
 #include "lisy.h"
 
-
 //global strcut, the lisy environment
 t_stru_lisy_env lisy_env;
 
