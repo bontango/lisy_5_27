@@ -448,7 +448,7 @@ int lisy_udp_switch_reader( unsigned char *action, unsigned char do_only_init  )
 void lisy_logger(void)
 {
  char str[255];
- sprintf(str,"nice /usr/local/bin/lisylogger \"%s;%d;%s;%s;%d;%f;%d;%d;%d;%s;%d;%d\"",
+ sprintf(str,"nice /usr/local/bin/lisylogger \"%s;%d;%s;%s;%d;%f;%d;%d;%d;%s;%d;%d\" &",
   lisy_env.variant,  // string LISY variant 1,80,35,williams,mini,atari ...
   lisy_env.selection, //game selection, usally via S2
   lisy_env.gamename,  // game name mame fromat (8 chars)
