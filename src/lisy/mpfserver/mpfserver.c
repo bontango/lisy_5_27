@@ -999,7 +999,8 @@ int main(int argc, char *argv[])
          lisy_hw.no_sol = 8;
 	 lisy_hw.no_sounds = 7;
 	 lisy_hw.no_disp = 5;
-	 lisy_hw.no_switches = 30;  //5*6 Matrix
+	 //lisy_hw.no_switches = 30;  //5*6 Matrix
+	 lisy_hw.no_switches = 77;  //5*6 Matrix however count to 54 AND special switches at 56,66,76
 	 strcpy( lisy_hw.game_info,lisy1_game.rom_id);
 	 lisy_display_chars[0] = 4;
 	 lisy_display_chars[1] = 6;
@@ -1014,7 +1015,8 @@ int main(int argc, char *argv[])
 	 lisy_hw.no_sol = 9;
 	 lisy_hw.no_sounds = 32;
 	 lisy_hw.no_disp = 7; //RTH: for displays we need to do diff later on
-	 lisy_hw.no_switches = 64; // 8*8 Matrix
+	 //lisy_hw.no_switches = 64; // 8*8 Matrix
+	 lisy_hw.no_switches = 89; // 8*8 Matrix however count to 88
 	 sprintf( lisy_hw.game_info,"%3d",lisy80_game.gtb_no);
 
 	 //number of chars per display

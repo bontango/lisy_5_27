@@ -3,7 +3,7 @@
 
 //the version
 #define MPFSERVER_SOFTWARE_MAIN    0
-#define MPFSERVER_SOFTWARE_SUB     39
+#define MPFSERVER_SOFTWARE_SUB     40
 
 struct stru_lisy_hw
 {
