@@ -102,7 +102,7 @@ void lisy35_init( void )
  {
   //set volume according to poti
   lisy_adjust_volume();
-  sprintf(debugbuf,"/bin/echo \"Welcome to LISY 35 Version %s\" | /usr/bin/festival --tts",s_lisy_software_version);
+  sprintf(debugbuf,"/bin/echo \"Welcome to LISY 35 Version %s running on %s\" | /usr/bin/festival --tts",s_lisy_software_version,lisy35_game.long_name);
   system(debugbuf);
  }
 
