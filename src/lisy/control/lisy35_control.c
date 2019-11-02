@@ -172,7 +172,7 @@ void do_sound_set( char *buffer)
  if ( ls80opt.bitv.JustBoom_sound )
  {
   //construct the filename, according to game_nr
-  sprintf(wav_file_name,"%s%03d/%d.wav",LISY80_SOUND_PATH,lisy80_game.gamenr,sound_no);
+  sprintf(wav_file_name,"%s%03d/%d.wav",LISY35_SOUND_PATH,lisy35_game.gamenr,sound_no);
   sprintf(debugbuf,"/usr/bin/aplay %s",wav_file_name);
   system(debugbuf);
  }
