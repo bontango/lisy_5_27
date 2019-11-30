@@ -794,8 +794,8 @@ else
 
   ls80opt.byte |= dip_missing_values;
 
-  //RTH only sevendigit if autostart is on, meaning no MPF support at the moment
-  if (ls80opt.bitv.autostart ) ls80opt.bitv.sevendigit = 0;
+  //RTH only sevendigit if autostart is on (==0), meaning no MPF support at the moment
+  if (ls80opt.bitv.autostart == 0 ) ls80opt.bitv.sevendigit = 0;
 
 }
 
