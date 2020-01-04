@@ -10,7 +10,7 @@
 #include <wiringPi.h>
 #include "../utils.h"
 
-#define VERSION "1.1"
+#define VERSION "1.2"
 
 #define TESTSWITCH 22
 #define DIP2 12
@@ -26,6 +26,7 @@
 #define LISY1 1
 #define LISY80 2
 #define LISY35 3
+#define LISY80_LED 4
 //environment
 #define PIC_DIR "/boot/lisy/picpgm/"
 #define ONE_SHOT_DIR "/boot/lisy/picpgm/one_shot/"
@@ -35,27 +36,14 @@ FILE *f_serial;
 #define SERIAL_DEVICE "/dev/serial0"
 unsigned char serialexist = 0;
 FILE *f_usbserial;
-//#define USB_SERIAL_DEVICE "/dev/ttyGS0"
-//unsigned char usbserialexist = 0;
-unsigned char soundcardexists = 0;
 
 
 //log the message to the console
-//and 'say' it if soundboard is available
 void log_message(char *str)
 {
 
- char system_str[255];
-
  if (serialexist) fprintf(f_serial,"%s\n",str);
    else printf("%s\n",str);
- //if (usbserialexist) fprintf(f_usbserial,"%s\n",str);
-
- if (soundcardexists)
- {
-   sprintf(system_str,"/bin/echo \"%s\" | /usr/bin/festival --tts",str);
-   system(system_str);
- }
 
 }
 
@@ -158,30 +146,29 @@ void set_led(unsigned char led)
 //flash the green led
 void flash_green_led(void)
 {
-  int i;
-
   ctrl_leds(0);
-  for (i=0; i<5; i++)
+  do
   {
   digitalWrite ( LED1, 1);
   delay(150);
   digitalWrite ( LED1, 0);
   delay(150);
-  }
+  } while((get_switch_status(TESTSWITCH)) == PIN_NOT_PRESSED);
+  delay(150);
 }
 
 //flash the red led
 void flash_red_led(void)
 {
-  int i;
   ctrl_leds(0);
-  for (i=0; i<10; i++)
+  do
   {
   digitalWrite ( LED3, 1);
   delay(150);
   digitalWrite ( LED3, 0);
   delay(150);
-  }
+  } while((get_switch_status(TESTSWITCH)) == PIN_NOT_PRESSED);
+  delay(150);
 }
 
 //do the programming with picpgm
@@ -213,6 +200,9 @@ switch (lisy_variant)
   case LISY80:
      strcpy(str_variant,"LISY80_");
   break;
+  case LISY80_LED:
+     strcpy(str_variant,"LISY80_LED_");
+  break;
 }
 switch (selected_PIC)
 {
@@ -235,7 +225,7 @@ switch (selected_PIC)
     {
         while ((dir = readdir(d)) != NULL)
         {
-	    if ( strncmp(dir->d_name,str_search,12) == 0)
+	    if ( strncmp(dir->d_name,str_search,strlen(str_search)) == 0)
 	     {
 		strcpy(str_found,  dir->d_name);
 		found = 1;
@@ -349,7 +339,6 @@ int lisy_variant = LISY35;
 int selected_PIC;
 char message[255];
 char one_shot_file[255];
-FILE *fp;
 
 
 
@@ -358,30 +347,9 @@ FILE *fp;
 
 init_gpios();
 
-
-
-  // soundcards known to the system
-  fp = fopen("/proc/asound/cards","r");
-  //read the first line
-  if ( fgets(message, sizeof(message)-1, fp) != NULL)
-   {
-     if ( strncmp("--- no soundcards ---",message,12) == 0)
-        fprintf(stderr,"no soundcard detected\n");
-     else
-	soundcardexists = 1;
-   }
-   pclose(fp);
-
 //check if serial devices exist
 if ( ( f_serial = fopen(SERIAL_DEVICE,"r+")) != NULL ) serialexist = 1;
   else fprintf(stderr,"problem open serial console\n");
-/*
-if ( ( f_usbserial = fopen(USB_SERIAL_DEVICE,"r+")) != NULL ) 
-  {
-   usbserialexist = 1;
-   log_message("usb serial device successfully opened");
-  }
- */ 
 
 sprintf(message,"simple_flasher Version %s started",VERSION);
 log_message(message);
@@ -424,16 +392,14 @@ do
     if (ret_val)
      {
        init_gpios();
-       flash_red_led();
        log_message("programming PIC failed\n");
-       set_led(RED_LED);
+       flash_red_led();
      }
     else
      {
        init_gpios();
-       flash_green_led();
        log_message("programming PIC successful\n");
-       set_led(GREEN_LED);
+       flash_green_led();
      }
 
    //wait for testswitch press for next try
@@ -460,7 +426,7 @@ do
   if ( ( status = get_switch_status(TESTSWITCH)) == PIN_PRESSED_SHORT  )
   {
     lisy_variant++;
-    if( lisy_variant >3) lisy_variant = 1;
+    if( lisy_variant >4) lisy_variant = 1;
     set_leds(lisy_variant);
   switch (lisy_variant)
   {
@@ -472,6 +438,9 @@ do
   break;
   case LISY80:
      log_message("LISY80 selected");
+  break;
+  case LISY80_LED:
+     log_message("LISY80_LED selected");
   break;
   }
 
@@ -497,6 +466,9 @@ switch (lisy_variant)
   break;
   case LISY80: 
      log_message("LISY80 selection confirmed");
+  break;
+  case LISY80_LED: 
+     log_message("LISY80_LED selection confirmed");
   break;
 }
 
@@ -556,14 +528,14 @@ do
     if (ret) 
      {  
        init_gpios();
-       flash_red_led();
        log_message("programming PIC failed\n");
+       flash_red_led();
      }
     else
      {
        init_gpios();
-       flash_green_led();
        log_message("programming PIC successful\n");
+       flash_green_led();
      }
     set_led(selected_PIC);
    break;

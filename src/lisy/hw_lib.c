@@ -66,6 +66,8 @@ int lisy_get_hardware_revision(int disp_sw_ver, int *hw_ID)
  * new: eeprom of display & coil pic used, no separate eeprom anymore
  * hardware revision is stored in display pic now
  * 1 .. 40 LISY80
+ *    21 LISY_HOME
+ *    31 LISY80_LED
  * 41 .. 80 LISY1
  * 81 .. 120 LISY35
  * with that, siftware version of PIC has to be is >= 4
