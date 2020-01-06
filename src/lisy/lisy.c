@@ -236,6 +236,14 @@ void lisy_get_sw_version( unsigned char *sw_main, unsigned char *sw_sub, unsigne
 
 }
 
+//this give back lisy_time_to_quit to cpuexec
+//set by signalhandler
+int lisy_time_to_quit(void)
+{
+  return lisy_time_to_quit_flag;
+}
+
+
 //sound handler
 void lisy_sound_handler( unsigned char data )
 {

@@ -1027,14 +1027,6 @@ int lisy80_get_gamename(char *gamename)
   return ret;
 }
 
-
-//this give back lisy_time_to_quit to cpuexec
-//set by signalhandler
-int lisy_time_to_quit(void)
-{
-  return lisy_time_to_quit_flag;
-}
-
 //read dipswitchsettings for specific game/mpu
 //and give back settings or -1 in case of error
 //switch_nr is 0..3
