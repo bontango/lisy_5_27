@@ -221,7 +221,7 @@ int lisy_usb_init()
     lisy80_debug(debugbuf);
 
     //print status of switches
-    printf("Switch Status:\n");
+    printf("Switch Statusn 1..8;9..16;17..24; ...:\n");
     for(i=0; i<=8; i++)
      {
        for(j=1; j<=8; j++)
@@ -245,6 +245,7 @@ int lisy_usb_init()
 
 
 //send a string to a display
+//new with api 0.09: we send 'len' number of bytes, not a null terminated string
 int lisy_usb_send_str_to_disp(unsigned char num, char *str)
 {
 
@@ -273,12 +274,14 @@ int lisy_usb_send_str_to_disp(unsigned char num, char *str)
  {
  //send command
  if ( write( lisy_usb_serfd,&cmd,1) != 1) { fprintf(stderr,"ERROR write cmd\n"); return (-1); }
- //send string
- len = strlen(str)+1; //include trailing \0
+ //send length of byte sequence
+ len = strlen(str);
+ if ( write( lisy_usb_serfd,&len,1) != 1) { fprintf(stderr,"ERROR write lenght\n"); return (-1); }
+ //send bytes of string
  if ( write( lisy_usb_serfd,str,len) != len) { fprintf(stderr,"ERROR write display\n"); return (-2); }
  }
 
- return (len+1);
+ return (len+2);
 }
 
 //ask for changed switches
@@ -384,11 +387,8 @@ void lisy_usb_sol_pulse(int sol_no)
 void lisy_usb_sol_set_hwrule(int sol_no, int special_switch)
 {
  uint8_t cmd;
- uint8_t par;
  uint8_t error_occured = 0;
 
-struct
- {
   uint8_t index; //Index c of the solenoid to configure
   uint8_t sw1; //Switch sw1. Set bit 7 to invert the switch.
   uint8_t sw2; //Switch sw2. Set bit 7 to invert the switch.
@@ -399,40 +399,40 @@ struct
   uint8_t flag_sw1; //Flag for sw1
   uint8_t flag_sw2; //Flag for sw2
   uint8_t flag_sw3; //Flag for sw3
- }
-s_lisy_hw_rule;
 
+  
   cmd=LISY_S_SET_HWRULE;
-
+  index = sol_no;
+  sw1 = special_switch;
+  sw2 = 127; //no sw2
+  sw3 = 127; //no sw3
+  pulse_time = 80;
+  pulse_pwm_power = 191; //75% not used by APC
+  hold_pwm_power = 64;  //25% not used by APC
+  flag_sw1 = 3; //sw1 will enable the rule and disable it when released.
+  flag_sw2 = 0; //do not use sw2
+  flag_sw3 = 0; //do not use sw3
 
   if ( ls80dbg.bitv.basic ) 
   {
     sprintf(debugbuf,"LISY_Mini: HW Rule set for solnenoid:%d and switch:%d",sol_no,special_switch);
     lisy80_debug(debugbuf);
+    sprintf(debugbuf," send: 0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x",cmd,index,sw1,sw2,sw3,pulse_time,pulse_pwm_power,hold_pwm_power,flag_sw1,flag_sw2,flag_sw3 );
+    lisy80_debug(debugbuf);
   }
 
+//10bytes to follow
 if ( write( lisy_usb_serfd,&cmd,1) != 1) error_occured++;
-
-par = sol_no;
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //1
-par = special_switch;
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //2
-par = 127;
-write( lisy_usb_serfd,&par,1); //no sw2
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //nosw2 -3
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //nosw3 -4
-par=40;
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //pulsetime -5
-par=191;
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++;//pulse power -6
-par=64;
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++;  //hold power -7
-par=1;
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++; //sw1 activ on ->pulse -8
-par=0;
-write( lisy_usb_serfd,&par,1); //sw2 disabled
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++;  //sw2 disabled -9
-if ( write( lisy_usb_serfd,&par,1) != 1) error_occured++;  //sw3 disabled -10
+if ( write( lisy_usb_serfd,&index,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&sw1,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&sw2,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&sw3,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&pulse_time,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&pulse_pwm_power,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&hold_pwm_power,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&flag_sw1,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&flag_sw2,1) != 1) error_occured++; 
+if ( write( lisy_usb_serfd,&flag_sw3,1) != 1) error_occured++; 
 
 if ( error_occured) 
         fprintf(stderr,"Setting hW rules, Error writing to serial %s , %d times\n",strerror(errno),error_occured);

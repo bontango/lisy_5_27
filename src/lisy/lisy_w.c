@@ -153,7 +153,7 @@ void lisy_w_init( void )
  //set HW rules for solenoids
  //RTH this is game specific
  //at the moment we do it fix for Comet
- lisy_usb_sol_set_hwrule( 17, 65 ); //left kicker
+lisy_usb_sol_set_hwrule( 17, 65 ); //left kicker
  lisy_usb_sol_set_hwrule( 18, 66 ); //right kicker
  lisy_usb_sol_set_hwrule( 19, 67 ); //upper bumber
  lisy_usb_sol_set_hwrule( 20, 68 ); //left bumber
@@ -586,6 +586,12 @@ unsigned char lisy_w_switch_reader( unsigned char *action )
 
  //no change if we get 127, this is 80 LISY internal
  if (switch_number == 127) return 80;
+
+ if ( ls80dbg.bitv.switches )
+ {
+     sprintf(debugbuf,"LISY_W_SWITCH_READER: changed switch reported: returnbyte:%d",switch_number);
+     lisy80_debug(debugbuf);
+ }
 
  //otherwise check action for switch ( ON/OFF )
  if ( CHECK_BIT( switch_number,7))

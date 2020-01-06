@@ -32,13 +32,13 @@
 #define	LISY_S_SOL_PULSE_PWM    26	//Pulse solenoid and then enable solenoid with PWM
 
 //displays, parameter string
-#define	LISY_S_DISP_0		30	//set display 0 (status) to string - return none
-#define	LISY_S_DISP_1		31	//set display 1 to string - return none
-#define	LISY_S_DISP_2		32	//set display 2 to string - return none
-#define	LISY_S_DISP_3		33	//set display 3 to string - return none
-#define	LISY_S_DISP_4		34	//set display 4 to string - return none
-#define	LISY_S_DISP_5		35	//set display 5 to string - return none
-#define	LISY_S_DISP_6		36	//set display 6 to string - return none
+#define	LISY_S_DISP_0		30	//set display 0 (status) to sequence of bytes, second arg is length - return none
+#define	LISY_S_DISP_1		31	//set display 1 to sequence of bytes, second arg is length - return none
+#define	LISY_S_DISP_2		32	//set display 2 to sequence of bytes, second arg is length - return none
+#define	LISY_S_DISP_3		33	//set display 3 to sequence of bytes, second arg is length - return none
+#define	LISY_S_DISP_4		34	//set display 4 to sequence of bytes, second arg is length - return none
+#define	LISY_S_DISP_5		35	//set display 5 to sequence of bytes, second arg is length - return none
+#define	LISY_S_DISP_6		36	//set display 6 to sequence of bytes, second arg is length - return none
 
 //switches, parameter byte/none
 #define	LISY_G_STAT_SW		40	//get status of switch# - return byte "0=OFF; 1=ON; 2=Error"
