@@ -115,7 +115,7 @@ void lisy_init( void )
 //do system specific init
   if ( lisy_hardware_revision == 100 ) system=1;
   else if ( lisy_hardware_revision == 350 ) system=35;
-  else if ( lisy_hardware_revision == LISY_HW_LISY_W ) system=121; //RTH where is System used ?? fadecandy only?
+  else if ( lisy_hardware_revision == LISY_HW_LISY_W ) system=121; // lise W <-> mini
      else system=80;
 
  //init the fadecandy HW ( if told present via K3 )

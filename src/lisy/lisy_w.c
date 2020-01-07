@@ -159,7 +159,7 @@ lisy_usb_sol_set_hwrule( 17, 65 ); //left kicker
  lisy_usb_sol_set_hwrule( 20, 68 ); //left bumber
  lisy_usb_sol_set_hwrule( 21, 69 ); //lower bumber
 
- //show green ligth for now, lisy1 is running
+ //show green ligth for now, lisy mini is running
  lisy80_set_red_led(0);
  lisy80_set_yellow_led(0);
  lisy80_set_green_led(1);

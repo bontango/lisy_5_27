@@ -171,7 +171,7 @@ void lisymini_hwlib_init( void )
  //set GPIOs for the traffic ligth
  pinMode ( LISY_MINI_LED_RED, OUTPUT);
  pinMode ( LISY80_LED_YELLOW, OUTPUT);
- pinMode ( LISY80_LED_GREEN, OUTPUT);
+ pinMode ( LISY_MINI_LED_GREEN, OUTPUT);
 
  //lets do debug
  if (ls80dbg.bitv.basic) lisy80_debug("LISY_Mini Hardware init start");
@@ -888,7 +888,7 @@ void lisy80_set_yellow_led( int value )
 
 void lisy80_set_green_led( int value )
 {
- int dum;
+int dum;
  if ( lisy_hardware_revision == LISY_HW_LISY_W) dum = LISY_MINI_LED_GREEN; 
  else  dum = LISY80_LED_GREEN;
 
