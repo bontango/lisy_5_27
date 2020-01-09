@@ -115,6 +115,26 @@ unsigned char lisy_api_read_byte(unsigned char cmd, unsigned char *data)
 
 }
 
+//this command has an option
+//read answer of two byte, and return data into *data1 and *data2
+//return -2 in case we had problems to send  cmd
+//return -1 in case we had problems to receive byte
+//return 0 otherwise
+unsigned char lisy_api_read_2bytes(unsigned char cmd, unsigned char option, unsigned char *data1, unsigned char *data2)
+{
+
+ //send command
+ if ( write( lisy_usb_serfd,&cmd,1) != 1) return (-2);
+ if ( write( lisy_usb_serfd,&option,1) != 1) return (-2);
+
+ //receive answer
+ if ( read(lisy_usb_serfd,data1,1) != 1) return (-1);
+ if ( read(lisy_usb_serfd,data2,1) != 1) return (-1);
+
+ return(0);
+
+}
+
 
 #define ARDUINO_NO_TRIES 9
 int lisy_usb_init()
@@ -122,8 +142,8 @@ int lisy_usb_init()
 
    int i,j,n,ret,tries;
    char *portname = "/dev/ttyACM0";
-   unsigned char data,cmd;
-   char answer[40];
+   unsigned char data,cmd,data1,data2,no_of_displays,no;
+   char answer[80];
 
     //open interface
     lisy_usb_serfd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
@@ -190,6 +210,9 @@ int lisy_usb_init()
     fprintf(stderr,"LISY_Mini: HW Client is: %s \n",answer);
 
 
+    //number of displays
+    if ( lisy_api_read_byte(LISY_G_NO_DISP, &no_of_displays) < 0) return (-1);
+
   if ( ls80dbg.bitv.basic ) 
   {
     if ( lisy_api_read_string(LISY_G_LISY_VER, answer) < 0) return (-1);
@@ -211,11 +234,62 @@ int lisy_usb_init()
     if ( read_byte(LISY_G_NO_SOUNDS, &data) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client supports %d sounds",data);
     lisy80_debug(debugbuf);
-
-    if ( read_byte(LISY_G_NO_DISP, &data) < 0) return (-1);
+*/
     sprintf(debugbuf,"LISY_Mini: Client supports %d displays",data);
     lisy80_debug(debugbuf);
-*/
+    lisy80_debug("settings now:");
+
+    for(no=0; no<no_of_displays; no++)
+	{
+	  //query each display
+          if ( lisy_api_read_2bytes(LISY_G_DISP_DETAIL, no, &data1, &data2) < 0) return (-1);
+	  // verbose type
+	  switch(data1)
+	  {
+		case 0: strcpy(answer,"Display index is invalid or does not exist in machine."); break;
+		case 1: strcpy(answer,"BCD7, BCD Code for 7 Segment Displays without comma"); break;
+		case 2: strcpy(answer,"BCD8, BCD Code for 8 Segment Displays (same as BCD7 but with comma"); break;
+		case 3: strcpy(answer,"SEG7, Fully addressable 7 Segment Display (with comma)"); break;
+		case 4: strcpy(answer,"SEG14,Fully addressable 14 Segment Display (with comma)"); break;
+		case 5: strcpy(answer,"ASCII, ASCII Code"); break;
+		case 6: strcpy(answer,"ASCII_DOT, ASCII Code with comma"); break;
+	  }
+    	  sprintf(debugbuf,"Display no:%d has type:%d (%s) with %d segments",no,data1,answer,data2);
+    	  lisy80_debug(debugbuf);
+	}
+
+  }//debug basic
+
+  //set displays to ASCII
+  for(no=0; no<no_of_displays; no++) lisy_usb_display_set_prot( no, 5);
+
+
+
+  if ( ls80dbg.bitv.basic ) 
+  {
+
+    lisy80_debug("\nsettings after init");
+
+    for(no=0; no<no_of_displays; no++)
+        {
+          //query each display
+          if ( lisy_api_read_2bytes(LISY_G_DISP_DETAIL, no, &data1, &data2) < 0) return (-1);
+          // verbose type
+          switch(data1)
+          {
+                case 0: strcpy(answer,"Display index is invalid or does not exist in machine."); break;
+                case 1: strcpy(answer,"BCD7, BCD Code for 7 Segment Displays without comma"); break;
+                case 2: strcpy(answer,"BCD8, BCD Code for 8 Segment Displays (same as BCD7 but with comma"); break;
+                case 3: strcpy(answer,"SEG7, Fully addressable 7 Segment Display (with comma)"); break;
+                case 4: strcpy(answer,"SEG14,Fully addressable 14 Segment Display (with comma)"); break;
+                case 5: strcpy(answer,"ASCII, ASCII Code"); break;
+                case 6: strcpy(answer,"ASCII_DOT, ASCII Code with comma"); break;
+          }
+          sprintf(debugbuf,"Display no:%d has type:%d (%s) with %d segments",no,data1,answer,data2);
+          lisy80_debug(debugbuf);
+	}
+
+
     if ( lisy_api_read_byte(LISY_G_NO_SW, &data) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client supports %d switches",data);
     lisy80_debug(debugbuf);
@@ -439,3 +513,30 @@ if ( error_occured)
 
 
 }
+
+//display control
+//set a protocol for a display
+// displayno is 0 to ... max displays -1
+// option is
+// 1: BCD7, BCD Code for 7 Segment Displays without comma
+// 2: BCD8, BCD Code for 8 Segment Displays (same as BCD7 but with comma
+// 3: SEG7, Fully addressable 7 Segment Display (with comma)
+// 4: SEG14,Fully addressable 14 Segment Display (with comma)
+// 5: ASCII, ASCII Code
+// 6: ASCII_DOT, ASCII Code with comma
+void lisy_usb_display_set_prot(uint8_t display_no,uint8_t protocol)
+{
+	uint8_t cmd;
+
+     //send cmd
+     cmd = LISY_S_DISP_PROT;
+     if ( write( lisy_usb_serfd,&cmd,1) != 1)
+        fprintf(stderr,"display option Error writing to serial %s\n",strerror(errno));
+     //send display number
+     if ( write( lisy_usb_serfd,&display_no,1) != 1)
+        fprintf(stderr,"display option Error writing to serial %s\n",strerror(errno));
+     //send protocol number
+     if ( write( lisy_usb_serfd,&protocol,1) != 1)
+        fprintf(stderr,"display option Error writing to serial %s\n",strerror(errno));
+}
+

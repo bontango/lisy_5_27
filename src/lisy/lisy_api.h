@@ -39,6 +39,7 @@
 #define	LISY_S_DISP_4		34	//set display 4 to sequence of bytes, second arg is length - return none
 #define	LISY_S_DISP_5		35	//set display 5 to sequence of bytes, second arg is length - return none
 #define	LISY_S_DISP_6		36	//set display 6 to sequence of bytes, second arg is length - return none
+#define	LISY_S_DISP_PROT	37	//set the protocoll for the display, first arg is display no, second arg is display no
 
 //switches, parameter byte/none
 #define	LISY_G_STAT_SW		40	//get status of switch# - return byte "0=OFF; 1=ON; 2=Error"

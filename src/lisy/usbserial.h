@@ -11,6 +11,7 @@ void lisy_usb_sol_pulse(int sol_no);
 int lisy_api_read_string(unsigned char cmd, char *content);
 unsigned char lisy_api_read_byte(unsigned char cmd, unsigned char *data);
 void lisy_usb_sol_set_hwrule(int sol_no, int special_switch);
+void lisy_usb_display_set_prot(unsigned char display_no,unsigned char protocol);
 
 #endif  /* LISY_USBSER_H */
 
