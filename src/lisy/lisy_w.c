@@ -519,10 +519,11 @@ if ( mysol != coreGlobals.solenoids)
       {
         if ( CHECK_BIT(coreGlobals.solenoids,i)) action = 1; else action = 0;
         sol_no = i+1;
-        lisy_usb_sol_ctrl(sol_no,action);
+	//do not activate special solenoids, we do that with HW rules
+        if ( sol_no <= 16 ) lisy_usb_sol_ctrl(sol_no,action);
         //in case we hav solenoid #23, also activate #24 on APC
         //as APC use two solenoids for flipper (left/right)
-        if (sol_no == 23 ) lisy_usb_sol_ctrl(24,action);
+        if (sol_no == 23 ) { lisy_usb_sol_ctrl(23,action); lisy_usb_sol_ctrl(24,action); }
       //debug?
       if ( ls80dbg.bitv.coils )
       {
