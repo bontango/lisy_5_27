@@ -518,7 +518,7 @@ void lisy_usb_sound_play_file( char *filename )
 	uint8_t cmd;
 	int len;
 
- if ( ls80dbg.bitv.basic )
+ if ( ls80dbg.bitv.sound )
   {
     sprintf(debugbuf,"play sound %s",filename);
     lisy80_debug(debugbuf);

@@ -150,7 +150,7 @@ void lisy_w_init( void )
  for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 5);
 
  //show the 'boot' message
- lisy_usb_show_boot_message(s_lisy_software_version,"LISY W",49,"Comet");
+ lisy_usb_show_boot_message(s_lisy_software_version,"LISY W",49,"COMET");
 
  //set HW rules for solenoids
  //RTH this is game specific
@@ -659,11 +659,20 @@ void lisy_w_lamp_handler( )
 //sound handler
 void lisy_w_sound_handler(unsigned char data)
 {
+  char filename[40];
 
   if ( ls80dbg.bitv.sound )
   {
     sprintf(debugbuf,"LISY_W sound_handler: 0x%x",data);
     lisy80_debug(debugbuf);
     }
+
+ //ver 1.0, just consctruct filename: <no>.BIN
+ //do not play 0 & 0xff
+ if (( data != 0) & (data != 0xff))
+  {
+   sprintf(filename,"%d.BIN",data);
+   lisy_usb_sound_play_file(filename);
+  }
 
 }
