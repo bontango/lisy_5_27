@@ -250,6 +250,6 @@ void lisy_sound_handler( unsigned char data )
 
 //first tests
 if ( lisy_hardware_revision == LISY_HW_LISY_W)
-  printf("RTH sound handler: %d\n",data);
+  lisy_w_sound_handler(data);
 }
       

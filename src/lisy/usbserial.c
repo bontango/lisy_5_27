@@ -540,3 +540,35 @@ void lisy_usb_display_set_prot(uint8_t display_no,uint8_t protocol)
         fprintf(stderr,"display option Error writing to serial %s\n",strerror(errno));
 }
 
+void lisy_usb_sound_play_file( char *filename )
+{
+	uint8_t cmd;
+	int len;
+
+ if ( ls80dbg.bitv.basic )
+  {
+    sprintf(debugbuf,"play sound %s",filename);
+    lisy80_debug(debugbuf);
+  }
+     //send cmd
+     cmd = LISY_S_PLAY_FILE;
+     if ( write( lisy_usb_serfd,&cmd,1) != 1)
+        fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
+     //track 1
+     cmd = 1;
+     if ( write( lisy_usb_serfd,&cmd,1) != 1)
+        fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
+     //no flags
+     cmd = 0;
+     if ( write( lisy_usb_serfd,&cmd,1) != 1)
+        fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
+     //filename plus \0
+     len = strlen(filename) +1;
+     if ( write( lisy_usb_serfd,filename,len) != len)
+        fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
+
+
+
+
+
+}

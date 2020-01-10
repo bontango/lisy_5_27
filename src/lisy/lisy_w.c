@@ -654,3 +654,14 @@ void lisy_w_lamp_handler( )
  }//changed
 }//lamp_handler
 
+//sound handler
+void lisy_w_sound_handler(unsigned char data)
+{
+
+  if ( ls80dbg.bitv.sound )
+  {
+    sprintf(debugbuf,"LISY_W sound_handler: 0x%x",data);
+    lisy80_debug(debugbuf);
+    }
+
+}
