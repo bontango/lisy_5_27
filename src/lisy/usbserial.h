@@ -13,6 +13,9 @@ unsigned char lisy_api_read_byte(unsigned char cmd, unsigned char *data);
 void lisy_usb_sol_set_hwrule(int sol_no, int special_switch);
 void lisy_usb_display_set_prot(unsigned char display_no,unsigned char protocol);
 void lisy_usb_sound_play_file( char *filename );
+int lisy_usb_print_hw_info(void);
+void lisy_usb_show_boot_message(char *software_version,char *system_id, int game_no, char *gamename);
+
 
 #endif  /* LISY_USBSER_H */
 

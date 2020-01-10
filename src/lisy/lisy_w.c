@@ -146,9 +146,11 @@ void lisy_w_init( void )
  sprintf(s_lisy_software_version,"%d%02d %02d",sw_main,sw_sub,commit);
  fprintf(stderr,"This is LISY (Lisy Mini) by bontango, Version %s\n",s_lisy_software_version);
 
+ //set displays to ASCII
+ for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 5);
+
  //show the 'boot' message
- //display_show_boot_message_lisy35(s_lisy_software_version);
- //RTH to be done
+ lisy_usb_show_boot_message(s_lisy_software_version,"LISY W",49,"Comet");
 
  //set HW rules for solenoids
  //RTH this is game specific

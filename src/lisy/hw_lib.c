@@ -198,6 +198,12 @@ void lisymini_hwlib_init( void )
   exit(1);
  }
 
+
+ //do some debug output if requested
+ //number of displays
+ if (ls80dbg.bitv.basic) lisy_usb_print_hw_info();
+
+
  //set all the leds controlled by the PI
  lisy80_set_red_led(0);
  lisy80_set_yellow_led(0);

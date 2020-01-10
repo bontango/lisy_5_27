@@ -142,7 +142,7 @@ int lisy_usb_init()
 
    int i,j,n,ret,tries;
    char *portname = "/dev/ttyACM0";
-   unsigned char data,cmd,data1,data2,no_of_displays,no;
+   unsigned char data,cmd;
    char answer[80];
 
     //open interface
@@ -209,12 +209,20 @@ int lisy_usb_init()
 
     fprintf(stderr,"LISY_Mini: HW Client is: %s \n",answer);
 
+  return 0;
+}
 
-    //number of displays
-    if ( lisy_api_read_byte(LISY_G_NO_DISP, &no_of_displays) < 0) return (-1);
 
-  if ( ls80dbg.bitv.basic ) 
-  {
+//print some usefull parameters
+int lisy_usb_print_hw_info(void)
+{
+   unsigned char data,cmd,data1,data2,no_of_displays,no;
+   char answer[80];
+   int i,j,n,ret;
+
+  //number of displays
+  if ( lisy_api_read_byte(LISY_G_NO_DISP, &no_of_displays) < 0) return (-1);
+
     if ( lisy_api_read_string(LISY_G_LISY_VER, answer) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client has SW version: %s",answer);
     lisy80_debug(debugbuf);
@@ -230,14 +238,11 @@ int lisy_usb_init()
     if ( lisy_api_read_byte(LISY_G_NO_SOL, &data) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client supports %d solenoids",data);
     lisy80_debug(debugbuf);
-/*  
-    if ( read_byte(LISY_G_NO_SOUNDS, &data) < 0) return (-1);
-    sprintf(debugbuf,"LISY_Mini: Client supports %d sounds",data);
-    lisy80_debug(debugbuf);
-*/
+
+    if ( lisy_api_read_byte(LISY_G_NO_DISP, &data) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client supports %d displays",data);
     lisy80_debug(debugbuf);
-    lisy80_debug("settings now:");
+    no_of_displays = data;
 
     for(no=0; no<no_of_displays; no++)
 	{
@@ -257,38 +262,6 @@ int lisy_usb_init()
     	  sprintf(debugbuf,"Display no:%d has type:%d (%s) with %d segments",no,data1,answer,data2);
     	  lisy80_debug(debugbuf);
 	}
-
-  }//debug basic
-
-  //set displays to ASCII
-  for(no=0; no<no_of_displays; no++) lisy_usb_display_set_prot( no, 5);
-
-
-
-  if ( ls80dbg.bitv.basic ) 
-  {
-
-    lisy80_debug("\nsettings after init");
-
-    for(no=0; no<no_of_displays; no++)
-        {
-          //query each display
-          if ( lisy_api_read_2bytes(LISY_G_DISP_DETAIL, no, &data1, &data2) < 0) return (-1);
-          // verbose type
-          switch(data1)
-          {
-                case 0: strcpy(answer,"Display index is invalid or does not exist in machine."); break;
-                case 1: strcpy(answer,"BCD7, BCD Code for 7 Segment Displays without comma"); break;
-                case 2: strcpy(answer,"BCD8, BCD Code for 8 Segment Displays (same as BCD7 but with comma"); break;
-                case 3: strcpy(answer,"SEG7, Fully addressable 7 Segment Display (with comma)"); break;
-                case 4: strcpy(answer,"SEG14,Fully addressable 14 Segment Display (with comma)"); break;
-                case 5: strcpy(answer,"ASCII, ASCII Code"); break;
-                case 6: strcpy(answer,"ASCII_DOT, ASCII Code with comma"); break;
-          }
-          sprintf(debugbuf,"Display no:%d has type:%d (%s) with %d segments",no,data1,answer,data2);
-          lisy80_debug(debugbuf);
-	}
-
 
     if ( lisy_api_read_byte(LISY_G_NO_SW, &data) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client supports %d switches",data);
@@ -311,9 +284,9 @@ int lisy_usb_init()
     sprintf(debugbuf,"LISY_Mini: Game Info: %s",answer);
     lisy80_debug(debugbuf);
 */
-   }
 
-  return 0;
+
+ return 0;
 
 }
 
@@ -566,9 +539,41 @@ void lisy_usb_sound_play_file( char *filename )
      len = strlen(filename) +1;
      if ( write( lisy_usb_serfd,filename,len) != len)
         fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
-
-
-
-
-
 }
+
+
+//this is the boot message for lisy Mini
+void lisy_usb_show_boot_message(char *software_version,char *system_id, int game_no, char *gamename)
+{
+        int i;
+        char buf[22];
+
+
+  //show 'system_id' on display one -> "LISY_W"
+  sprintf(buf,"%-6s",system_id);
+  lisy_usb_send_str_to_disp( 1, buf);
+
+  //show 'gamename' on display two
+  sprintf(buf,"%-6s",gamename);
+  lisy_usb_send_str_to_disp( 2, buf);
+
+  //show S2 Setting on display three
+  sprintf(buf,"S2 %03d",game_no);
+  lisy_usb_send_str_to_disp( 3, buf);
+
+  //show Version number on Display 4
+  display_show_str( 4, software_version);
+
+
+  //status display countdown
+  for (i=5; i>=0; i--)
+   {
+     sprintf(buf,"  %02d",i);
+     lisy_usb_send_str_to_disp( 0, buf);
+     sleep(1);
+    }
+
+  //blank status display
+  lisy_usb_send_str_to_disp( 0, "    ");
+}
+
