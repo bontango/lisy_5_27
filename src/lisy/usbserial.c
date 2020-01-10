@@ -562,7 +562,7 @@ void lisy_usb_show_boot_message(char *software_version,char *system_id, int game
   lisy_usb_send_str_to_disp( 3, buf);
 
   //show Version number on Display 4
-  display_show_str( 4, software_version);
+  lisy_usb_send_str_to_disp( 4, software_version);
 
 
   //status display countdown
