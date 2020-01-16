@@ -19,7 +19,7 @@ void lisy80_coil_handler_b( int data);
 int lisy80_get_mpudips( int switch_nr );
 void lisy80_simulate_switch( int myswitch, int action );
 int lisy80_special_function(int myswitch, int action);
-int lisy80_simulated_switch_reader( unsigned char *action );
+//int lisy80_simulated_switch_reader( unsigned char *action );
 int lisy80_nvram_handler(int read_or_write, UINT8 *GTS80_pRAM);
 
 

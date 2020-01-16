@@ -272,6 +272,7 @@ void lisy80_shutdown(void)
 }
 
 
+/* RTH
 static int replay_pushed = 0;
 //take care of special functions
 //check value and give back new value if special function hits
@@ -318,7 +319,9 @@ int lisy80_special_function(int myswitch, int action)
  //return old value
  return(myswitch);
 }
+*/
 
+/*
 //switch simulation via internal FIFO
 void lisy80_simulate_switch( int myswitch, int action )
 {
@@ -336,6 +339,7 @@ void lisy80_simulate_switch( int myswitch, int action )
         lisy80_debug(debugbuf);
   }
 }
+*/
 
 //watchdog, this one is called every 15 milliseconds or so
 //depending on spee of PI
@@ -343,8 +347,8 @@ void lisy80_simulate_switch( int myswitch, int action )
 void lisy80TickleWatchdog( void )
 {
  static int test_button_count = 0;
- static int replay_pushed_count = 0;
- static int replay_was_pushed = 0;
+ // RTH static int replay_pushed_count = 0;
+ // RTH static int replay_was_pushed = 0;
  static int testbut_interval = 0;
 
 //do update the soundstream  RTH: replaced with SDL queue ?
@@ -367,7 +371,7 @@ void lisy80TickleWatchdog( void )
 	    break;
   }
 
-
+/* RTH
  //we do things here appr. five times  a second
  if ( testbut_interval++  > 10)
  {
@@ -385,7 +389,9 @@ void lisy80TickleWatchdog( void )
 //reset one interval
   testbut_interval = 0;
  }
+*/
 
+/* RTH
  //check if we need to count for freeplay
  //replay button was pushed
  if (replay_pushed)
@@ -413,8 +419,11 @@ void lisy80TickleWatchdog( void )
 	replay_was_pushed = 0;
 	replay_pushed_count = 0;
  }
+*/
+
 }//watchdog
 
+/*
 //we simulate switches here via buffer
 int lisy80_simulated_switch_reader( unsigned char *action )
 {
@@ -430,6 +439,7 @@ int lisy80_simulated_switch_reader( unsigned char *action )
  else
   return 510;
 }
+*/
 
 /*
  throttle routine as with sound disabled
@@ -488,6 +498,7 @@ int ret,bits,ii;
 int simulated_flag;
 unsigned char strobe,returnval,action;
 unsigned char mystrobe,myreturnval;
+static int simulate_coin_flag = 0;
 
 
 //read values from pic
@@ -506,13 +517,60 @@ if ( ( ls80dbg.bitv.basic ) & ( ret == 80))
 
 
 //do we need a 'special' routine to handle that switch?
+//system80 Test switch
+if ( swMatrix[8] & 0x01 ) //is bit set?
+ {
+    //after 3 secs we initiate shutdown; internal timer 0
+    //def lisy_timer( unsigned int duration, int command, int index)
+    if ( lisy_timer( 3000, 0, 0)) lisy_time_to_quit_flag = 1;
+ }
+ else // bit is zero, reset timer index 0
+ {
+    lisy_timer( 0, 1, 0);
+ }
+
+
+
 // switch 47 (Replay) could mean to add credits in case of Freeplay
-// others to follow
-if (ret==47)
+if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
 {
- ret = lisy80_special_function( ret, action );
+
+//system80 Replay switch strobe:7 ret:4
+ if ( CHECK_BIT(swMatrix[8],4)) //is bit set?
+ {
+    //after 3 secs we simulate coin insert
+    //def lisy_timer( unsigned int duration, int command, int index)
+    if ( lisy_timer( 3000, 0, 1)) { simulate_coin_flag = 1;  lisy_timer( 0, 1, 1); }
+ }
+ else // bit is zero, reset timer index 0
+ {
+    lisy_timer( 0, 1, 1);
+ }
+//do we need to simalte coin insert?
+ if ( simulate_coin_flag )
+ {
+    //simulate coin insert for 50 millisecs via timer 2
+    // left coin ; strobe 7 ret 1
+     SET_BIT(swMatrix[8],1);
+     if ( lisy_timer( 50, 0, 2)) { CLEAR_BIT(swMatrix[8],1); simulate_coin_flag = 0; }
+ }
+ else // bit is zero, reset timer index 0
+ {
+    lisy_timer( 0, 1, 2);
+ }
+}//freeplay option set
+
+//set volume each time replay is pressed
+if ( (ret==LISY80_REPLAY_SWITCH) | ( action == 1))
+{
+       if ( lisy80_has_soundcard )
+         {
+          lisy_adjust_volume();
+          if ( ls80dbg.bitv.basic) lisy80_debug("Volume setting initiated by REPLAY Switch");
+         }
 }
 
+/* RTH
 //if ret >80 lets check if we have switches to simulate in the queue
 simulated_flag=0;
 if (ret >= 80)
@@ -520,6 +578,7 @@ if (ret >= 80)
   if ( ( ret = lisy80_simulated_switch_reader( &action )) < 80)
   	simulated_flag=1;
  }
+*/
 
 //77 switches ; ret < 80 indicates a change
 // values >=80 are for debugging only

@@ -407,7 +407,6 @@ if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
  if ( CHECK_BIT(swMatrixLISY1[3],0)) //is bit set?
  {
     //after 3 secs we simulate coin insert via Chute#1; internal timer 1
-    //def lisy_timer( unsigned int duration, int command, int index)
     if ( lisy_timer( 3000, 0, 1)) { simulate_coin_flag = 1;  lisy_timer( 0, 1, 1); }
  }
  else // bit is zero, reset timer index 0
