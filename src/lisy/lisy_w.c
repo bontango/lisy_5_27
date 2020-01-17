@@ -115,7 +115,7 @@ Credits: 0 8 Balls: 20 28
   } t_mysegments;
 
 //global var for internal game_name structure,
-//set by  lisy80_get_gamename in unix/main
+//set by  lisy_set_gamename in unix/main
 t_stru_lisymini_games_csv lisymini_game;
 
 //global var for timing and speed
@@ -150,16 +150,16 @@ void lisy_w_init( void )
  for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 5);
 
  //show the 'boot' message
- lisy_usb_show_boot_message(s_lisy_software_version,"LISY W",49,"COMET");
+ lisy_usb_show_boot_message(s_lisy_software_version,lisymini_game.type,lisymini_game.gamenr,lisymini_game.long_name);
 
  //set HW rules for solenoids
- //RTH this is game specific
- //at the moment we do it fix for Comet
-lisy_usb_sol_set_hwrule( 17, 65 ); //left kicker
- lisy_usb_sol_set_hwrule( 18, 66 ); //right kicker
- lisy_usb_sol_set_hwrule( 19, 67 ); //upper bumber
- lisy_usb_sol_set_hwrule( 20, 68 ); //left bumber
- lisy_usb_sol_set_hwrule( 21, 69 ); //lower bumber
+ //even this is game specific
+ //we do it per default for all 6 special solenoids
+ lisy_usb_sol_set_hwrule( 17, 65 ); 
+ lisy_usb_sol_set_hwrule( 18, 66 );
+ lisy_usb_sol_set_hwrule( 19, 67 ); 
+ lisy_usb_sol_set_hwrule( 20, 68 ); 
+ lisy_usb_sol_set_hwrule( 21, 69 ); 
 
  //show green ligth for now, lisy mini is running
  lisy80_set_red_led(0);
