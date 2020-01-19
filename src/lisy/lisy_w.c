@@ -140,15 +140,19 @@ void lisy_w_init( void )
  //set signal handler
  lisy80_set_sighandler();
 
+//set the internal type
+if (strcmp(lisymini_game.type,"SYS9") == 0) lisymini_game.typeno = LISYW_TYPE_SYS9;
+else if (strcmp(lisymini_game.type,"SYS11A") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11A;
+else lisymini_game.typeno = LISYW_TYPE_NONE;
 
  //show up on calling terminal
  lisy_get_sw_version( &sw_main, &sw_sub, &commit);
  sprintf(s_lisy_software_version,"%d%02d %02d",sw_main,sw_sub,commit);
  fprintf(stderr,"This is LISY (Lisy Mini) by bontango, Version %s\n",s_lisy_software_version);
 
- //set displays to ASCII
- for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 5);
 
+ //set displays initial to ASCII for boot message
+ for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 5);
 //convert gamename to uppercase for display
 for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = toupper(lisymini_game.long_name[i]);
  //show the 'boot' message
@@ -162,6 +166,16 @@ for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = to
  lisy_usb_sol_set_hwrule( 19, 67 ); 
  lisy_usb_sol_set_hwrule( 20, 68 ); 
  lisy_usb_sol_set_hwrule( 21, 69 ); 
+
+ //get the switch status from APC andf set internal pinmame matrix
+for(i=1; i<=64; i++)
+        core_setSw( i, lisy_usb_get_switch_status(i) );
+//advance no=72  has reverse logik
+i = lisy_usb_get_switch_status(72);
+if (i==0) i=1; else i=0;
+core_setSw( S11_SWADVANCE, i );
+//up down switch no=73
+core_setSw( S11_SWADVANCE, lisy_usb_get_switch_status(73) );
 
  //show green ligth for now, lisy mini is running
  lisy80_set_red_led(0);
@@ -424,11 +438,13 @@ if ( ret == 71) {
            lisy80_debug(debugbuf);
         }
     }
+//advance has reverse logic
+if (action==0) action=1; else action=0;
 if ( ret == 72) {
         core_setSw( S11_SWADVANCE, action );
         if ( ls80dbg.bitv.switches )
         {
-           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWADVANCE(%d) action:%d\n",ret,action);
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWADVANCE(%d) action(reverse):%d\n",ret,action);
            lisy80_debug(debugbuf);
         }
     }
