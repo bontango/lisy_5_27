@@ -149,6 +149,8 @@ void lisy_w_init( void )
  //set displays to ASCII
  for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 5);
 
+//convert gamename to uppercase for display
+for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = toupper(lisymini_game.long_name[i]);
  //show the 'boot' message
  lisy_usb_show_boot_message(s_lisy_software_version,lisymini_game.type,lisymini_game.gamenr,lisymini_game.long_name);
 
