@@ -268,7 +268,7 @@ int lisy_usb_print_hw_info(void)
     lisy80_debug(debugbuf);
 
     //print status of switches
-    printf("Switch Statusn 1..8;9..16;17..24; ...:\n");
+    printf("Switch Status 1..8;9..16;17..24; ...:\n");
     for(i=0; i<=8; i++)
      {
        for(j=1; j<=8; j++)
@@ -287,6 +287,56 @@ int lisy_usb_print_hw_info(void)
 
 
  return 0;
+
+}
+
+
+//send SEG14 data to a display
+int lisy_usb_send_SEG14_to_disp(unsigned char disp, int num, uint16_t *data)
+{
+
+ unsigned char hi, lo;
+ unsigned char cmd, i;
+ int len;
+
+ cmd = 255;
+ switch(disp)
+ {
+        case 0: cmd = LISY_S_DISP_0; break;
+        case 1: cmd = LISY_S_DISP_1; break;
+        case 2: cmd = LISY_S_DISP_2; break;
+        case 3: cmd = LISY_S_DISP_3; break;
+        case 4: cmd = LISY_S_DISP_4; break;
+        case 5: cmd = LISY_S_DISP_5; break;
+        case 6: cmd = LISY_S_DISP_6; break;
+ }
+
+if ( ls80dbg.bitv.displays )
+   {
+    sprintf(debugbuf,"send cmd %d to Display %d: %d SEG14 data",cmd,disp,num);
+    lisy80_debug(debugbuf);
+   }
+
+
+ if( cmd != 255 )
+ {
+ //send command
+ if ( write( lisy_usb_serfd,&cmd,1) != 1) { fprintf(stderr,"ERROR write cmd\n"); return (-1); }
+ //send length of byte sequence
+ len = num * 2; //we send two byte per data
+ if ( write( lisy_usb_serfd,&len,1) != 1) { fprintf(stderr,"ERROR write lenght\n"); return (-1); }
+
+  //send SEG14 data
+  for ( i=0; i<num; i++)
+  {
+    lo = data[i] & 0xFF;
+    hi = data[i] >> 8;
+    if ( write( lisy_usb_serfd,&lo,1) != 1) { fprintf(stderr,"ERROR write display\n"); return (-2); }
+    if ( write( lisy_usb_serfd,&hi,1) != 1) { fprintf(stderr,"ERROR write display\n"); return (-2); }
+  }
+ }
+
+ return (len+2);
 
 }
 

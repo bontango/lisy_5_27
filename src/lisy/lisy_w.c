@@ -32,14 +32,7 @@
 /*
 
 
-********   SYSTEM 11  *************
-const struct core_dispLayout s11_dispS11[] = {
-  DISP_SEG_7(0,0,CORE_SEG16),DISP_SEG_7(0,1,CORE_SEG16),
-  DISP_SEG_7(1,0,CORE_SEG8), DISP_SEG_7(1,1,CORE_SEG8),
-  {2,8,0,1,CORE_SEG7S},{2,10,8,1,CORE_SEG7S}, {2,2,20,1,CORE_SEG7S},{2,4,28,1,CORE_SEG7S}, {0}
-};
-
-********   SYSTEM 7  *************
+********   Position in segment array in general ****************
 from core.c
 #define DISP_SEG_7(row,col,type) {4*row,16*col,row*20+col*8+1,7,type}
 *
@@ -47,6 +40,42 @@ core.h:#define DISP_SEG_BALLS(no1,no2,type)  {2,8,no1,1,type},{2,10,no2,1,type}
 *
 core.h:#define DISP_SEG_CREDIT(no1,no2,type) {2,2,no1,1,type},{2,4,no2,1,type}
 *
+*******************************************************************
+
+
+********   SYSTEM 11  *************
+const struct core_dispLayout s11_dispS11[] = {
+  DISP_SEG_7(0,0,CORE_SEG16),DISP_SEG_7(0,1,CORE_SEG16),
+  DISP_SEG_7(1,0,CORE_SEG8), DISP_SEG_7(1,1,CORE_SEG8),
+  {2,8,0,1,CORE_SEG7S},{2,10,8,1,CORE_SEG7S}, {2,2,20,1,CORE_SEG7S},{2,4,28,1,CORE_SEG7S}, {0}
+};
+*
+results in:
+Player 1: 0
+Player 2: 8
+Player 3: 20
+Player 4: 28
+Credits: 20 28 Balls: 0 8
+*/
+ typedef union {
+       core_tSeg segments;
+       //assigment accoring to s11games.c & core.c/.h see above
+       struct {
+          UINT16 balls1; //0
+          UINT16 player1[7]; //1..7
+          UINT16 balls2;  //8
+          UINT16 player2[7]; //9..15
+          UINT16 dum1[4]; //16..19
+          UINT16 credits1; //20
+          UINT16 player3[7]; //21..27
+          UINT16 credits2; //28
+          UINT16 player4[7]; //29..35
+          UINT16 dum2[CORE_SEGCOUNT-36]; //the rest
+      } disp;
+  } t_mysegments_s11;
+
+/*
+********   SYSTEM 7  *************
 from core.h
 struct core_dispLayout {
   UINT16 top, left, start, length, type;
@@ -63,23 +92,7 @@ Player 2: 29
 Player 3: 1
 Player 4: 9
 Credits: 20 28 Balls: 0 8
-
-
-
-********   SYSTEM 9  *************
-const struct core_dispLayout s11_dispS9[] = {
-  {4, 0, 1,7, CORE_SEG87}, {4,16, 9,7, CORE_SEG87},
-  {0, 0,21,7, CORE_SEG87}, {0,16,29,7, CORE_SEG87},
-  DISP_SEG_CREDIT(0,8,CORE_SEG7S),DISP_SEG_BALLS(20,28,CORE_SEG7S),{0}
-results in:
-Player 1: 1
-Player 2: 9
-Player 3: 21
-Player 4: 29
-Credits: 0 8 Balls: 20 28
-
 */
-
  typedef union {
        core_tSeg segments;
        //assigment accoring to s7games.c & core.c/.h see above
@@ -97,9 +110,22 @@ Credits: 0 8 Balls: 20 28
       } disp;
   } t_mysegments_s7;
 
+/*
+********   SYSTEM 9  *************
+const struct core_dispLayout s11_dispS9[] = {
+  {4, 0, 1,7, CORE_SEG87}, {4,16, 9,7, CORE_SEG87},
+  {0, 0,21,7, CORE_SEG87}, {0,16,29,7, CORE_SEG87},
+  DISP_SEG_CREDIT(0,8,CORE_SEG7S),DISP_SEG_BALLS(20,28,CORE_SEG7S),{0}
+results in:
+Player 1: 1
+Player 2: 9
+Player 3: 21
+Player 4: 29
+Credits: 0 8 Balls: 20 28
+*/
  typedef union {
        core_tSeg segments;
-       //assigment accoring to s7games.c & core.c/.h see above
+       //assigment accoring to s11games.c & core.c/.h see above
        struct {
 	  UINT16 credits1; //0
           UINT16 player3[7]; //1..7
@@ -112,7 +138,8 @@ Credits: 0 8 Balls: 20 28
           UINT16 player2[7]; //29..35
 	  UINT16 dum2[CORE_SEGCOUNT-36]; //the rest
       } disp;
-  } t_mysegments;
+  } t_mysegments_s9;
+
 
 //global var for internal game_name structure,
 //set by  lisy_set_gamename in unix/main
@@ -151,8 +178,8 @@ else lisymini_game.typeno = LISYW_TYPE_NONE;
  fprintf(stderr,"This is LISY (Lisy Mini) by bontango, Version %s\n",s_lisy_software_version);
 
 
- //set displays initial to ASCII for boot message
- for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 5);
+ //set displays initial to ASCII with dot (6)  for boot message
+ for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 6);
 //convert gamename to uppercase for display
 for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = toupper(lisymini_game.long_name[i]);
  //show the 'boot' message
@@ -166,17 +193,7 @@ for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = to
  lisy_usb_sol_set_hwrule( 19, 67 ); 
  lisy_usb_sol_set_hwrule( 20, 68 ); 
  lisy_usb_sol_set_hwrule( 21, 69 ); 
-
- //get the switch status from APC andf set internal pinmame matrix
-for(i=1; i<=64; i++)
-        core_setSw( i, lisy_usb_get_switch_status(i) );
-//advance no=72  has reverse logik
-i = lisy_usb_get_switch_status(72);
-if (i==0) i=1; else i=0;
-core_setSw( S11_SWADVANCE, i );
-//up down switch no=73
-core_setSw( S11_SWADVANCE, lisy_usb_get_switch_status(73) );
-
+  
  //show green ligth for now, lisy mini is running
  lisy80_set_red_led(0);
  lisy80_set_yellow_led(0);
@@ -266,7 +283,9 @@ char my_seg2char( UINT16 segvalue )
  return (retchar);;
 }
 
-void send_to_display( int no, UINT16 *dispval)
+//send ASCII characters o display
+//use my_seg2char routine to translate williams 7segment to ASCII
+void send_ASCII_to_display( int no, UINT16 *dispval)
 {
  int i;
  char str[8]; //include null termination
@@ -276,11 +295,21 @@ void send_to_display( int no, UINT16 *dispval)
 
  lisy_usb_send_str_to_disp(no, str);
 
+}
+
+//send SEG14 data to display
+void send_SEG14_to_display( int no, UINT16 *dispval)
+{
+ int i;
+ char str[8]; //include null termination
+
+ if (no) { lisy_usb_send_SEG14_to_disp(no, 7, dispval);  }
+ else { lisy_usb_send_SEG14_to_disp(no, 4, dispval); } //status display
 
 }
 
-//display handler
-void lisy_w_display_handler(void)
+//display handler System9
+void lisy_w_display_handler_SYS9(void)
 {
   static UINT8 first = 1;
   UINT8 i,k;
@@ -289,8 +318,8 @@ void lisy_w_display_handler(void)
   int len;
 
 
-  static t_mysegments mysegments;
-  t_mysegments tmp_segments;
+  static t_mysegments_s9 mysegments;
+  t_mysegments_s9 tmp_segments;
 
   if(first)
   {
@@ -305,10 +334,10 @@ void lisy_w_display_handler(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.player1);
-    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_to_display(1, tmp_segments.disp.player1);
-    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_to_display(2, tmp_segments.disp.player2);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_to_display(3, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_to_display(4, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
@@ -318,7 +347,7 @@ void lisy_w_display_handler(void)
 	 status[1]=tmp_segments.disp.credits2;
 	 status[2]=tmp_segments.disp.balls1;
 	 status[3]=tmp_segments.disp.balls2;
-	 send_to_display(0, status);
+	 send_ASCII_to_display(0, status);
 	}
     //remember it
     memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
@@ -343,21 +372,6 @@ void lisy_w_display_handler(void)
       else printf("%c",c);
     }
 
-UINT16 rt;
-    printf("\nPlayer3: ");
-    for(i=0; i<=6; i++) 
-    {
-      rt = mysegments.disp.player3[i];
-      printf("0x%04x ",rt);
-    }
-    printf("\nPlayer4: ");
-    for(i=0; i<=6; i++) 
-    {
-      rt = mysegments.disp.player4[i];
-      printf("0x%04x ",rt);
-    }
-
-/*RTH test
     printf("\nPlayer3: ");
     for(i=0; i<=6; i++) 
     {
@@ -372,7 +386,6 @@ UINT16 rt;
       if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
       else printf("%c",c);
     }
-*/
 
     printf("\nCredits: %c%c",my_seg2char(mysegments.disp.credits1),my_seg2char(mysegments.disp.credits2));
     printf("\nBalls: %c%c",my_seg2char(mysegments.disp.balls1),my_seg2char(mysegments.disp.balls2));
@@ -384,6 +397,111 @@ UINT16 rt;
   }
 }
 
+//display handler System11A
+void lisy_w_display_handler_SYS11A(void)
+{
+  static UINT8 first = 1;
+  UINT8 i,k;
+  UINT16 status[4];
+  UINT16 sum1,sum2;
+  int len;
+
+
+  static t_mysegments_s11 mysegments;
+  t_mysegments_s11 tmp_segments;
+
+  if(first)
+  {
+        memset(mysegments.segments,0,sizeof(mysegments.segments));
+	//for system11A display 1&2 are SEG14, other keep at default ASCII with dot
+	lisy_usb_display_set_prot(1,4);
+	lisy_usb_display_set_prot(2,4);
+	first=0;
+  }
+ 
+  //something changed?
+  if  ( memcmp(mysegments.segments,coreGlobals.segments,sizeof(mysegments)) != 0)
+  {
+    //store it
+    memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
+    //check it display per display
+    len = sizeof(mysegments.disp.player1);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_SEG14_to_display(1, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_SEG14_to_display(2, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, tmp_segments.disp.player4);
+    //status display
+    sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
+    sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
+    if (sum1 != sum2 )
+	{
+	 status[0]=tmp_segments.disp.credits1;
+	 status[1]=tmp_segments.disp.credits2;
+	 status[2]=tmp_segments.disp.balls1;
+	 status[3]=tmp_segments.disp.balls2;
+	 send_ASCII_to_display(0, status);
+	}
+    //remember it
+    memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
+
+    //and print out if debug display
+    if ( ls80dbg.bitv.displays ) 
+    {
+char c;
+UINT16 rt;
+    printf("\nPlayer1: ");
+    for(i=0; i<=6; i++) 
+    {
+      rt = mysegments.disp.player1[i];
+      printf("0x%04x ",rt);
+    }
+    printf("\nPlayer2: ");
+    for(i=0; i<=6; i++) 
+    {
+      rt = mysegments.disp.player2[i];
+      printf("0x%04x ",rt);
+    }
+  
+    printf("\nPlayer3: ");
+    for(i=0; i<=6; i++) 
+    {
+      c=my_seg2char(mysegments.disp.player3[i]); 
+      if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
+      else printf("%c",c);
+    }
+    printf("\nPlayer4: ");
+    for(i=0; i<=6; i++) 
+    {
+      c=my_seg2char(mysegments.disp.player4[i]); 
+      if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
+      else printf("%c",c);
+    }
+
+    printf("\nCredits: %c%c",my_seg2char(mysegments.disp.credits1),my_seg2char(mysegments.disp.credits2));
+    printf("\nBalls: %c%c",my_seg2char(mysegments.disp.balls1),my_seg2char(mysegments.disp.balls2));
+    printf("\n\n ");
+    }
+
+    //check which line has changed
+
+  }
+}
+
+
+//display handler
+//we switch here according to system type
+void lisy_w_display_handler(void)
+{
+
+ switch(lisymini_game.typeno)
+ {
+  case LISYW_TYPE_SYS9: lisy_w_display_handler_SYS9();
+       break;
+  case LISYW_TYPE_SYS11A: lisy_w_display_handler_SYS11A();
+       break;
+ }
+}
+
 /*
   switch handler
   we use core_setSw and let pinmame
@@ -391,9 +509,28 @@ UINT16 rt;
 */
 void lisy_w_switch_handler( void )
 {
-int ret;
+int i,ret;
 unsigned char action;
+static unsigned char first=1;
 static int simulate_coin_flag = 0;
+
+//on first call read alls wicthes from APC
+if (first)
+{
+ //get the switch status from APC andf set internal pinmame matrix
+ for(i=1; i<=64; i++) core_setSw( i, lisy_usb_get_switch_status(i) );
+  
+ //advance no=72  has reverse logik
+ ret = lisy_usb_get_switch_status(72);
+ if (ret==0) ret=1; else ret=0;
+ core_setSw( S11_SWADVANCE, ret );
+
+ //up down switch no=73
+ core_setSw( S11_SWADVANCE, lisy_usb_get_switch_status(73) );
+
+ first=0;
+}
+
 
 
 //read values over usbserial

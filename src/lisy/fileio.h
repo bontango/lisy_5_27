@@ -44,6 +44,7 @@ typedef struct
   char gamename[10];  // game name mame fromat (8 chars)
   char long_name[80];  // game name from csv
   char type[10];  // type of game ( e.g. SYS7 for Williams system7)
+  unsigned char typeno;  // type of game , internal number
   int throttle;  // throttle value per game, default is 300
   char comment[80];  // comment from csv
 } t_stru_lisymini_games_csv;
