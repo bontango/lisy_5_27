@@ -1493,10 +1493,10 @@ int main(int argc, char *argv[])
        strcpy (ifa.ifr_name, "noip");
        //construct the message
         fprintf(stderr,"LISY MINI NO IP");
-        //display35_show_str( 1, "000000");
-        //display35_show_str( 2, "000000");
-        //display35_show_str( 3, "000000");
-        //display35_show_str( 4, "000000");
+        lisy_usb_send_str_to_disp( 1, " NO IP ");
+        lisy_usb_send_str_to_disp( 2, "0000000");
+        lisy_usb_send_str_to_disp( 3, "0000000");
+        lisy_usb_send_str_to_disp( 4, "0000000");
      }
      else //we found an IP
      {
@@ -1504,17 +1504,20 @@ int main(int argc, char *argv[])
 	//get teh pouinter to teh Ip address
         line = inet_ntoa(myip->sin_addr);
 	//split the ip to four displays and store value for display routine
-        sprintf(buffer,"%-6s",strtok(line, "."));
-        //display35_show_str( 1, buffer); //strcpy(display_D1,buffer); strcpy(display_D1A,buffer);
+        sprintf(buffer,"%-7s",strtok(line, "."));
+	lisy_usb_send_str_to_disp(1,buffer);
        fprintf(stderr,"%s\n",buffer);
-        sprintf(buffer,"%-6s",strtok(NULL, "."));
-        //display35_show_str( 2, buffer); //strcpy(display_D2,buffer); strcpy(display_D2A,buffer);
+
+        sprintf(buffer,"%-7s",strtok(NULL, "."));
+	lisy_usb_send_str_to_disp(2,buffer);
        fprintf(stderr,"%s\n",buffer);
-        sprintf(buffer,"%-6s",strtok(NULL, "."));
-        //display35_show_str( 3, buffer); //strcpy(display_D3,buffer); strcpy(display_D3A,buffer);
+
+        sprintf(buffer,"%-7s",strtok(NULL, "."));
+	lisy_usb_send_str_to_disp(3,buffer);
        fprintf(stderr,"%s\n",buffer);
-        sprintf(buffer,"%-6s",strtok(NULL, "."));
-        //display35_show_str( 4, buffer); //strcpy(display_D4,buffer); strcpy(display_D4A,buffer);
+
+        sprintf(buffer,"%-7s",strtok(NULL, "."));
+	lisy_usb_send_str_to_disp(4,buffer);
        fprintf(stderr,"%s\n",buffer);
      }
 
