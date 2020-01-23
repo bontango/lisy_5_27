@@ -297,7 +297,8 @@ int lisy_usb_send_SEG14_to_disp(unsigned char disp, int num, uint16_t *data)
 
  unsigned char hi, lo;
  unsigned char cmd, i;
- int len;
+ int len,pos;
+ unsigned char seg14_data[40];
 
  cmd = 255;
  switch(disp)
@@ -311,30 +312,43 @@ int lisy_usb_send_SEG14_to_disp(unsigned char disp, int num, uint16_t *data)
         case 6: cmd = LISY_S_DISP_6; break;
  }
 
+ if( cmd != 255 )
+ {
+  pos = 0;
+  //construct data
+  //command
+  seg14_data[pos++] = cmd;
+  //send length of byte sequence
+  len = num * 2; //we send two byte per data
+  seg14_data[pos++] = len;
+  //send SEG14 data
+  //LISYAPI 0.09
+  //2 bytes (a-g encoded as bit 0 to 6 in first byte. 
+  //h to r encoded as bit 0 to 6 in second byte. comma as bit 7 in second byte)
+  for ( i=0; i<num; i++)
+  {
+    seg14_data[pos++] = data[i] & 0xFF; //low byte first
+    seg14_data[pos++] = hi = data[i] >> 8;//high byte in second byte
+  }
+ }
+
+ //send it all
+ if ( write( lisy_usb_serfd,seg14_data,len+2) != len+2) { fprintf(stderr,"ERROR write display\n"); return (-2); }
+
 if ( ls80dbg.bitv.displays )
    {
-    sprintf(debugbuf,"send cmd %d to Display %d: %d SEG14 data",cmd,disp,num);
+    char helpstr[10];
+    sprintf(debugbuf,"send cmd %d to Display %d: %d bytes of SEG14 data",cmd,disp,len);
+    lisy80_debug(debugbuf);
+    sprintf(debugbuf," ->");
+    for ( i=0; i<pos; i++)
+      {
+       sprintf(helpstr," %02x",seg14_data[i]);
+       strcat(debugbuf,helpstr);
+      }
     lisy80_debug(debugbuf);
    }
 
-
- if( cmd != 255 )
- {
- //send command
- if ( write( lisy_usb_serfd,&cmd,1) != 1) { fprintf(stderr,"ERROR write cmd\n"); return (-1); }
- //send length of byte sequence
- len = num * 2; //we send two byte per data
- if ( write( lisy_usb_serfd,&len,1) != 1) { fprintf(stderr,"ERROR write lenght\n"); return (-1); }
-
-  //send SEG14 data
-  for ( i=0; i<num; i++)
-  {
-    lo = data[i] & 0xFF;
-    hi = data[i] >> 8;
-    if ( write( lisy_usb_serfd,&lo,1) != 1) { fprintf(stderr,"ERROR write display\n"); return (-2); }
-    if ( write( lisy_usb_serfd,&hi,1) != 1) { fprintf(stderr,"ERROR write display\n"); return (-2); }
-  }
- }
 
  return (len+2);
 
