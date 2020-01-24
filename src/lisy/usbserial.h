@@ -17,6 +17,31 @@ void lisy_usb_sound_play_file( char *filename );
 int lisy_usb_print_hw_info(void);
 void lisy_usb_show_boot_message(char *software_version,char *system_id, int game_no, char *gamename);
 
+//mapping for segemnts
+typedef union {
+    unsigned char byte;
+    struct {
+    unsigned d:1, c:1, b:1, a:1, e:1, f:1, g:1, comma:1;
+    //signed b0:1, b1:1, b2:1, b3:1, b4:1, b5:1, b6:1, b7:1;
+        } bitv_apc;
+    struct {
+    unsigned a:1, b:1, c:1, d:1, e:1, f:1, g:1, FREE:1;
+    //signed b0:1, b1:1, b2:1, b3:1, b4:1, b5:1, b6:1, b7:1;
+        } bitv_pinmame;
+    } map_byte1_t;
+
+//mapping for segemnts
+typedef union {
+    unsigned char byte;
+    struct {
+    unsigned j:1, h:1, m:1, k:1, p:1, r:1, dot:1, n:1;
+    //signed b0:1, b1:1, b2:1, b3:1, b4:1, b5:1, b6:1, b7:1;
+        } bitv_apc;
+    struct {
+    unsigned h:1, j:1, k:1, m:1, n:1, p:1, r:1, dot:1;
+    //signed b0:1, b1:1, b2:1, b3:1, b4:1, b5:1, b6:1, b7:1;
+        } bitv_pinmame;
+    } map_byte2_t;
 
 #endif  /* LISY_USBSER_H */
 

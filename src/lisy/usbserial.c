@@ -299,6 +299,8 @@ int lisy_usb_send_SEG14_to_disp(unsigned char disp, int num, uint16_t *data)
  unsigned char cmd, i;
  int len,pos;
  unsigned char seg14_data[40];
+ map_byte1_t apc1, pinmame1;
+ map_byte2_t apc2, pinmame2;
 
  cmd = 255;
  switch(disp)
@@ -323,12 +325,43 @@ int lisy_usb_send_SEG14_to_disp(unsigned char disp, int num, uint16_t *data)
   seg14_data[pos++] = len;
   //send SEG14 data
   //LISYAPI 0.09
+  //Unser Mapping ist d, c, b, a, e, f, g, Komma für's erste Byte 
+  //und j, h, m, k, p, r , Punkt, n fuer's zweite. 
+  //pinmame has
   //2 bytes (a-g encoded as bit 0 to 6 in first byte. 
   //h to r encoded as bit 0 to 6 in second byte. comma as bit 7 in second byte)
+  //so we need to remap the segments
   for ( i=0; i<num; i++)
   {
-    seg14_data[pos++] = data[i] & 0xFF; //low byte first
-    seg14_data[pos++] = hi = data[i] >> 8;//high byte in second byte
+    
+    //low byte first
+    pinmame1.byte = data[i] & 0xFF;
+    //do map
+    apc1.bitv_apc.a = pinmame1.bitv_pinmame.a;
+    apc1.bitv_apc.b = pinmame1.bitv_pinmame.b;
+    apc1.bitv_apc.c = pinmame1.bitv_pinmame.c;
+    apc1.bitv_apc.d = pinmame1.bitv_pinmame.d;
+    apc1.bitv_apc.e = pinmame1.bitv_pinmame.e;
+    apc1.bitv_apc.f = pinmame1.bitv_pinmame.f;
+    apc1.bitv_apc.g = pinmame1.bitv_pinmame.g;
+    apc1.bitv_apc.comma = pinmame1.bitv_pinmame.FREE;
+    //assign
+    seg14_data[pos++] = apc1.byte;
+
+    //high byte in second byte
+    pinmame2.byte = data[i] >> 8;
+    //do map
+    apc2.bitv_apc.h = pinmame2.bitv_pinmame.h;
+    apc2.bitv_apc.j = pinmame2.bitv_pinmame.j;
+    apc2.bitv_apc.k = pinmame2.bitv_pinmame.k;
+    apc2.bitv_apc.m = pinmame2.bitv_pinmame.m;
+    apc2.bitv_apc.n = pinmame2.bitv_pinmame.n;
+    apc2.bitv_apc.p = pinmame2.bitv_pinmame.p;
+    apc2.bitv_apc.r = pinmame2.bitv_pinmame.r;
+    apc2.bitv_apc.dot = pinmame2.bitv_pinmame.dot;
+
+
+    seg14_data[pos++] = apc2.byte;
   }
  }
 

@@ -34,7 +34,7 @@
 
 //the version
 #define LISYAPIcontrol_SOFTWARE_MAIN    0
-#define LISYAPIcontrol_SOFTWARE_SUB     4
+#define LISYAPIcontrol_SOFTWARE_SUB     5
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -883,7 +883,7 @@ void send_update_infos( int sockfd )
     //set mode to read - write
     sprintf(buffer,"setting system mode to read/write<br><br>\n");
     sendit( sockfd, buffer);
-    system("/bin/mount -o remount,rw /lisy");
+    system("/bin/mount -o remount,rw /boot");
     system("/bin/mount -o remount,rw /");
 
     //clean up /home/pi/update
