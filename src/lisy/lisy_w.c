@@ -520,13 +520,13 @@ if (first)
  //get the switch status from APC andf set internal pinmame matrix
  for(i=1; i<=64; i++) core_setSw( i, lisy_usb_get_switch_status(i) );
   
- //advance no=72  has reverse logik
- ret = lisy_usb_get_switch_status(72);
- if (ret==0) ret=1; else ret=0;
- core_setSw( S11_SWADVANCE, ret );
+ //advance no=72
+ core_setSw( S11_SWADVANCE, lisy_usb_get_switch_status(72) );
 
- //up down switch no=73
- core_setSw( S11_SWADVANCE, lisy_usb_get_switch_status(73) );
+ //up down switch no=73 has reverse logic
+ ret = lisy_usb_get_switch_status(73);
+ if (ret==0) ret=1; else ret=0;
+ core_setSw( S11_SWUPDN, ret );
 
  first=0;
 }
@@ -575,21 +575,22 @@ if ( ret == 71) {
            lisy80_debug(debugbuf);
         }
     }
-//advance has reverse logic
-if (action==0) action=1; else action=0;
+//advance
 if ( ret == 72) {
         core_setSw( S11_SWADVANCE, action );
         if ( ls80dbg.bitv.switches )
         {
-           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWADVANCE(%d) action(reverse):%d\n",ret,action);
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWADVANCE(%d) action:%d\n",ret,action);
            lisy80_debug(debugbuf);
         }
     }
+//up down has reverse logic
 if ( ret == 73) {
+        if (action==0) action=1; else action=0;
         core_setSw( S11_SWUPDN, action );
         if ( ls80dbg.bitv.switches )
         {
-           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWUPDN(%d) action:%d\n",ret,action);
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWUPDN(%d) action(reverse):%d\n",ret,action);
            lisy80_debug(debugbuf);
         }
     }
