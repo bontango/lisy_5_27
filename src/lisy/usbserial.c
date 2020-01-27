@@ -37,7 +37,7 @@ int lisy_api_write( unsigned char *data, int count, int debug  )
 
    if ( debug != 0)
     {
-     sprintf(debugbuf,"USB_write:");
+     sprintf(debugbuf,"USB_write(%d bytes):",count);
      for(i=0; i<count; i++)
      {
        sprintf(helpstr," 0x%02x",data[i]);
@@ -265,6 +265,7 @@ int lisy_usb_print_hw_info(void)
    unsigned char data,cmd,data1,data2,no_of_displays,no;
    char answer[80];
    int i,j,n,ret;
+   unsigned char my_switch_status[80];
 
   //number of displays
   if ( lisy_api_read_byte(LISY_G_NO_DISP, &no_of_displays) < 0) return (-1);
@@ -313,6 +314,9 @@ int lisy_usb_print_hw_info(void)
     sprintf(debugbuf,"LISY_Mini: Client supports %d switches",data);
     lisy80_debug(debugbuf);
 
+    //get status of switches
+    for (i=1; i<=64; i++) my_switch_status[i] = lisy_usb_get_switch_status(i);
+
     //print status of switches
     fprintf(stderr,"Switch Status 1..8;9..16;17..24; ...:\n");
     for(i=0; i<=8; i++)
@@ -320,7 +324,7 @@ int lisy_usb_print_hw_info(void)
        for(j=1; j<=8; j++)
 	{
 	 n = j + i*8;
-	 fprintf(stderr,"%d ",lisy_usb_get_switch_status(n));
+	 fprintf(stderr,"%d ",my_switch_status[i]);
 	}
       fprintf(stderr,"\n");
      }//i
@@ -500,21 +504,28 @@ unsigned char lisy_usb_get_switch_status( unsigned char number)
 
  int ret;
  unsigned char cmd,status;
+ unsigned char cmd_data[2];
+
+     cmd = LISY_G_STAT_SW;
+
+  //send cmd
+  cmd_data[0] = cmd;
+  //send switch number
+  cmd_data[1] = number;
 
       //send cmd
-     cmd = LISY_G_STAT_SW;
-     if ( lisy_api_write( &cmd,1,ls80dbg.bitv.switches) != 1)
+     if ( lisy_api_write( cmd_data,2,ls80dbg.bitv.switches) != 2)
       {
-        printf("Error writing to serial %s\n",strerror(errno));
+        printf("Error get switch status writing to serial\n");
         return -1;
       }
 
- //ask APC via serial
- ret = lisy_api_read_byte(number, &status);
- if (ret < 0) 
-  {
-    fprintf(stderr,"ERROR: problem with switch status reading: %d\n",ret);
-  }
+ //receive answer
+  if ( ( ret = read(lisy_usb_serfd,&status,1)) != 1)
+    {
+        printf("Error reading from serial switch status, return:%d %s\n",ret,strerror(errno));
+        return -1;
+    }
 
  return status;
 
