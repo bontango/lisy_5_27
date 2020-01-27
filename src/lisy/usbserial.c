@@ -27,6 +27,29 @@
 //local vars
 static int lisy_usb_serfd;
 
+//lisy routine for writing to usb serial device
+//we do it here in order to beable to log all bytes send to APC
+int lisy_api_write( unsigned char *data, int count, int debug  )
+{
+
+    int i;
+    char helpstr[10];
+
+   if ( debug != 0)
+    {
+     sprintf(debugbuf,"USB_write:");
+     for(i=0; i<count; i++)
+     {
+       sprintf(helpstr," 0x%02x",data[i]);
+       strcat(debugbuf,helpstr);
+     }
+    lisy80_debug(debugbuf);
+   }
+
+   return( write( lisy_usb_serfd,data,count));
+}
+
+
 //subroutine for serial com
 int set_interface_attribs(int fd, int speed)
 {
@@ -76,7 +99,7 @@ int lisy_api_read_string(unsigned char cmd, char *content)
   int i,n,ret;
 
  //send command
- if ( write( lisy_usb_serfd,&cmd,1) != 1)
+ if ( lisy_api_write( &cmd,1,ls80dbg.bitv.basic) != 1)
     {
         printf("Error writing to serial %s\n",strerror(errno));
         return -1;
@@ -93,7 +116,14 @@ int lisy_api_read_string(unsigned char cmd, char *content)
   content[i] = nextbyte;
   i++;
   } while ( nextbyte != '\0');
- 
+
+  //USB debug?
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"USB_read_string: %s",content);
+    lisy80_debug(debugbuf);
+  }
+
  return(i);
 
 }
@@ -106,10 +136,17 @@ unsigned char lisy_api_read_byte(unsigned char cmd, unsigned char *data)
 {
 
  //send command
- if ( write( lisy_usb_serfd,&cmd,1) != 1) return (-2);
+ if ( lisy_api_write( &cmd,1,ls80dbg.bitv.basic) != 1) return (-2);
 
  //receive answer
  if ( read(lisy_usb_serfd,data,1) != 1) return (-1);
+
+  //USB debug?
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"USB_read_byte: 0x%02x",*data);
+    lisy80_debug(debugbuf);
+  }
 
  return(0);
 
@@ -123,13 +160,22 @@ unsigned char lisy_api_read_byte(unsigned char cmd, unsigned char *data)
 unsigned char lisy_api_read_2bytes(unsigned char cmd, unsigned char option, unsigned char *data1, unsigned char *data2)
 {
 
+ unsigned char cmd_data[2];
  //send command
- if ( write( lisy_usb_serfd,&cmd,1) != 1) return (-2);
- if ( write( lisy_usb_serfd,&option,1) != 1) return (-2);
+ cmd_data[0] = cmd;
+ cmd_data[1] = option;
+ if ( lisy_api_write( cmd_data,2,ls80dbg.bitv.basic) != 2) return (-2);
 
  //receive answer
  if ( read(lisy_usb_serfd,data1,1) != 1) return (-1);
  if ( read(lisy_usb_serfd,data2,1) != 1) return (-1);
+
+  //USB debug?
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"USB_read_2bytes: 0x%02x 0x%02x",*data1,*data2);
+    lisy80_debug(debugbuf);
+  }
 
  return(0);
 
@@ -365,23 +411,15 @@ int lisy_usb_send_SEG14_to_disp(unsigned char disp, int num, uint16_t *data)
   }
  }
 
- //send it all
- if ( write( lisy_usb_serfd,seg14_data,len+2) != len+2) { fprintf(stderr,"ERROR write display\n"); return (-2); }
-
+//debug?
 if ( ls80dbg.bitv.displays )
    {
-    char helpstr[10];
     sprintf(debugbuf,"send cmd %d to Display %d: %d bytes of SEG14 data",cmd,disp,len);
-    lisy80_debug(debugbuf);
-    sprintf(debugbuf," ->");
-    for ( i=0; i<pos; i++)
-      {
-       sprintf(helpstr," %02x",seg14_data[i]);
-       strcat(debugbuf,helpstr);
-      }
     lisy80_debug(debugbuf);
    }
 
+ //send it all
+ if ( lisy_api_write( seg14_data,len+2,ls80dbg.bitv.displays) != len+2) { fprintf(stderr,"ERROR write display\n"); return (-2); }
 
  return (len+2);
 
@@ -393,7 +431,8 @@ if ( ls80dbg.bitv.displays )
 int lisy_usb_send_str_to_disp(unsigned char num, char *str)
 {
 
- unsigned char cmd, len;
+ unsigned char cmd,len,i;
+ unsigned char cmd_data[20];
 
  cmd = 255;
  switch(num)
@@ -417,12 +456,13 @@ int lisy_usb_send_str_to_disp(unsigned char num, char *str)
  if( cmd != 255 )
  {
  //send command
- if ( write( lisy_usb_serfd,&cmd,1) != 1) { fprintf(stderr,"ERROR write cmd\n"); return (-1); }
+ cmd_data[0] = cmd;
  //send length of byte sequence
- len = strlen(str);
- if ( write( lisy_usb_serfd,&len,1) != 1) { fprintf(stderr,"ERROR write lenght\n"); return (-1); }
+ len = cmd_data[1] = strlen(str);
  //send bytes of string
- if ( write( lisy_usb_serfd,str,len) != len) { fprintf(stderr,"ERROR write display\n"); return (-2); }
+ for(i=0; i<len; i++) cmd_data[i+2] = str[i];
+
+ if ( lisy_api_write( cmd_data,len+2,ls80dbg.bitv.displays) != len+2) { fprintf(stderr,"ERROR write display\n"); return (-2); }
  }
 
  return (len+2);
@@ -432,16 +472,23 @@ int lisy_usb_send_str_to_disp(unsigned char num, char *str)
 unsigned char lisy_usb_ask_for_changed_switch(void)
 {
 
- unsigned char my_switch;
+ unsigned char my_switch,cmd;
  int ret;
 
- //ask APC via serial
- ret = lisy_api_read_byte(LISY_G_CHANGED_SW, &my_switch);
- if (ret < 0) 
-  {
-    fprintf(stderr,"ERROR: problem with switchreading: %d\n",ret);
-    return 80;
-  }
+ //send command
+ cmd = LISY_G_CHANGED_SW;
+ if ( write( lisy_usb_serfd,&cmd,1) != 1) return (-2);
+//receive answer
+ if ( read(lisy_usb_serfd,&my_switch,1) != 1) return (-1);
+
+ //USB debug? only if reurn is not 0x7f == no switch changed
+ if((ls80dbg.bitv.switches) & ( my_switch != 0x7f))
+ {
+    sprintf(debugbuf,"USB_write: 0x%02x",cmd);
+    lisy80_debug(debugbuf);
+    sprintf(debugbuf,"USB_read_byte: 0x%02x",my_switch);
+    lisy80_debug(debugbuf);
+ }
 
  return my_switch;
 
@@ -456,7 +503,7 @@ unsigned char lisy_usb_get_switch_status( unsigned char number)
 
       //send cmd
      cmd = LISY_G_STAT_SW;
-     if ( write( lisy_usb_serfd,&cmd,1) != 1)
+     if ( lisy_api_write( &cmd,1,ls80dbg.bitv.switches) != 1)
       {
         printf("Error writing to serial %s\n",strerror(errno));
         return -1;
@@ -477,15 +524,16 @@ unsigned char lisy_usb_get_switch_status( unsigned char number)
 void lisy_usb_lamp_ctrl(int lamp_no,unsigned char action)
 {
  uint8_t cmd;
+ unsigned char cmd_data[2];
 
   if (action) cmd=LISY_S_LAMP_ON; else cmd=LISY_S_LAMP_OFF;
 
-      //send cmd
-     if ( write( lisy_usb_serfd,&cmd,1) != 1)
-        fprintf(stderr,"Lamps Error writing to serial %s\n",strerror(errno));
-     //send lamp number
-      //send cmd
-     if ( write( lisy_usb_serfd,&lamp_no,1) != 1)
+  //send cmd
+  cmd_data[0] = cmd;
+  //send lamp number
+  cmd_data[1] = lamp_no;
+
+  if ( lisy_api_write( cmd_data,2,ls80dbg.bitv.lamps) != 2)
         fprintf(stderr,"Lamps Error writing to serial %s\n",strerror(errno));
 }
 
@@ -494,15 +542,16 @@ void lisy_usb_lamp_ctrl(int lamp_no,unsigned char action)
 void lisy_usb_sol_ctrl(int sol_no,unsigned char action)
 {
  uint8_t cmd;
+ unsigned char cmd_data[2];
 
   if (action) cmd=LISY_S_SOL_ON; else cmd=LISY_S_SOL_OFF;
 
-      //send cmd
-     if ( write( lisy_usb_serfd,&cmd,1) != 1)
-        fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
-     //send solenoid number
-      //send cmd
-     if ( write( lisy_usb_serfd,&sol_no,1) != 1)
+  //send cmd
+  cmd_data[0] = cmd;
+  //send lamp number
+  cmd_data[1] = sol_no;
+
+  if ( lisy_api_write( cmd_data,2,ls80dbg.bitv.coils) != 2)
         fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
 
 
@@ -512,18 +561,17 @@ void lisy_usb_sol_ctrl(int sol_no,unsigned char action)
 void lisy_usb_sol_pulse(int sol_no)
 {
  uint8_t cmd;
+ unsigned char cmd_data[2];
 
   cmd=LISY_S_PULSE_SOL;
 
-      //send cmd
-     if ( write( lisy_usb_serfd,&cmd,1) != 1)
-        fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
-     //send solenoid number
-      //send cmd
-     if ( write( lisy_usb_serfd,&sol_no,1) != 1)
-        fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
+  //send cmd
+  cmd_data[0] = cmd;
+  //send lamp number
+  cmd_data[1] = sol_no;
 
-
+  if ( lisy_api_write( cmd_data,2,ls80dbg.bitv.coils) != 2)
+        fprintf(stderr,"Solenoids Error writing to serial %s\n",strerror(errno));
 }
 
 //set HW rule for solenoid
@@ -531,57 +579,29 @@ void lisy_usb_sol_pulse(int sol_no)
 void lisy_usb_sol_set_hwrule(int sol_no, int special_switch)
 {
  uint8_t cmd;
- uint8_t error_occured = 0;
+ unsigned char cmd_data[11];
 
-  uint8_t index; //Index c of the solenoid to configure
-  uint8_t sw1; //Switch sw1. Set bit 7 to invert the switch.
-  uint8_t sw2; //Switch sw2. Set bit 7 to invert the switch.
-  uint8_t sw3; //Switch sw3. Set bit 7 to invert the switch.
-  uint8_t pulse_time; //Pulse time in ms (0-255)
-  uint8_t pulse_pwm_power; //Pulse PWM power (0-255). 0=0% power. 255=100% power
-  uint8_t hold_pwm_power; //Hold PWM power (0-255). 0=0% power. 255=100% power
-  uint8_t flag_sw1; //Flag for sw1
-  uint8_t flag_sw2; //Flag for sw2
-  uint8_t flag_sw3; //Flag for sw3
-
-  
-  cmd=LISY_S_SET_HWRULE;
-  index = sol_no;
-  sw1 = special_switch;
-  sw2 = 127; //no sw2
-  sw3 = 127; //no sw3
-  pulse_time = 80;
-  pulse_pwm_power = 191; //75% not used by APC
-  hold_pwm_power = 64;  //25% not used by APC
-  flag_sw1 = 3; //sw1 will enable the rule and disable it when released.
-  flag_sw2 = 0; //do not use sw2
-  flag_sw3 = 0; //do not use sw3
+  cmd_data[0] = LISY_S_SET_HWRULE;
+  cmd_data[1] = sol_no; //Index c of the solenoid to configure
+  cmd_data[2] = special_switch; //Switch sw1. Set bit 7 to invert the switch.
+  cmd_data[3] = 127; //Switch sw2. Set bit 7 to invert the switch.
+  cmd_data[4] = 127;  //Switch sw3. Set bit 7 to invert the switch.
+  cmd_data[5] = 80; //Pulse time in ms (0-255)
+  cmd_data[6] = 191; ///Pulse PWM power (0-255). 0=0% power. 255=100% power 75% not used by APC
+  cmd_data[7] = 64;  //Hold PWM power (0-255). 0=0% power. 255=100% power 25% not used by APC
+  cmd_data[8] = 3; //sw1 will enable the rule and disable it when released.
+  cmd_data[9] = 0; //do not use sw2
+  cmd_data[10] = 0; //do not use sw3
 
   if ( ls80dbg.bitv.basic ) 
   {
-    sprintf(debugbuf,"LISY_Mini: HW Rule set for solnenoid:%d and switch:%d",sol_no,special_switch);
-    lisy80_debug(debugbuf);
-    sprintf(debugbuf," send: 0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x",cmd,index,sw1,sw2,sw3,pulse_time,pulse_pwm_power,hold_pwm_power,flag_sw1,flag_sw2,flag_sw3 );
+    sprintf(debugbuf,"LISY_Mini: HW Rule set for solenoid:%d and switch:%d",sol_no,special_switch);
     lisy80_debug(debugbuf);
   }
 
-//10bytes to follow
-if ( write( lisy_usb_serfd,&cmd,1) != 1) error_occured++;
-if ( write( lisy_usb_serfd,&index,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&sw1,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&sw2,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&sw3,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&pulse_time,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&pulse_pwm_power,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&hold_pwm_power,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&flag_sw1,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&flag_sw2,1) != 1) error_occured++; 
-if ( write( lisy_usb_serfd,&flag_sw3,1) != 1) error_occured++; 
-
-if ( error_occured) 
-        fprintf(stderr,"Setting hW rules, Error writing to serial %s , %d times\n",strerror(errno),error_occured);
-
-
+  //11 bytes to follow
+  if ( lisy_api_write( cmd_data,11,ls80dbg.bitv.basic) != 11)
+        fprintf(stderr,"Setting hW rules, Error writing to serial\n");
 }
 
 //display control
@@ -597,45 +617,48 @@ if ( error_occured)
 void lisy_usb_display_set_prot(uint8_t display_no,uint8_t protocol)
 {
 	uint8_t cmd;
+        unsigned char cmd_data[3];
 
-     //send cmd
-     cmd = LISY_S_DISP_PROT;
-     if ( write( lisy_usb_serfd,&cmd,1) != 1)
-        fprintf(stderr,"display option Error writing to serial %s\n",strerror(errno));
-     //send display number
-     if ( write( lisy_usb_serfd,&display_no,1) != 1)
-        fprintf(stderr,"display option Error writing to serial %s\n",strerror(errno));
-     //send protocol number
-     if ( write( lisy_usb_serfd,&protocol,1) != 1)
-        fprintf(stderr,"display option Error writing to serial %s\n",strerror(errno));
+   cmd = LISY_S_DISP_PROT;
+
+    //send cmd
+    cmd_data[0] = cmd;
+    //send display number
+    cmd_data[1] = display_no;
+    //send protocol number
+    cmd_data[2] = protocol;
+
+     if ( lisy_api_write( cmd_data,3,ls80dbg.bitv.displays) != 3)
+        fprintf(stderr,"display option Error writing to serial\n");
 }
 
 void lisy_usb_sound_play_file( char *filename )
 {
 	uint8_t cmd;
-	int len;
+	int i,len;
+        unsigned char cmd_data[80];
 
  if ( ls80dbg.bitv.sound )
   {
     sprintf(debugbuf,"play sound %s",filename);
     lisy80_debug(debugbuf);
   }
-     //send cmd
+
      cmd = LISY_S_PLAY_FILE;
-     if ( write( lisy_usb_serfd,&cmd,1) != 1)
-        fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
+
+     //send cmd
+     cmd_data[0] = cmd;
      //track 1
-     cmd = 1;
-     if ( write( lisy_usb_serfd,&cmd,1) != 1)
-        fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
+     cmd_data[1] = 1;
      //no flags
-     cmd = 0;
-     if ( write( lisy_usb_serfd,&cmd,1) != 1)
-        fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
+     cmd_data[2] = 0;
      //filename plus \0
      len = strlen(filename) +1;
-     if ( write( lisy_usb_serfd,filename,len) != len)
-        fprintf(stderr,"sound play file error writing to serial %s\n",strerror(errno));
+     for(i=0; i<=len; i++) cmd_data[i+3] = filename[i];
+
+     //len+4 cmd.track,flags + trailing \0
+     if ( lisy_api_write( cmd_data,len+4,ls80dbg.bitv.sound) != len+4)
+        fprintf(stderr,"sound play file error writing to serial\n");
 }
 
 
