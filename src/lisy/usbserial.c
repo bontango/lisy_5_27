@@ -314,15 +314,15 @@ int lisy_usb_print_hw_info(void)
     lisy80_debug(debugbuf);
 
     //print status of switches
-    printf("Switch Status 1..8;9..16;17..24; ...:\n");
+    fprintf(stderr,"Switch Status 1..8;9..16;17..24; ...:\n");
     for(i=0; i<=8; i++)
      {
        for(j=1; j<=8; j++)
 	{
 	 n = j + i*8;
-	 printf("%d ",lisy_usb_get_switch_status(n));
+	 fprintf(stderr,"%d ",lisy_usb_get_switch_status(n));
 	}
-      printf("\n");
+      fprintf(stderr,"\n");
      }//i
 
 /*  

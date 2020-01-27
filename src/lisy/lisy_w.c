@@ -357,39 +357,39 @@ void lisy_w_display_handler_SYS9(void)
     {
     char c;
     lisy80_debug("display change detected");
-    printf("\nPlayer1: ");
+    fprintf(stderr,"\nPlayer1: ");
     for(i=0; i<=6; i++) 
     {
       c=my_seg2char(mysegments.disp.player1[i]); 
-      if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
-      else printf("%c",c);
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
     }
-    printf("\nPlayer2: ");
+    fprintf(stderr,"\nPlayer2: ");
     for(i=0; i<=6; i++) 
     {
       c=my_seg2char(mysegments.disp.player2[i]); 
-      if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
-      else printf("%c",c);
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
     }
 
-    printf("\nPlayer3: ");
+    fprintf(stderr,"\nPlayer3: ");
     for(i=0; i<=6; i++) 
     {
       c=my_seg2char(mysegments.disp.player3[i]); 
-      if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
-      else printf("%c",c);
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
     }
-    printf("\nPlayer4: ");
+    fprintf(stderr,"\nPlayer4: ");
     for(i=0; i<=6; i++) 
     {
       c=my_seg2char(mysegments.disp.player4[i]); 
-      if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
-      else printf("%c",c);
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
     }
 
-    printf("\nCredits: %c%c",my_seg2char(mysegments.disp.credits1),my_seg2char(mysegments.disp.credits2));
-    printf("\nBalls: %c%c",my_seg2char(mysegments.disp.balls1),my_seg2char(mysegments.disp.balls2));
-    printf("\n\n ");
+    fprintf(stderr,"\nCredits: %c%c",my_seg2char(mysegments.disp.credits1),my_seg2char(mysegments.disp.credits2));
+    fprintf(stderr,"\nBalls: %c%c",my_seg2char(mysegments.disp.balls1),my_seg2char(mysegments.disp.balls2));
+    fprintf(stderr,"\n\n ");
     }
 
     //check which line has changed
@@ -449,37 +449,37 @@ void lisy_w_display_handler_SYS11A(void)
     {
 char c;
 UINT16 rt;
-    printf("\nPlayer1: ");
+    fprintf(stderr,"\nPlayer1: ");
     for(i=0; i<=6; i++) 
     {
       rt = mysegments.disp.player1[i];
-      printf("0x%04x ",rt);
+      fprintf(stderr,"0x%04x ",rt);
     }
-    printf("\nPlayer2: ");
+    fprintf(stderr,"\nPlayer2: ");
     for(i=0; i<=6; i++) 
     {
       rt = mysegments.disp.player2[i];
-      printf("0x%04x ",rt);
+      fprintf(stderr,"0x%04x ",rt);
     }
   
-    printf("\nPlayer3: ");
+    fprintf(stderr,"\nPlayer3: ");
     for(i=0; i<=6; i++) 
     {
       c=my_seg2char(mysegments.disp.player3[i]); 
-      if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
-      else printf("%c",c);
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
     }
-    printf("\nPlayer4: ");
+    fprintf(stderr,"\nPlayer4: ");
     for(i=0; i<=6; i++) 
     {
       c=my_seg2char(mysegments.disp.player4[i]); 
-      if ( c>=0x80 ) { c=c-0x80; printf("%c",c); printf("."); }
-      else printf("%c",c);
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
     }
 
-    printf("\nCredits: %c%c",my_seg2char(mysegments.disp.credits1),my_seg2char(mysegments.disp.credits2));
-    printf("\nBalls: %c%c",my_seg2char(mysegments.disp.balls1),my_seg2char(mysegments.disp.balls2));
-    printf("\n\n ");
+    fprintf(stderr,"\nCredits: %c%c",my_seg2char(mysegments.disp.credits1),my_seg2char(mysegments.disp.credits2));
+    fprintf(stderr,"\nBalls: %c%c",my_seg2char(mysegments.disp.balls1),my_seg2char(mysegments.disp.balls2));
+    fprintf(stderr,"\n\n ");
     }
 
     //check which line has changed
