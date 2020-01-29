@@ -523,10 +523,8 @@ if (first)
  //advance no=72
  core_setSw( S11_SWADVANCE, lisy_usb_get_switch_status(72) );
 
- //up down switch no=73 has reverse logic
- ret = lisy_usb_get_switch_status(73);
- if (ret==0) ret=1; else ret=0;
- core_setSw( S11_SWUPDN, ret );
+ //up down switch no=73
+ core_setSw( S11_SWUPDN, lisy_usb_get_switch_status(73) );
 
  first=0;
 }
@@ -584,13 +582,12 @@ if ( ret == 72) {
            lisy80_debug(debugbuf);
         }
     }
-//up down has reverse logic
+//up down
 if ( ret == 73) {
-        if (action==0) action=1; else action=0;
         core_setSw( S11_SWUPDN, action );
         if ( ls80dbg.bitv.switches )
         {
-           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWUPDN(%d) action(reverse):%d\n",ret,action);
+           sprintf(debugbuf,"LISY_W_SWITCH_HANDLER S11_SWUPDN(%d) action:%d\n",ret,action);
            lisy80_debug(debugbuf);
         }
     }
