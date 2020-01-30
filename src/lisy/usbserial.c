@@ -328,6 +328,10 @@ int lisy_usb_print_hw_info(void)
 	}
       fprintf(stderr,"\n");
      }//i
+    
+     //advance & auto up
+      fprintf(stderr,"advance: %d\n",lisy_usb_get_switch_status(72));
+      fprintf(stderr,"UP/Down: %d\n",lisy_usb_get_switch_status(73));
 
 /*  
     if ( read_string(LISY_G_GAME_INFO, answer) < 0) return (-1);

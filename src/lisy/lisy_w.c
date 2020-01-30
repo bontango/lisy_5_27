@@ -249,12 +249,66 @@ if 'comma' is active we add 0x80
 */
 
 //internal routine
-//gets a segment value and give back char value 
+//gets a (7digit) segment value and give back char value
+char my_seg14_2char( UINT16 segvalue )
+{
+
+ char retchar;
+
+ switch(segvalue)
+   {
+        case 0x0877: retchar = 'A'; break;
+        case 0x2a0f: retchar = 'B'; break;
+        case 0x0039: retchar = 'C'; break;
+        case 0x220f: retchar = 'D'; break;
+        case 0x0079: retchar = 'E'; break;
+        case 0x0071: retchar = 'F'; break;
+        case 0x083d: retchar = 'G'; break;
+        case 0x0876: retchar = 'H'; break;
+        case 0x2209: retchar = 'I'; break;
+        //case : retchar = 'J'; break;
+        //case : retchar = 'K'; break;
+        case 0x0038: retchar = 'L'; break;
+        case 0x0536: retchar = 'M'; break;
+        case 0x1136: retchar = 'N'; break;
+        //case 0x003f: retchar = 'O'; break; same as '0'
+        case 0x0873: retchar = 'P'; break;
+        //case : retchar = 'Q'; break;
+        case 0x1873: retchar = 'R'; break;
+        //case 0x086d: retchar = 'S'; break; same as '5'
+        case 0x2201: retchar = 'T'; break;
+        case 0x003e: retchar = 'U'; break;
+        case 0xc430: retchar = 'V'; break;
+        case 0x5036: retchar = 'W'; break;
+        case 0x5500: retchar = 'X'; break;
+        case 0x2500: retchar = 'Y'; break;
+        //case : retchar = 'Z'; break;
+        case 0x003f: retchar = '0'; break;
+        case 0x0006: retchar = '1'; break;
+        case 0x085f: retchar = '2'; break;
+        case 0x084f: retchar = '3'; break;
+        case 0x0866: retchar = '4'; break;
+        case 0x086d: retchar = '5'; break;
+        case 0x087d: retchar = '6'; break;
+        case 0x0007: retchar = '7'; break;
+        case 0x087f: retchar = '8'; break;
+        case 0x086f: retchar = '9'; break;
+
+        case 0: retchar = ' '; break;
+        default: retchar = '?';
+   }
+
+ return (retchar);;
+
+}
+
+//internal routine
+//gets a (7digit) segment value and give back char value 
 char my_seg2char( UINT16 segvalue ) 
 {
 
  UINT8 hascomma = 0;
- char retchar = ' ';
+ char retchar;
 
  //handle comma
  if ( segvalue >= 0x80 ) 
@@ -276,7 +330,7 @@ char my_seg2char( UINT16 segvalue )
 	case 0x7f: retchar = '8'; break;
 	case 0x6f: retchar = '9'; break;
 	case 0: retchar = ' '; break;
-	default: retchar = ' ';
+	default: retchar = '?';
    }
 
  if(hascomma) retchar = retchar + 0x80;
@@ -455,12 +509,30 @@ UINT16 rt;
       rt = mysegments.disp.player1[i];
       fprintf(stderr,"0x%04x ",rt);
     }
+//test RTH print chars
+    fprintf(stderr,"\nPlayer1: ");
+    for(i=0; i<=6; i++)
+    {
+      c=my_seg14_2char(mysegments.disp.player1[i]);
+      fprintf(stderr,"%c",c);
+    }
+
+
+
     fprintf(stderr,"\nPlayer2: ");
     for(i=0; i<=6; i++) 
     {
       rt = mysegments.disp.player2[i];
       fprintf(stderr,"0x%04x ",rt);
     }
+//test RTH print chars
+    fprintf(stderr,"\nPlayer2: ");
+    for(i=0; i<=6; i++)
+    {
+      c=my_seg14_2char(mysegments.disp.player2[i]);
+      fprintf(stderr,"%c",c);
+    }
+
   
     fprintf(stderr,"\nPlayer3: ");
     for(i=0; i<=6; i++) 
@@ -658,34 +730,101 @@ if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
 void lisy_w_solenoid_handler( void )
 {
 
-int i,sol_no;
-static UINT32 mysol=0;
+int i,j,sol_no;
+static UINT64 mysol=0;
+int mux_sol_active = 0;
 uint8_t action;
+//remember if we need a delayd ac select activation
+//this is needed as we sometimes in pinmame have a ac select
+//activation too early (see also PROC code in s11.c)
+static uint8_t ac_want_to_change = 0; //1== action 0; 2==action 2
 
 
 //did something changed?
 if ( mysol != coreGlobals.solenoids)
 {
-   //check all solenoids
-   for(i=0; i<=31; i++)
+   //check all solenoids ( 33 RTH: is that enough?)
+   for(i=0; i<=32; i++)
     {
-      //send to APC
+      //send to APC in case something changed
       if( CHECK_BIT(mysol,i) != CHECK_BIT(coreGlobals.solenoids,i) )
       {
+	//do we activate or do we deactivate
         if ( CHECK_BIT(coreGlobals.solenoids,i)) action = 1; else action = 0;
+	//sol number starts with 1
         sol_no = i+1;
+	//in case of Solenoid 14 (AC Relais)
+        //check if one of the multiplexed sols are still active
+        // (RTH: TODO need another routine for Road Kings)
+	if ( sol_no == 14)
+	{
+	  //lets check if any of the muxed solenoids are active now
+	  //in pinmame these are 1..8 ( AC-relais 0) and 25..33 ( AC-relais 1)
+	  for(j=0; j<=7; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
+	  for(j=24; j<=32; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
+          //no muxed solenoid active, activate ac relais
+	  if (mux_sol_active == 0) 
+	    {
+	      lisy_usb_sol_ctrl(14,action);
+	      if ( ls80dbg.bitv.coils )
+		{
+                  sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: AC-Relais changed to %d",action);
+                  lisy80_debug(debugbuf);
+	        }
+	    }
+	  else //we have active solenoids, ac relais needs to be delayd
+	   {
+	        ac_want_to_change = action + 1; //just remember for next round
+	        if ( ls80dbg.bitv.coils )
+		{
+                  sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: AC-Relais wants change to %d, DELAYED due %d active muxed Solenoids",mux_sol_active,action);
+                  lisy80_debug(debugbuf);
+	        }
+	   }
+	}//sol == 14	
+
 	//do not activate special solenoids, we do that with HW rules
-        if ( sol_no <= 16 ) lisy_usb_sol_ctrl(sol_no,action);
+        //for ac relais (sol 14) we havea special routine (see above)
+        if ( ( sol_no != 14) &( sol_no <= 16 )) lisy_usb_sol_ctrl(sol_no,action);
+
         //in case we hav solenoid #23, also activate #24 on APC
         //as APC use two solenoids for flipper (left/right)
         if (sol_no == 23 ) { lisy_usb_sol_ctrl(23,action); lisy_usb_sol_ctrl(24,action); }
-      //debug?
-      if ( ls80dbg.bitv.coils )
-      {
-         sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d",sol_no,action);
-         lisy80_debug(debugbuf);
+
+	//with A-C Relais Solenoids 1..8 are muxed, in pinmame we have the 'C-Side' as Solenoids 25..33
+        //so we need to substract 24 before sending command to APC
+	if ( sol_no >=25) { lisy_usb_sol_ctrl(sol_no-24,action); }
+
+        //debug?
+        if ( ( ls80dbg.bitv.coils ) & ( sol_no != 14))
+        {
+	  if ( sol_no < 25)
+           sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d",sol_no,action);
+          else
+           sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d",sol_no-24,sol_no,action);
+
+           lisy80_debug(debugbuf);
+         }
+
+	//do we have a delayd ac activation from last round?
+	if (ac_want_to_change != 0)
+	{
+	      //is it now save to activate?
+	      for(j=0; j<=7; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
+	      for(j=24; j<=32; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
+	      if (mux_sol_active == 0)
+		{
+	          lisy_usb_sol_ctrl(14,ac_want_to_change-1); 
+                  if ( ls80dbg.bitv.coils )
+                  {
+                    sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: AC-Relais DELAYD change to %d",ac_want_to_change-1);
+                    lisy80_debug(debugbuf);
+                  }
+		  ac_want_to_change = 0; //reset flag
+		}
+	 mux_sol_active = 0; //reset counter
 	}
-      }
+      }//something changed
      }//for
    //store it for next call
    mysol = coreGlobals.solenoids;
