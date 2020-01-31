@@ -731,7 +731,7 @@ void lisy_w_solenoid_handler( void )
 {
 
 int i,j,sol_no;
-static UINT64 mysol=0;
+static UINT32 mysol=0;
 int mux_sol_active = 0;
 uint8_t action;
 //remember if we need a delayd ac select activation
@@ -739,12 +739,11 @@ uint8_t action;
 //activation too early (see also PROC code in s11.c)
 static uint8_t ac_want_to_change = 0; //1== action 0; 2==action 2
 
-
 //did something changed?
 if ( mysol != coreGlobals.solenoids)
 {
-   //check all solenoids ( 33 RTH: is that enough?)
-   for(i=0; i<=32; i++)
+   //check all solenoids 
+   for(i=0; i<=31; i++)
     {
       //send to APC in case something changed
       if( CHECK_BIT(mysol,i) != CHECK_BIT(coreGlobals.solenoids,i) )
@@ -761,7 +760,7 @@ if ( mysol != coreGlobals.solenoids)
 	  //lets check if any of the muxed solenoids are active now
 	  //in pinmame these are 1..8 ( AC-relais 0) and 25..33 ( AC-relais 1)
 	  for(j=0; j<=7; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
-	  for(j=24; j<=32; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
+	  for(j=24; j<=31; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
           //no muxed solenoid active, activate ac relais
 	  if (mux_sol_active == 0) 
 	    {
@@ -799,9 +798,9 @@ if ( mysol != coreGlobals.solenoids)
         if ( ( ls80dbg.bitv.coils ) & ( sol_no != 14))
         {
 	  if ( sol_no < 25)
-           sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d",sol_no,action);
+           { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d",sol_no,action); }
           else
-           sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d",sol_no-24,sol_no,action);
+          { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d",sol_no-24,sol_no,action); }
 
            lisy80_debug(debugbuf);
          }
@@ -811,7 +810,7 @@ if ( mysol != coreGlobals.solenoids)
 	{
 	      //is it now save to activate?
 	      for(j=0; j<=7; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
-	      for(j=24; j<=32; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
+	      for(j=24; j<=31; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
 	      if (mux_sol_active == 0)
 		{
 	          lisy_usb_sol_ctrl(14,ac_want_to_change-1); 
@@ -866,13 +865,11 @@ unsigned char lisy_w_switch_reader( unsigned char *action )
 {
 
  unsigned char switch_number;
- static int pollrate = 100; //fixed pollrate 100 per second  at the moment
  static int num = 0;
 
  //this routine is called every 0,5 msec, which 2000 per second
- //RTH check throttl value
  num++;
- if ( num > (2000/pollrate))
+ if ( num > 100)
  { 
   num = 0;
   switch_number  = lisy_usb_ask_for_changed_switch();
