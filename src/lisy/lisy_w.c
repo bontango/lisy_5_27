@@ -964,7 +964,15 @@ void lisy_w_sound_handler(unsigned char data)
  if (( data != 0) & (data != 0xff))
   {
    sprintf(filename,"%d.BIN",data);
-   lisy_usb_sound_play_file(filename);
+   //temp: RTH make soundoutpu adjustable
+   if (ls80opt.bitv.watchdog ) 
+    {
+      lisy80_debug("LISY80 option: watchdog: no soundoutput!");
+    }
+    else
+    {
+      lisy_usb_sound_play_file(filename);
+    }
   }
 
 }
