@@ -761,7 +761,7 @@ if ( mysol != coreGlobals.solenoids)
 	  //lets check if any of the muxed solenoids are active now
 	  //in pinmame these are 1..8 ( AC-relais 0) and 25..33 ( AC-relais 1)
 	  for(j=0; j<=7; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
-	  //RTH TODO for(j=24; j<=31; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
+	  for(j=24; j<=31; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
           //no muxed solenoid active, activate ac relais
 	  if (mux_sol_active == 0) 
 	    {
@@ -794,7 +794,7 @@ if ( mysol != coreGlobals.solenoids)
 
 	//with A-C Relais Solenoids 1..8 are muxed, in pinmame we have the 'C-Side' as Solenoids 25..33
         //so we need to substract 24 before sending command to APC
-	//RTH TODO debug on at the moment if ( sol_no >=25) { lisy_usb_sol_ctrl(sol_no-24,action); }
+	if ( sol_no >=25) { lisy_usb_sol_ctrl(sol_no-24,action); }
 
         //debug?
         if ( ( ls80dbg.bitv.coils ) & ( sol_no != 14))
@@ -812,7 +812,7 @@ if ( mysol != coreGlobals.solenoids)
 	{
 	      //is it now save to activate?
 	      for(j=0; j<=7; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
-	      //RTH TODO for(j=24; j<=31; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
+	      for(j=24; j<=31; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
 	      if (mux_sol_active == 0)
 		{
 	          lisy_usb_sol_ctrl(14,ac_want_to_change-1); 
