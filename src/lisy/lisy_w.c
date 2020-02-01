@@ -738,6 +738,7 @@ uint8_t action;
 //this is needed as we sometimes in pinmame have a ac select
 //activation too early (see also PROC code in s11.c)
 static uint8_t ac_want_to_change = 0; //1== action 0; 2==action 2
+static uint8_t current_ac_state = 0;
 
 //did something changed?
 if ( mysol != coreGlobals.solenoids)
@@ -765,6 +766,7 @@ if ( mysol != coreGlobals.solenoids)
 	  if (mux_sol_active == 0) 
 	    {
 	      lisy_usb_sol_ctrl(14,action);
+	      current_ac_state = action;
 	      if ( ls80dbg.bitv.coils )
 		{
                   sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: AC-Relais changed to %d",action);
@@ -798,9 +800,9 @@ if ( mysol != coreGlobals.solenoids)
         if ( ( ls80dbg.bitv.coils ) & ( sol_no != 14))
         {
 	  if ( sol_no < 25)
-           { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d",sol_no,action); }
+           { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( AC is %d)",sol_no,action,current_ac_state); }
           else
-          { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d",sol_no-24,sol_no,action); }
+          { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d ( AC is %d)",sol_no-24,sol_no,action,current_ac_state); }
 
            lisy80_debug(debugbuf);
          }
@@ -819,6 +821,7 @@ if ( mysol != coreGlobals.solenoids)
                     sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: AC-Relais DELAYD change to %d",ac_want_to_change-1);
                     lisy80_debug(debugbuf);
                   }
+		  current_ac_state = ac_want_to_change-1;
 		  ac_want_to_change = 0; //reset flag
 		}
 	 mux_sol_active = 0; //reset counter
