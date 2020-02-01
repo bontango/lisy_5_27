@@ -669,9 +669,8 @@ void lisy_usb_sound_play_file( char *filename )
      cmd_data[2] = 0;
      //len of filename
      len = strlen(filename);
-     cmd_data[3] = len;
-     //filename
-     for(i=0; i<len; i++) cmd_data[i+4] = filename[i];
+     //filename plus trailing \0
+     for(i=0; i<=len; i++) cmd_data[i+3] = filename[i];
 
      if ( lisy_api_write( cmd_data,len+4,ls80dbg.bitv.sound) != len+4)
         fprintf(stderr,"sound play file error writing to serial\n");
