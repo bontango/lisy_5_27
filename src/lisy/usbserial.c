@@ -26,14 +26,20 @@
 
 //local vars
 static int lisy_usb_serfd;
+static long lisy_usb_counter = 0;
 
 //lisy routine for writing to usb serial device
 //we do it here in order to beable to log all bytes send to APC
+//exceptions are 'init' and switch poll routine 'lisy_usb_ask_for_changed_switch'
 int lisy_api_write( unsigned char *data, int count, int debug  )
 {
 
     int i;
     char helpstr[10];
+
+    //do some statistics
+    lisy_usb_counter += count;
+
 
    if ( debug != 0)
     {
@@ -44,6 +50,14 @@ int lisy_api_write( unsigned char *data, int count, int debug  )
        strcat(debugbuf,helpstr);
      }
     lisy80_debug(debugbuf);
+
+    //print statistics each 1000 bytes
+    if ( lisy_usb_counter > 1000)
+    {
+     sprintf(debugbuf,"STATISTICS: USB_write %ld bytes since last log",lisy_usb_counter);
+     lisy80_debug(debugbuf);
+     lisy_usb_counter = 0;
+    }
    }
 
    return( write( lisy_usb_serfd,data,count));
@@ -482,6 +496,9 @@ unsigned char lisy_usb_ask_for_changed_switch(void)
 
  unsigned char my_switch,cmd;
  int ret;
+
+ //do some statistics
+ lisy_usb_counter++;
 
  //send command
  cmd = LISY_G_CHANGED_SW;
