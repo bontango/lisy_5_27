@@ -75,7 +75,7 @@ void sndbrd_diag(int board, int button) {
 
 void sndbrd_data_w(int board, int data) {
 #if defined(LISY_SUPPORT)
-lisy_sound_handler( data );
+lisy_sound_handler( board, data );
 #endif
   const struct sndbrdIntf *b = intf[board].brdIntf;
   if(b && (b->flags & SNDBRD_NOTSOUND)==0)

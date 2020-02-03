@@ -8,7 +8,7 @@ void lisy_w_solenoid_handler( void );
 void lisy_w_switch_handler( void );
 unsigned char lisy_w_switch_reader( unsigned char *action );
 void lisy_w_lamp_handler(void);
-void lisy_w_sound_handler(unsigned char data);
+void lisy_w_sound_handler( unsigned char board, unsigned char data);
 
 #define LISYW_TYPE_NONE 0
 #define LISYW_TYPE_SYS9 1

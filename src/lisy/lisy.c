@@ -245,11 +245,11 @@ int lisy_time_to_quit(void)
 
 
 //sound handler
-void lisy_sound_handler( unsigned char data )
+void lisy_sound_handler( unsigned char board, unsigned char data )
 {
 
 //first tests
 if ( lisy_hardware_revision == LISY_HW_LISY_W)
-  lisy_w_sound_handler(data);
+  lisy_w_sound_handler(board, data);
 }
       

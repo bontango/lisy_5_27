@@ -16,8 +16,7 @@ void lisy_hw_init(int lisy_variant);
 int lisy_set_gamename( char *arg_from_main, char *lisy_gamename);
 void lisy_nvram_write_to_file( void );
 void lisy_get_sw_version( unsigned char *sw_main, unsigned char *sw_sub, unsigned char *commit);
-
-void lisy_sound_handler( unsigned char data );
+void lisy_sound_handler( unsigned char board, unsigned char data );
 
 
 #define NVRAM_DELAY 500  //delay counter for nvram write

@@ -949,13 +949,17 @@ void lisy_w_lamp_handler( )
 }//lamp_handler
 
 //sound handler
-void lisy_w_sound_handler(unsigned char data)
+void lisy_w_sound_handler(unsigned char board, unsigned char data)
 {
   char filename[40];
 
+ //only play data for internal board 0
+ //tested with s11 pinbot
+ if (board != 0) return;
+
   if ( ls80dbg.bitv.sound )
   {
-    sprintf(debugbuf,"LISY_W sound_handler: 0x%x",data);
+    sprintf(debugbuf,"LISY_W sound_handler: board:%d 0x%x",board,data);
     lisy80_debug(debugbuf);
     }
 
