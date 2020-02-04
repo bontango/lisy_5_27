@@ -980,3 +980,18 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
   }
 
 }
+
+//shutdown lisy mini
+void lisy_mini_shutdown(void)
+{
+
+ fprintf(stderr,"LISY Mini graceful shutdown initiated\n");
+ //show the 'shutdown' message
+ //set displays  one and two to ASCII with dot (6)  for boot message
+ lisy_usb_display_set_prot( 1, 6);
+ lisy_usb_display_set_prot( 2, 6);
+ lisy_usb_send_str_to_disp( 1, "DO SHUT");
+ lisy_usb_send_str_to_disp( 2, "DOWN   ");
+
+}
+

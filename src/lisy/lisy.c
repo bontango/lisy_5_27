@@ -59,12 +59,15 @@ struct timeval lisy_start_t;
 extern void lisy1_shutdown();
 extern void lisy80_shutdown();
 extern void lisy35_shutdown();
+extern void lisy_mini_shutdown();
 void lisy_shutdown(void)
 {
  if ( lisy_hardware_revision == 100 )
     lisy1_shutdown( );
  else if ( lisy_hardware_revision == 350 )
     lisy35_shutdown( );
+ else if ( lisy_hardware_revision == LISY_HW_LISY_W )
+    lisy_mini_shutdown( );
  else
     lisy80_shutdown( );
 }
