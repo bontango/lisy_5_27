@@ -185,14 +185,15 @@ for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = to
  //show the 'boot' message
  lisy_usb_show_boot_message(s_lisy_software_version,lisymini_game.type,lisymini_game.gamenr,lisymini_game.long_name);
 
- //set HW rules for solenoids
- //even this is game specific
+ //set HW rules for solenoids, let do APC this (faster)
  //we do it per default for all 6 special solenoids
+ //and ignore 'special switches' for pinmamem in switch_handler
  lisy_usb_sol_set_hwrule( 17, 65 ); 
  lisy_usb_sol_set_hwrule( 18, 66 );
  lisy_usb_sol_set_hwrule( 19, 67 ); 
  lisy_usb_sol_set_hwrule( 20, 68 ); 
  lisy_usb_sol_set_hwrule( 21, 69 ); 
+ lisy_usb_sol_set_hwrule( 22, 70 ); 
   
  //show green ligth for now, lisy mini is running
  lisy80_set_red_led(0);
@@ -784,9 +785,10 @@ if ( mysol != coreGlobals.solenoids)
 	   }
 	}//sol == 14	
 
-	//do not activate special solenoids, we do that with HW rules
         //for ac relais (sol 14) we havea special routine (see above)
-        if ( ( sol_no != 14) &( sol_no <= 16 )) lisy_usb_sol_ctrl(sol_no,action);
+	//special solenoids, we with HW rules only by ignoring special switches 65 ... 70
+	//if the pinball (e.g. pinbot) is using special solenoids 'normal' we do it here
+        if ( ( sol_no != 14) &( sol_no <= 22 )) lisy_usb_sol_ctrl(sol_no,action);
 
         //in case we hav solenoid #23, also activate #24 on APC
         //as APC use two solenoids for flipper (left/right)
