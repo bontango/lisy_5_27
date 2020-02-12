@@ -956,12 +956,20 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
   char filename[40];
 
  //only play data for internal board 0
- //tested with s11 pinbot
- if (board != 0) return;
+ //for second board we do only debugging atr the moment
+ if (board != 0) 
+ {
+  if ( ls80dbg.bitv.sound )
+  {
+    sprintf(debugbuf,"LISY_W sound_handler: BOARD:%d 0x%x (%d) (debug only)",board,data,data);
+    lisy80_debug(debugbuf);
+    }
+   return;
+ }
 
   if ( ls80dbg.bitv.sound )
   {
-    sprintf(debugbuf,"LISY_W sound_handler: board:%d 0x%x",board,data);
+    sprintf(debugbuf,"LISY_W sound_handler: board:%d 0x%x (%d)",board,data,data);
     lisy80_debug(debugbuf);
     }
 
