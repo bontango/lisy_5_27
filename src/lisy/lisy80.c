@@ -561,7 +561,7 @@ if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
 }//freeplay option set
 
 //set volume each time replay is pressed
-if ( (ret==LISY80_REPLAY_SWITCH) | ( action == 1))
+if ( (ret==LISY80_REPLAY_SWITCH) & ( action == 1))
 {
        if ( lisy80_has_soundcard )
          {
