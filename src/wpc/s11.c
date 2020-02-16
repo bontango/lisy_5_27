@@ -179,6 +179,9 @@ static INTERRUPT_GEN(s11_vblank) {
 #ifdef PROC_SUPPORT
     if (!coreGlobals.p_rocEn) {
 #endif
+#ifdef LISY_SUPPORT
+    if (0) { //not with LISY support
+#endif
 
     /*-- special solenoids updated based on switches         -- */
     /*-- but only when no P-ROC, otherwise special solenoids -- */
@@ -187,7 +190,7 @@ static INTERRUPT_GEN(s11_vblank) {
       if (core_gameData->sxx.ssSw[ii] && core_getSw(core_gameData->sxx.ssSw[ii]))
         locals.solenoids |= CORE_SOLBIT(CORE_FIRSTSSSOL+ii);
     }
-#ifdef PROC_SUPPORT
+#if defined(PROC_SUPPORT) || defined(LISY_SUPPORT)
     }
 #endif
   }
