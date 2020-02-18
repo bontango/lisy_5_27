@@ -33,7 +33,7 @@
 
 //the version
 #define LISY80control_SOFTWARE_MAIN    0
-#define LISY80control_SOFTWARE_SUB     25
+#define LISY80control_SOFTWARE_SUB     26
 
 
 //fake definiton needed in lisy_w
@@ -165,10 +165,11 @@ void do_sound_set( char *buffer)
  //JustBoom Sound? we may want to play wav files here
  if ( ls80opt.bitv.JustBoom_sound )
  {
+  lisy80_play_wav(sound_no);
   //construct the filename, according to game_nr
-  sprintf(wav_file_name,"%s%03d/%d.wav",LISY80_SOUND_PATH,lisy80_game.gamenr,sound_no);
-  sprintf(debugbuf,"/usr/bin/aplay %s",wav_file_name);
-  system(debugbuf);
+  //sprintf(wav_file_name,"%s%03d/%d.wav",LISY80_SOUND_PATH,lisy80_game.gamenr,sound_no);
+  //sprintf(debugbuf,"/usr/bin/aplay %s",wav_file_name);
+  //system(debugbuf);
  }
 
  if ( ls80dbg.bitv.sound )
