@@ -215,6 +215,7 @@ void lisy80_play_wav(int sound_no)
 {
 
  int i,ret;
+ int loopcount = 0;
 
  if ( ls80dbg.bitv.sound )
   {
@@ -237,7 +238,8 @@ void lisy80_play_wav(int sound_no)
   }
 
  //just play sound on sepearate channel
-   ret = Mix_PlayChannel( sound_no, lisysound[sound_no], lisy80_sound_stru[sound_no].loop);
+   if (  lisy80_sound_stru[sound_no].loop > 0) loopcount = -1; //infinitiv loops
+   ret = Mix_PlayChannel( sound_no, lisysound[sound_no], loopcount);
    if(ret == -1) {
          fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
      }
