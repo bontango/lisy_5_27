@@ -216,7 +216,7 @@ void lisy80_init( void )
      for(i=1; i<=31; i++)
        fprintf(stderr,"Sound[%d]: %d %d %d \n",i,lisy80_sound_stru[i].can_be_interrupted,
 			lisy80_sound_stru[i].loop,
-			lisy80_sound_stru[i].st_a_catchup);
+			lisy80_sound_stru[i].not_int_loops);
     }
    }
  }

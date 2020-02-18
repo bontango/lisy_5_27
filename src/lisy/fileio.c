@@ -1033,7 +1033,7 @@ int  lisy80_file_get_soundopts(void)
      sound_no = atoi(strtok(line, ";")); 	//sound number
      lisy80_sound_stru[sound_no].can_be_interrupted = atoi(strtok(NULL, ";"));	
      lisy80_sound_stru[sound_no].loop = atoi(strtok(NULL, ";"));	
-     lisy80_sound_stru[sound_no].st_a_catchup = atoi(strtok(NULL, ";"));	
+     lisy80_sound_stru[sound_no].not_int_loops = atoi(strtok(NULL, ";"));	
    } //while
    fclose(fstream);
 

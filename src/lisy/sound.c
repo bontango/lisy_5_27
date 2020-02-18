@@ -20,7 +20,7 @@
 
 
 //initial value
-static int lisy80_sound_stream_status = LISY80_SOUND_STATUS_IDLE;
+//static int lisy80_sound_stream_status = LISY80_SOUND_STATUS_IDLE;
 
 //our pointers to preloaded sounds
 Mix_Chunk *lisysound[257];   
@@ -214,46 +214,33 @@ void lisy80_sound_stream_destroy(void)
 void lisy80_play_wav(int sound_no)
 {
 
- int ret;
- static int last_sound_played = 0;
+ int i,ret;
 
  if ( ls80dbg.bitv.sound )
   {
-   sprintf(debugbuf,"lisy80_play_wav: want to play sound number: %d",sound_no);
+   sprintf(debugbuf,"lisy80_play_wav: want to play sound number: %d (loop:%d not_int_loops:%d)",sound_no,lisy80_sound_stru[sound_no].loop,lisy80_sound_stru[sound_no].not_int_loops);
    lisy80_debug(debugbuf);
   }
 
- //if we are in running state, but current sound is protected and still playing ignore request
- if ( lisy80_sound_stream_status == LISY80_SOUND_STATUS_RUNNING_PROTECTED)
+ //check if this sound can stop loop sounds
+ if ( lisy80_sound_stru[sound_no].not_int_loops == 0 )
   {
-    if (Mix_Playing(last_sound_played) != 0)
-      {
-        if ( ls80dbg.bitv.sound ) lisy80_debug("lisy80_sound: in running PROTECTED state, new request ignored\n");
-        return;
-      }
-  }
-
- //if we are in running state, check if old sound is still running
- if ( lisy80_sound_stream_status == LISY80_SOUND_STATUS_RUNNING)
-  {
-    if (Mix_Playing(last_sound_played) != 0)
+   //yes, check running state for all loop sounds and cancel them  if running
+   for(i=1; i<=31; i++)
     {
-      if ( ls80dbg.bitv.sound ) lisy80_debug("lisy80_sound: old sound still in running state, we cancel it\n");
-      Mix_HaltChannel(last_sound_played);
-    }
+     if (lisy80_sound_stru[i].loop & (Mix_Playing(i) != 0) )
+     {
+      if ( ls80dbg.bitv.sound ) lisy80_debug("found running loop sound, we cancel it\n");
+      Mix_HaltChannel(i);
+     }
+    }//all loop files
   }
 
-  //Play our (pre loaded) sound file on separate channel
-  ret = Mix_PlayChannel( sound_no, lisysound[sound_no], 0);
-  if(ret == -1) {
+ //just play sound on sepearate channel
+   ret = Mix_PlayChannel( sound_no, lisysound[sound_no], lisy80_sound_stru[sound_no].loop);
+   if(ret == -1) {
          fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
-        }
-
- //update the state  and store last sound played
- if (  lisy80_sound_stru[sound_no].can_be_interrupted ) lisy80_sound_stream_status = LISY80_SOUND_STATUS_RUNNING;
-   else lisy80_sound_stream_status = LISY80_SOUND_STATUS_RUNNING_PROTECTED;
- last_sound_played = sound_no;
-
+     }
 }
 
 /*
@@ -512,38 +499,3 @@ int mpf_play_mp3(Mix_Music *music)
 
 }
 
-  /*
- //if we are in running state, but current sound is protected and still playing ignore request
- if ( lisy80_sound_stream_status == LISY80_SOUND_STATUS_RUNNING_PROTECTED)
-  {
-    if (Mix_Playing(last_sound_played) != 0)
-      {
-        if ( ls80dbg.bitv.sound ) lisy80_debug("lisy80_sound: in running PROTECTED state, new request ignored\n");
-        return;
-      }
-  }
-
- //if we are in running state, check if old sound is still running
- if ( lisy80_sound_stream_status == LISY80_SOUND_STATUS_RUNNING)
-  {
-    if (Mix_Playing(last_sound_played) != 0)
-    {
-      if ( ls80dbg.bitv.sound ) lisy80_debug("lisy80_sound: old sound still in running state, we cancel it\n");
-      Mix_HaltChannel(last_sound_played);
-    }
-  }
-
-  //Play our (pre loaded) sound file on separate channel
-  ret = Mix_PlayChannel( sound_no, sound[sound_no], 0);
-  if(ret == -1) {
-         printf("Unable to play WAV file: %s\n", Mix_GetError());
-        }
-
- //update the state  and store last sound played
- if (  lisy80_sound_stru[sound_no].can_be_interrupted ) lisy80_sound_stream_status = LISY80_SOUND_STATUS_RUNNING;
-   else lisy80_sound_stream_status = LISY80_SOUND_STATUS_RUNNING_PROTECTED;
- last_sound_played = sound_no;
-
-}
-
-*/
