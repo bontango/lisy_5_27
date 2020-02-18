@@ -946,7 +946,9 @@ void send_update_infos( int sockfd )
   //start with some header
   sprintf(buffer,"do an update, with the URL specified<br><br>\n");
   sendit( sockfd, buffer);
-  sprintf(buffer,"NOTE: do only use URLs form lisy80.com<br><br>\n");
+  sprintf(buffer,"NOTE: do only use URLs from lisy.dev<br><br>\n");
+  sendit( sockfd, buffer);
+  sprintf(buffer,"for latest update use: http://www.flipperkeller.de/lisy/lisy_update.tgz <br><br>\n");
   sendit( sockfd, buffer);
 
   sprintf(buffer,"<p>  Update path: <input type=\"text\" name=\"U\" size=\"100\" maxlength=\"250\" value=\"\" /></p>");
