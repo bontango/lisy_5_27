@@ -92,10 +92,14 @@ static INTERRUPT_GEN(s7_vblank) {
     int ii;
     s7locals.solenoids |= CORE_SOLBIT(S7_GAMEONSOL);
     /*-- special solenoids updated based on switches --*/
+    /*-- but only when no LISY, otherwise special solenoids -- */
+    /*-- lock on when controlled by direct switches          -- */
+//#ifndef LISY_SUPPORT
     for (ii = 0; ii < 8; ii++) {
       if (core_gameData->sxx.ssSw[ii] && core_getSw(core_gameData->sxx.ssSw[ii]))
         s7locals.solenoids |= CORE_SOLBIT(CORE_FIRSTSSSOL+ii);
     }
+//#endif
   }
   s7locals.solsmooth[s7locals.vblankCount % S7_SOLSMOOTH] = s7locals.solenoids;
 #if S7_SOLSMOOTH != 2
@@ -296,12 +300,11 @@ lisy_w_throttle();
 
 static READ_HANDLER(pia4a_r)
  {
-#ifndef LISY_SUPPORT
-   return core_getSwCol(s7locals.swCol);
-#endif
 #if defined(LISY_SUPPORT)
-   return lisy_w_switch_handler(s7locals.swCol); //get the switches from LISY_W
+  //get the switches from LISY_mini
+  lisy_w_switch_handler();
 #endif
+   return core_getSwCol(s7locals.swCol);
  }
 
 /*---------------
