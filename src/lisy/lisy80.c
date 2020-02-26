@@ -169,11 +169,13 @@ void lisy80_init( void )
   //set volume according to poti
   lisy_adjust_volume();
   //speak Welcome Message only if jumper 'sound' set
+/* RTH disable for the moment
   if ( ls80dbg.bitv.sound)
   {
   sprintf(debugbuf,"/bin/echo \"Welcome to LISY 80 Version %s running on %s\" | /usr/bin/festival --tts",s_lisy_software_version,lisy80_game.long_name);
   system(debugbuf);
   }
+*/
  }
 
  //show green ligth for now, lisy80 is running
