@@ -25,7 +25,7 @@ void lisy_sound_handler( unsigned char board, unsigned char data );
 #define LISY_HW_LISY1   100             //LISY1
 #define LISY_HW_LISY80_311  311         //LISY80, old HW Version 3.11 (discontinue?)
 #define LISY_HW_LISY35  350             //LISY35 Bally
-#define LISY_HW_LISY80  80              //LISY80 HW320 & LISY_Home
+#define LISY_HW_LISY80  320             //LISY80 HW320 & LISY_Home
 #define LISY_HW_LISY_W  121             //LISYx_W (Williams) based on LISY_MINI1
 
 //the LISY HW ID, one revision can have multiple hw IDS
