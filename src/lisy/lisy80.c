@@ -1039,7 +1039,9 @@ void lisy80_coil_handler_b( int data)
 	   //and set the lamp/coil
 	    if ( new_lamp[i] ) lisy80_coil_set(i+1+offset, 1); else  lisy80_coil_set(i+1+offset, 0);
 
-           //special handling for sound16, which is lamp9/Q10 in case of bigger soundboard
+           //special handling for sound16, 
+           //which is lamp9/Q10 in case of bigger soundboard
+           //and lamp4/Q5 for system80B soundboards
 	   //we have to remember that for sound settings
 	    if ( (core_gameData->hw.soundBoard == SNDBRD_GTS80S) || (core_gameData->hw.soundBoard == SNDBRD_GTS80SP) )
               {
@@ -1047,7 +1049,14 @@ void lisy80_coil_handler_b( int data)
 	      }
 	    else
               {
-	       if ( ( i+1+offset) == 10 ) {  if ( new_lamp[i] ) sound16=16; else sound16=0; }
+		if (lisy80_game.is80B)
+		{
+	         if ( ( i+1+offset) == 5 ) {  if ( new_lamp[i] ) sound16=16; else sound16=0; }
+                }
+		else
+		{
+	         if ( ( i+1+offset) == 10 ) {  if ( new_lamp[i] ) sound16=16; else sound16=0; }
+                }
               }
 
   //aditional debug output
