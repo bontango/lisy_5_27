@@ -33,7 +33,7 @@
 
 //the version
 #define LISY80control_SOFTWARE_MAIN    0
-#define LISY80control_SOFTWARE_SUB     26
+#define LISY80control_SOFTWARE_SUB     27
 
 
 //fake definiton needed in lisy_w
