@@ -174,13 +174,27 @@ void do_sound_set( char *buffer)
 
  if ( ls80dbg.bitv.sound )
   {
-    sprintf(debugbuf,"send sound %d",sound_no);
+    if(lisy80_game.is80B)
+       sprintf(debugbuf,"80B:send sound %d",sound_no);
+    else 
+       sprintf(debugbuf,"send sound %d",sound_no);
     lisy80_debug(debugbuf);
   }
 
- //in case sound is >=16 we need to involve Lamp9/Q10 which is sound 16 
- if(sound_no >= 16) { sound_no = sound_no -16; lisy80_coil_set ( 10, 1); }
-    else lisy80_coil_set(10, 0);
+ //in case sound is >=16 we need to involve
+ // Lamp9/Q10 which is sound 16 on system80 games
+ // Lamp4/Q5 which is sound 16 on system80B games
+
+ if(sound_no >= 16)
+   { sound_no = sound_no -16;
+     if(lisy80_game.is80B) lisy80_coil_set ( 5, 1);
+     else lisy80_coil_set ( 10, 1);
+   }
+    else
+   {
+     if(lisy80_game.is80B) lisy80_coil_set ( 5, 0);
+     else lisy80_coil_set ( 10, 0);
+   }
 
  //now set sound
  lisy80_sound_set( sound_no );
