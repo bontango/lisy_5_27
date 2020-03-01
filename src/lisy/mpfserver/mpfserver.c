@@ -78,8 +78,9 @@ t_stru_lisymini_games_csv lisymini_game;
 //global avr for sound optuions
 t_stru_lisy80_sounds_csv lisy80_sound_stru[32];
 
-//global var for all switches
-unsigned char lisy_switches[81];
+//global var for all switches '90', just in case ..
+#define LISY_CONTROL_MAX_SWITCHES 90
+unsigned char lisy_switches[90];
 //global var for all lamps
 unsigned char lisy_lamps[120];
 //global var for all sounds
@@ -1072,9 +1073,11 @@ int main(int argc, char *argv[])
         }
 
 
-   //init internale vars
+   //init internale vars solenoids
    for (i=0; i<=lisy_hw.no_sol; i++) lisy_coil_pulse_time[i] = 150; //150msec pulsetime by default
    for (i=0; i<=lisy_hw.no_sol; i++) hw_rule_for_switch[i].is_set =0;
+   //init internale vars switches
+   for (i=0; i<LISY_CONTROL_MAX_SWITCHES; i++) lisy_switches[i] =0;
 
    //debug?
    if (ls80dbg.bitv.basic)
