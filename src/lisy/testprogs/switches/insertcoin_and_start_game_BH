@@ -1,0 +1,14 @@
+#close third position
+./a.out 127.0.0.1 125
+sleep 1
+#insert coin
+./a.out 127.0.0.1 137
+sleep 1
+./a.out 127.0.0.1 37
+#start game
+./a.out 127.0.0.1 146
+sleep 1
+./a.out 127.0.0.1 46
+#sleep 3
+#close saucer
+#./a.out 127.0.0.1 105

@@ -346,6 +346,7 @@ int lisy_get_position(void)
 
 //set new volume in case postion of poti have changed
 //give back setting made (in percent)
+//for HW_ID 2 set fix to 180 71%  RTH Test
 int lisy_adjust_volume(void)
 {
   static int first = 1;
@@ -354,6 +355,20 @@ int lisy_adjust_volume(void)
 
   //no poti for hardware 3.11
   if ( lisy_hardware_revision == 311) return(0);
+
+  //hardware 3.20 plus hardware_ID == 2 fix setting
+  if ( ( lisy_hardware_revision == 320) & ( lisy_hardware_ID == 2) )
+  {
+
+     system("/usr/bin/amixer sset PCM 180");
+
+     if ( ls80dbg.bitv.sound)
+     {
+      lisy80_debug("LISY80 with HW_ID 2: fix volume set to 180(71%)");
+     }
+
+    return(180);
+  }
 
 
   //read position
