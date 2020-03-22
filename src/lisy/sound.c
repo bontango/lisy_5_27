@@ -394,8 +394,11 @@ int lisy_adjust_volume(void)
  
     // first setting, we do it with amixer for now; range here is 0..100
      amix_volume = (sdl_volume*100) / 128;
-     //sprintf(debugbuf,"/usr/bin/amixer sset Digital %d\%%",amix_volume);
+     //set both PCM AND Digital
+     //which is for Hifiberry and Justboom
      sprintf(debugbuf,"/usr/bin/amixer sset PCM %d\%%",amix_volume);
+     system(debugbuf);
+     sprintf(debugbuf,"/usr/bin/amixer sset Digital %d\%%",amix_volume);
      system(debugbuf);
     // first setting, we announce here the volume setting
     // sprintf(debugbuf,"/bin/echo \"Volume set to %d percent\" | /usr/bin/festival --tts",amix_volume);
@@ -415,6 +418,8 @@ int lisy_adjust_volume(void)
      lisy_volume = sdl_volume; //set global var for SDL
      amix_volume = (sdl_volume*100) / 128;
      sprintf(debugbuf,"/usr/bin/amixer sset PCM %d\%%",amix_volume);
+     system(debugbuf);
+     sprintf(debugbuf,"/usr/bin/amixer sset Digital %d\%%",amix_volume);
      system(debugbuf);
      if ( ls80dbg.bitv.sound)
      {
