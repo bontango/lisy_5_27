@@ -41,7 +41,7 @@ t_stru_lisy80_games_csv lisy80_game;
 unsigned char lisy80_has_soundcard = 0;  //there is a pHat soundcard installed
 unsigned char lisy80_has_own_sounds = 0;  //play own sounds rather then usinig piname sound emulation
 
-t_stru_lisy80_sounds_csv lisy80_sound_stru[32];
+t_stru_lisy80_sounds_csv lisy80_sound_stru[64];
 int lisy_volume = 80; //SDL range from 0..128
 
 //global var for coil min pulse time option

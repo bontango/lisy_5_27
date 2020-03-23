@@ -1031,9 +1031,14 @@ int  lisy80_file_get_soundopts(void)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)
      sound_no = atoi(strtok(line, ";")); 	//sound number
-     lisy80_sound_stru[sound_no].volume = atoi(strtok(NULL, ";"));	
-     lisy80_sound_stru[sound_no].loop = atoi(strtok(NULL, ";"));	
-     lisy80_sound_stru[sound_no].not_int_loops = atoi(strtok(NULL, ";"));	
+     //sanity check for soundnumber ( max = 63)
+     if (sound_no < 64)
+	{
+     	 lisy80_sound_stru[sound_no].volume = atoi(strtok(NULL, ";"));	
+     	 lisy80_sound_stru[sound_no].loop = atoi(strtok(NULL, ";"));	
+     	 lisy80_sound_stru[sound_no].not_int_loops = atoi(strtok(NULL, ";"));	
+	}
+     else fprintf(stderr,"soundnumber is too big:%d in lisy80_sound_stru\n",sound_no);
    } //while
    fclose(fstream);
 
