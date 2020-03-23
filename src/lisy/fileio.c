@@ -1031,7 +1031,7 @@ int  lisy80_file_get_soundopts(void)
    {
      if (first_line) { first_line=0; continue; } //skip first line (Header)
      sound_no = atoi(strtok(line, ";")); 	//sound number
-     lisy80_sound_stru[sound_no].can_be_interrupted = atoi(strtok(NULL, ";"));	
+     lisy80_sound_stru[sound_no].volume = atoi(strtok(NULL, ";"));	
      lisy80_sound_stru[sound_no].loop = atoi(strtok(NULL, ";"));	
      lisy80_sound_stru[sound_no].not_int_loops = atoi(strtok(NULL, ";"));	
    } //while

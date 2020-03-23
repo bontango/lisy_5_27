@@ -51,7 +51,7 @@ typedef struct
 
 typedef struct 
 {
-  unsigned char can_be_interrupted;  // if this sound can be interrupted be others
+  unsigned char volume;  // volume of this sound (128 is max)
   unsigned char loop;  // sound needs to be playd in a 'loop' (e.g. background sound)
   unsigned char not_int_loops;  // sound will not interrupt loop sounds
 } t_stru_lisy80_sounds_csv;

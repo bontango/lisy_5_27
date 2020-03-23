@@ -167,11 +167,11 @@ void lisy80_init( void )
  if ( lisy80_has_soundcard )
  {
   //set volume according to poti
-  lisy_adjust_volume();
+  i = lisy_adjust_volume();
   //speak Welcome Message only if jumper 'sound' set
  // if ( ls80dbg.bitv.sound)
  // {
-  sprintf(debugbuf,"/bin/echo \"Welcome to LISY 80 Version %s running on %s\" | /usr/bin/festival --tts",s_lisy_software_version,lisy80_game.long_name);
+  sprintf(debugbuf,"/bin/echo \"Welcome to LISY 80 Version %s running on %s Volume is %d percent \" | /usr/bin/festival --tts",s_lisy_software_version,lisy80_game.long_name,i);
   system(debugbuf);
   }
  //}
@@ -218,7 +218,7 @@ void lisy80_init( void )
      if ( ls80dbg.bitv.sound) {
      int i;
      for(i=1; i<=31; i++)
-       fprintf(stderr,"Sound[%d]: %d %d %d \n",i,lisy80_sound_stru[i].can_be_interrupted,
+       fprintf(stderr,"Sound[%d]: %d %d %d \n",i,lisy80_sound_stru[i].volume,
 			lisy80_sound_stru[i].loop,
 			lisy80_sound_stru[i].not_int_loops);
     }
@@ -1049,11 +1049,27 @@ void lisy80_coil_handler_b( int data)
               {
 		if (lisy80_game.is80B)
 		{
-	         if ( ( i+1+offset) == 5 ) {  if ( new_lamp[i] ) sound16=16; else sound16=0; }
-                }
+	         if ( ( i+1+offset) == 5 ) 
+			{  
+			  if ( new_lamp[i] ) sound16=16; else sound16=0;
+               		  if ( ls80dbg.bitv.sound )
+                		{
+                        	  sprintf(debugbuf," SOUND16 (80B) changed to :%d" ,sound16 );
+                        	  lisy80_debug(debugbuf);
+                		}
+			 }
+                } //80B
 		else
 		{
-	         if ( ( i+1+offset) == 10 ) {  if ( new_lamp[i] ) sound16=16; else sound16=0; }
+	         if ( ( i+1+offset) == 10 ) 
+			{
+			  if ( new_lamp[i] ) sound16=16; else sound16=0;
+               		  if ( ls80dbg.bitv.sound )
+                		{
+                        	  sprintf(debugbuf," SOUND16 (80/80A) changed to :%d" ,sound16 );
+                        	  lisy80_debug(debugbuf);
+                		}
+			 }
                 }
               }
 

@@ -57,9 +57,6 @@ int lisy80_sound_stream_init(void)
   // allocate 31 mixing channels
   Mix_AllocateChannels(31);
 
-  // set volume to lisy_volume for all allocated channels
-  Mix_Volume(-1, lisy_volume);
-
     //try to preload all sounds
     for( i=1; i<=31; i++)
      {
@@ -67,16 +64,19 @@ int lisy80_sound_stream_init(void)
        if ( i==16) continue;
        //construct the filename, according to game_nr
        sprintf(wav_file_name,"%s%03d/%d.wav",LISY80_SOUND_PATH,lisy80_game.gamenr,i);
-       //put 'loop' fix to zero for now
+       //and load the file
        lisysound[i] = Mix_LoadWAV(wav_file_name);
        if(lisysound[i] == NULL) {
                 fprintf(stderr,"Unable to load WAV file: %s\n", Mix_GetError());
         }
  	else if ( ls80dbg.bitv.sound )
   	{
-   	  sprintf(debugbuf,"preload file:%s as sound number %d",wav_file_name,i);
+   	  sprintf(debugbuf,"preload file:%s as sound number %d (Volume:%d)",wav_file_name,i,lisy80_sound_stru[i].volume);
    	  lisy80_debug(debugbuf);
   	}
+
+	//set volume for each channel ( channel == soundnumber )
+	Mix_Volume( i, lisy80_sound_stru[i].volume);
      } // for i
 
 
