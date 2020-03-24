@@ -217,7 +217,7 @@ void lisy80_init( void )
    
      if ( ls80dbg.bitv.sound) {
      int i;
-     for(i=1; i<=31; i++)
+     for(i=1; i<=63; i++)
        fprintf(stderr,"Sound[%d]: %d %d %d \n",i,lisy80_sound_stru[i].volume,
 			lisy80_sound_stru[i].loop,
 			lisy80_sound_stru[i].not_int_loops);

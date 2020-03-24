@@ -1010,6 +1010,7 @@ int  lisy35_file_get_gamename(t_stru_lisy35_games_csv *lisy35_game)
 int  lisy80_file_get_soundopts(void)
 {
 
+ int i;
  char buffer[1024];
  char *line;
  char sound_file_name[80];
@@ -1026,6 +1027,14 @@ int  lisy80_file_get_soundopts(void)
       fprintf(stderr,"\n LISY80: opening %s failed ",sound_file_name);
       return -1;
    }
+
+   //init values of sound structure
+   for(i=0; i<=63; i++)
+    {
+	lisy80_sound_stru[i].volume = 0;
+	lisy80_sound_stru[i].loop = 0;
+	lisy80_sound_stru[i].not_int_loops = 0;
+     }
 
    while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
    {

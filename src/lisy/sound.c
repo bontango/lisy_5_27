@@ -54,29 +54,30 @@ int lisy80_sound_stream_init(void)
             return(-1);
         }
 
-  // allocate 31 mixing channels
-  Mix_AllocateChannels(31);
+  // allocate 64 possible mixing channels
+  Mix_AllocateChannels(64);
 
     //try to preload all sounds
-    for( i=1; i<=31; i++)
+    for( i=1; i<=63; i++)
      {
-       //there is no sound file 16
-       if ( i==16) continue;
-       //construct the filename, according to game_nr
-       sprintf(wav_file_name,"%s%03d/%d.wav",LISY80_SOUND_PATH,lisy80_game.gamenr,i);
-       //and load the file
-       lisysound[i] = Mix_LoadWAV(wav_file_name);
-       if(lisysound[i] == NULL) {
+       //only for sounds with volume not equal 0
+	if(lisy80_sound_stru[i].volume != 0)
+        {
+          //construct the filename, according to game_nr
+          sprintf(wav_file_name,"%s%03d/%d.wav",LISY80_SOUND_PATH,lisy80_game.gamenr,i);
+          //and load the file
+          lisysound[i] = Mix_LoadWAV(wav_file_name);
+          if(lisysound[i] == NULL) {
                 fprintf(stderr,"Unable to load WAV file: %s\n", Mix_GetError());
-        }
- 	else if ( ls80dbg.bitv.sound )
-  	{
-   	  sprintf(debugbuf,"preload file:%s as sound number %d (Volume:%d)",wav_file_name,i,lisy80_sound_stru[i].volume);
-   	  lisy80_debug(debugbuf);
-  	}
-
+           }
+ 	   else if ( ls80dbg.bitv.sound )
+  	   {
+   	     sprintf(debugbuf,"preload file:%s as sound number %d (Volume:%d)",wav_file_name,i,lisy80_sound_stru[i].volume);
+   	     lisy80_debug(debugbuf);
+  	   }
 	//set volume for each channel ( channel == soundnumber )
 	Mix_Volume( i, lisy80_sound_stru[i].volume);
+      } //volume not zero
      } // for i
 
 
@@ -217,6 +218,7 @@ void lisy80_play_wav(int sound_no)
 
  int i,ret;
  int loopcount = 0;
+ static int extended = 0;
 
  if ( ls80dbg.bitv.sound )
   {
@@ -224,8 +226,22 @@ void lisy80_play_wav(int sound_no)
    lisy80_debug(debugbuf);
   }
 
- //check if this sound can stop loop sounds
- if ( lisy80_sound_stru[sound_no].not_int_loops == 0 )
+ //does this sound mark an extended sound set?
+ if ( lisy80_sound_stru[sound_no].loop == 2 )
+ {
+   extended = 31; //second soundset has a shift of 31
+   if ( ls80dbg.bitv.sound )
+    {
+     sprintf(debugbuf,"lisy80_play_wav: found extended set: %d",sound_no);
+     lisy80_debug(debugbuf);
+    }
+   return; //nothing else todo
+ }
+
+ //sound_number plus extended flag is real soundnumber
+ sound_no += extended;
+
+ if ( lisy80_sound_stru[sound_no].not_int_loops == 0 ) //check if this sound can stop loop sounds
   {
    //yes, check running state for all loop sounds and cancel them  if running
    for(i=1; i<=31; i++)
@@ -244,6 +260,8 @@ void lisy80_play_wav(int sound_no)
    if(ret == -1) {
          fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
      }
+
+ extended = 0; //set back flag
 }
 
 /*
