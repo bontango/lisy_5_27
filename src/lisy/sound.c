@@ -393,10 +393,10 @@ int lisy_adjust_volume(void)
   //read position
   position = lisy_get_position();
 
-  //we assume pos is in range 600 ... 7500
+  //we assume pos is in range 600 ... 5000
   //and translate that to the SDL range of 0..128
-  //we use steps of 54
-  sdl_volume =  ( position / 54 ) - 10;
+  //we use steps of 36
+  sdl_volume =  ( position / 36 ) - 10;
   if ( sdl_volume > 128 ) sdl_volume = 128; //limit
 
   if ( first)  //first time called, set volume
