@@ -664,7 +664,7 @@ void lisy_usb_display_set_prot(uint8_t display_no,uint8_t protocol)
         fprintf(stderr,"display option Error writing to serial\n");
 }
 
-void lisy_usb_sound_play_file( char *filename )
+void lisy_usb_sound_play_file( unsigned char board, char *filename )
 {
 	uint8_t cmd;
 	int i,len;
@@ -680,8 +680,8 @@ void lisy_usb_sound_play_file( char *filename )
 
      //send cmd
      cmd_data[0] = cmd;
-     //track 1
-     cmd_data[1] = 1;
+     //track defines the board, track 1 -> board 0; track 2 -> board 2
+     cmd_data[1] = board + 1;
      //no flags
      cmd_data[2] = 0;
      //len of filename

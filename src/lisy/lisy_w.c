@@ -978,29 +978,20 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
 {
   char filename[40];
 
- //only play data for internal board 0
- //for second board we do only debugging atr the moment
- if (board != 0) 
- {
-  if ( ls80dbg.bitv.sound )
-  {
-    sprintf(debugbuf,"LISY_W sound_handler: BOARD:%d 0x%x (%d) (debug only)",board,data,data);
-    lisy80_debug(debugbuf);
-    }
-   return;
- }
-
   if ( ls80dbg.bitv.sound )
   {
     sprintf(debugbuf,"LISY_W sound_handler: board:%d 0x%x (%d)",board,data,data);
     lisy80_debug(debugbuf);
     }
 
- //ver 1.0, just consctruct filename: <no>.BIN
+ //just consctruct filename: <0xno>.BIN
  //do not play 0 & 0xff
  if (( data != 0) & (data != 0xff))
   {
-   sprintf(filename,"%d.BIN",data);
+   if(board == 0)
+     sprintf(filename,"00_0x%02x.BIN",data);
+   else
+     sprintf(filename,"01_0x%02x.BIN",data);
    //temp: RTH make soundoutpu adjustable
    if (ls80opt.bitv.watchdog ) 
     {
@@ -1008,7 +999,7 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
     }
     else
     {
-      lisy_usb_sound_play_file(filename);
+      lisy_usb_sound_play_file(board,filename);
     }
   }
 
