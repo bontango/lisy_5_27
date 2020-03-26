@@ -225,14 +225,37 @@ if (first)
  //is per default 3000 usec (3 msec)
  //we need to slow down a bit
 
- //see how many micros passed
- now = micros();
- //beware of 'wrap' which happens each 71 minutes
- if ( now < last) now = last; //we had a wrap
+ //do that in a while loop with updating soudn_stream in between
 
- //calculate difference and sleep a bit
- sleeptime = g_lisymini_throttle_val - ( now - last);
- if (sleeptime > 0) delayMicroseconds ( sleeptime );
+ //do update the soundstream if enabled (pinmame internal sound only)
+ if (sound_stream && sound_enabled)
+ {
+  do{
+    //do update the soundstream if enabled (pinmame internal sound only)
+    sound_stream_update(sound_stream);
+
+   //see how many micros passed
+   now = micros();
+   //beware of 'wrap' which happens each 71 minutes
+   if ( now < last) now = last; //we had a wrap
+
+   //calculate if we are above minimum sleep time
+   sleeptime = g_lisymini_throttle_val  - ( now - last);
+  } while ( sleeptime > 0);
+ }
+ else
+ //if no sound enabled use sleep routine
+  {
+   //see how many micros passed
+    now = micros();
+    //beware of 'wrap' which happens each 71 minutes
+    if ( now < last) now = last; //we had a wrap
+
+    //calculate if we are above minimum sleep time
+    sleeptime = g_lisymini_throttle_val - ( now - last);
+    if ( sleeptime > 0)
+          delayMicroseconds( sleeptime );
+  }
 
  //store current time for next round with speed limitc
  last = micros();

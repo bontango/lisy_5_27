@@ -276,75 +276,6 @@ void lisy80_shutdown(void)
 }
 
 
-/* RTH
-static int replay_pushed = 0;
-//take care of special functions
-//check value and give back new value if special function hits
-int lisy80_special_function(int myswitch, int action)
-{
- //we check for option freeplay here
- if (myswitch == LISY80_REPLAY_SWITCH)
-  {
-    //each time the replay switch is released
-    // do a delayed nvram write
-    //and set volume according to position of poti
-    if ( action == 1 ) 
-     { 
-       //RTH this conflicts with highcore ettings in testmode
-       //nvram_delayed_write = NVRAM_DELAY;
-       //if ( ls80dbg.bitv.basic) lisy80_debug("NVRAM delayed write initiated by REPLAY Switch");
-
-       //set volume in case position of poti has chnaged
-       //AND we do emulate sound with pi soundcard
-       if ( lisy80_has_soundcard )
-         {
-          lisy_adjust_volume();
-          if ( ls80dbg.bitv.basic) lisy80_debug("Volume setting initiated by REPLAY Switch");
-         }
-     }
-
-   //if freeplay option is not set give back old ret value
-   if (ls80opt.bitv.freeplay == 0) return (myswitch);
-   if (action==0) //closed
-    {
-	//switch closed, let do start counting in lisy80TickleWatchdog
-	replay_pushed = 1;
-        if ( ls80dbg.bitv.switches ) lisy80_debug("Freeplay BETA: play button pressed");
-    }
-   else 
-    { 
-	//stop counting
-	replay_pushed = 0;
-        if ( ls80dbg.bitv.switches )lisy80_debug("Freeplay BETA: play button released");
-    }
-
-   return(509);  //give back something >80
-  }
- //return old value
- return(myswitch);
-}
-*/
-
-/*
-//switch simulation via internal FIFO
-void lisy80_simulate_switch( int myswitch, int action )
-{
- int i;
-  //we need to do this severall times to fool Gottlieb debounce routine
-  for(i=0; i<=25; i++)
-   {
- 	LISY80_BufferIn ( (unsigned char) myswitch);
-	LISY80_BufferIn ( (unsigned char) action);
-   }
-
-  if ( ls80dbg.bitv.switches )
-  {
-        sprintf(debugbuf,"we simulate switch:%d action:%d",myswitch,action);
-        lisy80_debug(debugbuf);
-  }
-}
-*/
-
 //watchdog, this one is called every 15 milliseconds or so
 //depending on spee of PI
 //we do some usefull stuff in here
@@ -354,11 +285,6 @@ void lisy80TickleWatchdog( void )
  // RTH static int replay_pushed_count = 0;
  // RTH static int replay_was_pushed = 0;
  static int testbut_interval = 0;
-
-//do update the soundstream  RTH: replaced with SDL queue ?
-//        if (sound_stream && sound_enabled)
-//             	sound_stream_update(sound_stream);
-
 
  //count the tickles
  no_of_tickles++;
@@ -374,81 +300,8 @@ void lisy80TickleWatchdog( void )
    default: nvram_delayed_write--;
 	    break;
   }
-
-/* RTH
- //we do things here appr. five times  a second
- if ( testbut_interval++  > 10)
- {
-
- //test button is No:7 
- //if it is pressed for around 2-3 seconds, we assume
- //that the user wants to shutdown
- if ( swMatrix[8] & 0x01 )
- {
-  if (test_button_count++ > 13 )
-   lisy_time_to_quit_flag = 1;
- }
- else test_button_count = 0;
-
-//reset one interval
-  testbut_interval = 0;
- }
-*/
-
-/* RTH
- //check if we need to count for freeplay
- //replay button was pushed
- if (replay_pushed)
- {
-   replay_was_pushed = 1;
-   replay_pushed_count++;
-   //check if is still pushed
-   if(replay_pushed_count>20)
-    {
-        if ( ls80dbg.bitv.basic) lisy80_debug("we simulate coins now");
-	lisy80_simulate_switch( LISY80_LEFTCOIN_SWITCH, 0);
-	lisy80_simulate_switch( LISY80_LEFTCOIN_SWITCH, 1);
-	replay_was_pushed = 0;
-	replay_pushed_count = 0;
-    }
- }
-
- //replay button was pushed
- //but is now released
- if ((replay_was_pushed) && (replay_pushed==0))
- {
-        if ( ls80dbg.bitv.basic) lisy80_debug("replay normal function set");
-	lisy80_simulate_switch( LISY80_REPLAY_SWITCH, 0);
-	lisy80_simulate_switch( LISY80_REPLAY_SWITCH, 1);
-	replay_was_pushed = 0;
-	replay_pushed_count = 0;
- }
-*/
-
 }//watchdog
 
-/*
-//we simulate switches here via buffer
-int lisy80_simulated_switch_reader( unsigned char *action )
-{
-
- unsigned char value;
-
- if ( LISY80_BufferOut( &value) == LISY80_BUFFER_SUCCESS)
-  {
-   //next byte in buffer have to be action
-   LISY80_BufferOut ( action);
-   return value;
-  }
- else
-  return 510;
-}
-*/
-
-/*
- throttle routine as with sound disabled
- lisy80 runs faster than the org game :-0
-*/
 
 void lisy80_throttle(int riot0b)
 {
@@ -461,6 +314,7 @@ static unsigned int last;
 //on the 'normal' frequency a Gottlieb scan the switches
 // which is appr. each ms (can be 2 ms with PI zero & sound )
 // Note: if riot0b is 1, test showed that we have same spare time than
+
 
 //if val is zero, we have to run at full speed
 if ( g_lisy80_throttle_val == 0) return; 
@@ -475,16 +329,37 @@ if (first)
  // if we are faster than 1000 usec (1 msec)
  // which is the default for g_lisy80_throttle_val
  //we need to slow down a bit
+ //do that in a while loop with updating soudn_stream in between
 
- //see how many micros passed
- now = micros();
- //beware of 'wrap' which happens each 71 minutes
- if ( now < last) now = last; //we had a wrap
+ //do update the soundstream if enabled (pinmame internal sound only)
+ if (sound_stream && sound_enabled) 
+ {
+  do{
+    //do update the soundstream if enabled (pinmame internal sound only)
+    sound_stream_update(sound_stream);
 
- //calculate if we are above minimum sleep time 
- sleeptime = g_lisy80_throttle_val - ( now - last);
- if ( sleeptime > 0)
+   //see how many micros passed
+   now = micros();
+   //beware of 'wrap' which happens each 71 minutes
+   if ( now < last) now = last; //we had a wrap
+
+   //calculate if we are above minimum sleep time 
+   sleeptime = g_lisy80_throttle_val - ( now - last);
+  } while ( sleeptime > 0);
+ }
+ else
+ //if no sound enabled use sleep routine
+  {
+   //see how many micros passed
+    now = micros();
+    //beware of 'wrap' which happens each 71 minutes
+    if ( now < last) now = last; //we had a wrap
+
+    //calculate if we are above minimum sleep time 
+    sleeptime = g_lisy80_throttle_val - ( now - last);
+    if ( sleeptime > 0)
           delayMicroseconds( sleeptime );
+  }
 
  //store current time for next round with speed limitc
  last = micros();
