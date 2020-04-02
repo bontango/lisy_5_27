@@ -624,19 +624,41 @@ if (first)
  }
  }//first
 
-
+ //g_lisy1_throttle_val
  // if we are faster than throttle value which is per default 3000 usec (3 msec)
  //we need to slow down a bit
  //lets iterate the best value for cpu scaling from puinmame
 
- //see how many micros passed
- now = micros();
- //beware of 'wrap' which happens each 71 minutes
- if ( now < last) now = last; //we had a wrap
+ //do update the soundstream if enabled (pinmame internal sound only)
+ if (sound_stream && sound_enabled)
+ {
+  do{
+    //do update the soundstream if enabled (pinmame internal sound only)
+    sound_stream_update(sound_stream);
 
- //calculate difference and sleep a bit
- sleeptime = g_lisy1_throttle_val - ( now - last); 
- if (sleeptime > 0) delayMicroseconds ( sleeptime );
+   //see how many micros passed
+   now = micros();
+   //beware of 'wrap' which happens each 71 minutes
+   if ( now < last) now = last; //we had a wrap
+
+   //calculate if we are above minimum sleep time
+   sleeptime = g_lisy1_throttle_val - ( now - last);
+  } while ( sleeptime > 0);
+ }
+ else
+ //if no sound enabled use sleep routine
+  {
+   //see how many micros passed
+    now = micros();
+    //beware of 'wrap' which happens each 71 minutes
+    if ( now < last) now = last; //we had a wrap
+
+    //calculate if we are above minimum sleep time
+    sleeptime = g_lisy1_throttle_val - ( now - last);
+    if ( sleeptime > 0)
+          delayMicroseconds( sleeptime );
+  }
+
 
  //store current time for next round with speed limitc
  last = micros();
