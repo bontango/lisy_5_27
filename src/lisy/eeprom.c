@@ -18,6 +18,7 @@ added pic eeprom routines bontango January 2018
 #include <string.h>
 #include <time.h>
 #include <linux/i2c-dev.h>
+#include <linux/i2c.h>
 #include <wiringPi.h>
 #include "utils.h"
 #include "eeprom.h"

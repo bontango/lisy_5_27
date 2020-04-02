@@ -26,7 +26,7 @@ Implementation into pinmame; Files where LISY code is inserted:
 	src/unix/main.c -> lisy_set_gamename( ..) & lisy_version
 	src/mame.c -> lisy_init() & lisy80_error()
 	src/usrintrf.c -> check for 'time_to_quit' 
-	src/unix/unix.mak -> link in LISY_OBJ & lisy.mak & SDL,SDL2,wiringpi library
+	src/unix/unix.mak -> link in LISY_OBJ & lisy.mak & SDL,SDL2,wiringpi and i2c library
 	src/unix/video.c -> fake video, no videooutput with lisy
 	src/unix/video-drivers/vid_lisy.c -> part of fake lisy video
 	src/unix/sysdep/dsp-drivers/alsa.c -> new alsa code for lisy
