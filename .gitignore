@@ -1,6 +1,5 @@
 xpinmame.obj/
 xpinmame.vid_lisy
-src/lisy/lisyversion.h
 a.out
 *.o
 src/lisy/testprogs/get_dip_from_S1/get_dip_from_S1
