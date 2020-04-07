@@ -984,6 +984,11 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
     lisy80_debug(debugbuf);
     }
 
+
+      //RTH test, use play index and let do APC the work ;-)
+      lisy_usb_sound_play_index(board,data);
+
+/*
  //just consctruct filename: <0xno>.BIN
  //do not play 0 & 0xff
  if (( data != 0) & (data != 0xff))
@@ -1002,6 +1007,7 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
       lisy_usb_sound_play_file(board,filename);
     }
   }
+*/
 
 }
 
