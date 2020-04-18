@@ -368,7 +368,6 @@ int lisy_usb_send_SEG7_to_disp(unsigned char disp, int num, uint16_t *data)
  int len,pos;
  unsigned char seg7_data[20];
  map_byte1_t apc1, pinmame1;
- map_byte2_t apc2, pinmame2;
 
  cmd = 255;
  switch(disp)
@@ -393,11 +392,23 @@ int lisy_usb_send_SEG7_to_disp(unsigned char disp, int num, uint16_t *data)
   seg7_data[pos++] = len;
 
   //send SEG7 data
-  //do we need a mapping?
+  //we need a mapping
   for ( i=0; i<num; i++)
   {
-    //assign low byte only
-    seg7_data[pos++] = data[i] & 0xFF;
+
+   //low byte first
+    pinmame1.byte = data[i] & 0xFF;
+    //do map
+    apc1.bitv_apc.a = pinmame1.bitv_pinmame.a;
+    apc1.bitv_apc.b = pinmame1.bitv_pinmame.b;
+    apc1.bitv_apc.c = pinmame1.bitv_pinmame.c;
+    apc1.bitv_apc.d = pinmame1.bitv_pinmame.d;
+    apc1.bitv_apc.e = pinmame1.bitv_pinmame.e;
+    apc1.bitv_apc.f = pinmame1.bitv_pinmame.f;
+    apc1.bitv_apc.g = pinmame1.bitv_pinmame.g;
+    apc1.bitv_apc.comma = pinmame1.bitv_pinmame.FREE;
+    //assign
+    seg7_data[pos++] = apc1.byte;
   }
  }
 
