@@ -375,11 +375,18 @@ void send_ASCII_to_display( int no, UINT16 *dispval)
 
 }
 
+//send SEG7 data to display
+void send_SEG7_to_display( int no, UINT16 *dispval)
+{
+
+ if (no) { lisy_usb_send_SEG7_to_disp(no, 7, dispval);  }
+ else { lisy_usb_send_SEG7_to_disp(no, 4, dispval); } //status display
+
+}
+
 //send SEG14 data to display
 void send_SEG14_to_display( int no, UINT16 *dispval)
 {
- int i;
- char str[8]; //include null termination
 
  if (no) { lisy_usb_send_SEG14_to_disp(no, 7, dispval);  }
  else { lisy_usb_send_SEG14_to_disp(no, 4, dispval); } //status display
@@ -491,9 +498,11 @@ void lisy_w_display_handler_SYS11A(void)
   if(first)
   {
         memset(mysegments.segments,0,sizeof(mysegments.segments));
-	//for system11A display 1&2 are SEG14, other keep at default ASCII with dot
+	//for system11A display 1&2 are SEG14, 3&4 SEG7, we keep status display as ASCII
 	lisy_usb_display_set_prot(1,4);
 	lisy_usb_display_set_prot(2,4);
+	lisy_usb_display_set_prot(3,3);
+	lisy_usb_display_set_prot(4,3);
 	first=0;
   }
  
@@ -506,8 +515,10 @@ void lisy_w_display_handler_SYS11A(void)
     len = sizeof(mysegments.disp.player1);
     if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_SEG14_to_display(1, tmp_segments.disp.player1);
     if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_SEG14_to_display(2, tmp_segments.disp.player2);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, tmp_segments.disp.player4);
+    //if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, tmp_segments.disp.player3);
+    //if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_SEG7_to_display(3, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_SEG7_to_display(4, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;

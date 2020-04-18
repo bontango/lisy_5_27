@@ -359,6 +359,62 @@ int lisy_usb_print_hw_info(void)
 }
 
 
+//send SEG7 data to a display
+int lisy_usb_send_SEG7_to_disp(unsigned char disp, int num, uint16_t *data)
+{
+
+ unsigned char hi, lo;
+ unsigned char cmd, i;
+ int len,pos;
+ unsigned char seg7_data[20];
+ map_byte1_t apc1, pinmame1;
+ map_byte2_t apc2, pinmame2;
+
+ cmd = 255;
+ switch(disp)
+ {
+        case 0: cmd = LISY_S_DISP_0; break;
+        case 1: cmd = LISY_S_DISP_1; break;
+        case 2: cmd = LISY_S_DISP_2; break;
+        case 3: cmd = LISY_S_DISP_3; break;
+        case 4: cmd = LISY_S_DISP_4; break;
+        case 5: cmd = LISY_S_DISP_5; break;
+        case 6: cmd = LISY_S_DISP_6; break;
+ }
+
+ if( cmd != 255 )
+ {
+  pos = 0;
+  //construct data
+  //command
+  seg7_data[pos++] = cmd;
+  //send length of byte sequence
+  len = num; //we send one byte per data
+  seg7_data[pos++] = len;
+
+  //send SEG7 data
+  //do we need a mapping?
+  for ( i=0; i<num; i++)
+  {
+    //assign low byte only
+    seg7_data[pos++] = data[i] & 0xFF;
+  }
+ }
+
+//debug?
+if ( ls80dbg.bitv.displays )
+   {
+    sprintf(debugbuf,"send cmd %d to Display %d: %d bytes of SEG7 data",cmd,disp,len);
+    lisy80_debug(debugbuf);
+   }
+
+ //send it all
+ if ( lisy_api_write( seg7_data,len+2,ls80dbg.bitv.displays) != len+2) { fprintf(stderr,"ERROR write display\n"); return (-2); }
+
+ return (len+2);
+
+}
+
 //send SEG14 data to a display
 int lisy_usb_send_SEG14_to_disp(unsigned char disp, int num, uint16_t *data)
 {
