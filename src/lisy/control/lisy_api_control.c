@@ -39,7 +39,6 @@
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
 
-
 //fake definiton needed in lisy1
 void cpunum_set_clockscale(int cpu, float clockscale) {  };
 
@@ -59,6 +58,9 @@ typedef struct
 } t_coreGlobals;
 t_coreGlobals coreGlobals;
 void lisy_nvram_write_to_file( void ) {  }
+void sound_stream_update(int *dum ) {  };
+unsigned char sound_stream = 0;
+unsigned char  sound_enabled = 0;
 
 
 //global vars
