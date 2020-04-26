@@ -802,6 +802,7 @@ void lisy35_set_variant(void)
    if ( lisy35_game.soundboard_variant == LISY35_SB_EXTENDED)
    {
     if (core_gameData->hw.soundBoard == SNDBRD_BY51) lisy35_coil_set_extended_SB_type(0);
+    else if (core_gameData->hw.soundBoard == SNDBRD_BY56) lisy35_coil_set_extended_SB_type(0); //Xenon
 	else lisy35_coil_set_extended_SB_type(1);
    }
 
@@ -820,7 +821,7 @@ void lisy35_set_variant(void)
         sprintf(debugbuf,"Info: LISY35 will use soundboard variant 1 (standard SB)");
      break;
     case LISY35_SB_EXTENDED:
-      if (core_gameData->hw.soundBoard == SNDBRD_BY51)
+      if ((core_gameData->hw.soundBoard == SNDBRD_BY51) | (core_gameData->hw.soundBoard == SNDBRD_BY56))
          sprintf(debugbuf,"Info: LISY35 will use soundboard variant 2 (EXTENDED SB Type 2581-51)");
       else
          sprintf(debugbuf,"Info: LISY35 will use soundboard variant 2 (EXTENDED SB Type S&T)");
