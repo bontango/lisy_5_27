@@ -94,12 +94,12 @@ static INTERRUPT_GEN(s7_vblank) {
     /*-- special solenoids updated based on switches --*/
     /*-- but only when no LISY, otherwise special solenoids -- */
     /*-- lock on when controlled by direct switches          -- */
-//#ifndef LISY_SUPPORT
+#ifndef LISY_SUPPORT
     for (ii = 0; ii < 8; ii++) {
       if (core_gameData->sxx.ssSw[ii] && core_getSw(core_gameData->sxx.ssSw[ii]))
         s7locals.solenoids |= CORE_SOLBIT(CORE_FIRSTSSSOL+ii);
     }
-//#endif
+#endif
   }
   s7locals.solsmooth[s7locals.vblankCount % S7_SOLSMOOTH] = s7locals.solenoids;
 #if S7_SOLSMOOTH != 2

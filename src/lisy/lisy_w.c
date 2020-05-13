@@ -168,7 +168,8 @@ void lisy_w_init( void )
  lisy80_set_sighandler();
 
 //set the internal type
-if (strcmp(lisymini_game.type,"SYS9") == 0) lisymini_game.typeno = LISYW_TYPE_SYS9;
+if (strcmp(lisymini_game.type,"SYS7") == 0) lisymini_game.typeno = LISYW_TYPE_SYS7;
+else if (strcmp(lisymini_game.type,"SYS9") == 0) lisymini_game.typeno = LISYW_TYPE_SYS9;
 else if (strcmp(lisymini_game.type,"SYS11A") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11A;
 else lisymini_game.typeno = LISYW_TYPE_NONE;
 
@@ -177,14 +178,14 @@ else lisymini_game.typeno = LISYW_TYPE_NONE;
  sprintf(s_lisy_software_version,"%d%02d %02d",sw_main,sw_sub,commit);
  fprintf(stderr,"This is LISY (Lisy Mini) by bontango, Version %s\n",s_lisy_software_version);
 
-
+  
  //set displays initial to ASCII with dot (6)  for boot message
  for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 6);
 //convert gamename to uppercase for display
 for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = toupper(lisymini_game.long_name[i]);
  //show the 'boot' message
  lisy_usb_show_boot_message(s_lisy_software_version,lisymini_game.type,lisymini_game.gamenr,lisymini_game.long_name);
-
+  
  //set HW rules for solenoids, let do APC this (faster)
  //we do it per default for all 6 special solenoids
  //and ignore 'special switches' for pinmamem in switch_handler
@@ -194,7 +195,7 @@ for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = to
  lisy_usb_sol_set_hwrule( 20, 68 ); 
  lisy_usb_sol_set_hwrule( 21, 69 ); 
  lisy_usb_sol_set_hwrule( 22, 70 ); 
-  
+
  //show green ligth for now, lisy mini is running
  lisy80_set_red_led(0);
  lisy80_set_yellow_led(0);
@@ -602,9 +603,12 @@ void lisy_w_display_handler(void)
 
  switch(lisymini_game.typeno)
  {
-  case LISYW_TYPE_SYS9: lisy_w_display_handler_SYS9();
+  case LISYW_TYPE_SYS7: 
+  case LISYW_TYPE_SYS9: 
+	lisy_w_display_handler_SYS9();
        break;
-  case LISYW_TYPE_SYS11A: lisy_w_display_handler_SYS11A();
+  case LISYW_TYPE_SYS11A: 
+	lisy_w_display_handler_SYS11A();
        break;
  }
 }
@@ -996,29 +1000,8 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
     }
 
 
-      //RTH test, use play index and let do APC the work ;-)
+      //use command  play index and let do APC the work ;-)
       lisy_usb_sound_play_index(board,data);
-
-/*
- //just consctruct filename: <0xno>.BIN
- //do not play 0 & 0xff
- if (( data != 0) & (data != 0xff))
-  {
-   if(board == 0)
-     sprintf(filename,"00_0x%02x.BIN",data);
-   else
-     sprintf(filename,"01_0x%02x.BIN",data);
-   //temp: RTH make soundoutpu adjustable
-   if (ls80opt.bitv.watchdog ) 
-    {
-      lisy80_debug("LISY80 option: watchdog: no soundoutput!");
-    }
-    else
-    {
-      lisy_usb_sound_play_file(board,filename);
-    }
-  }
-*/
 
 }
 

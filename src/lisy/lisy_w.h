@@ -13,6 +13,7 @@ void lisy_w_sound_handler( unsigned char board, unsigned char data);
 #define LISYW_TYPE_NONE 0
 #define LISYW_TYPE_SYS9 1
 #define LISYW_TYPE_SYS11A 2
+#define LISYW_TYPE_SYS7 3
 
 #endif  /* LISY_W_H */
 
