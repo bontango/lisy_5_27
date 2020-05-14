@@ -16,6 +16,8 @@
 #include <wiringPi.h>
 //this is for I2C over open&fcntl
 #include <linux/i2c-dev.h>
+#include <linux/i2c.h>
+#include <i2c/smbus.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -31,6 +33,7 @@
 #include "hw_lib.h"
 #include "fadecandy.h"
 #include "usbserial.h"
+#include "lisy_api_com.h"
 #include "lisy_home.h"
 #include "externals.h"
 #include "lisy.h"
@@ -188,7 +191,8 @@ void lisymini_hwlib_init( void )
  K1_debug_values = lisymini_get_dip("K1");
 
  //init usb serial
- if ( lisy_usb_init() >= 0) 
+ fd_api = lisy_usb_init();
+ if ( fd_api >= 0) 
   fprintf(stderr,"Info: usb serial successfull initiated\n");
  else
  {
@@ -202,7 +206,7 @@ void lisymini_hwlib_init( void )
 
  //do some debug output if requested
  //number of displays
- if (ls80dbg.bitv.basic) lisy_usb_print_hw_info();
+ if (ls80dbg.bitv.basic) lisy_api_print_hw_info();
 
 
  //set all the leds controlled by the PI

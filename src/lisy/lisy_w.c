@@ -26,6 +26,7 @@
 #include "sound.h"
 #include "lisy.h"
 #include "usbserial.h"
+#include "lisy_api_com.h"
 
 //typedefs
 
@@ -180,21 +181,21 @@ else lisymini_game.typeno = LISYW_TYPE_NONE;
 
   
  //set displays initial to ASCII with dot (6)  for boot message
- for(i=0; i<5; i++) lisy_usb_display_set_prot( i, 6);
+ for(i=0; i<5; i++) lisy_api_display_set_prot( i, 6);
 //convert gamename to uppercase for display
 for(i=0; i<strlen(lisymini_game.long_name); i++) lisymini_game.long_name[i] = toupper(lisymini_game.long_name[i]);
  //show the 'boot' message
- lisy_usb_show_boot_message(s_lisy_software_version,lisymini_game.type,lisymini_game.gamenr,lisymini_game.long_name);
+ lisy_api_show_boot_message(s_lisy_software_version,lisymini_game.type,lisymini_game.gamenr,lisymini_game.long_name);
   
  //set HW rules for solenoids, let do APC this (faster)
  //we do it per default for all 6 special solenoids
  //and ignore 'special switches' for pinmamem in switch_handler
- lisy_usb_sol_set_hwrule( 17, 65 ); 
- lisy_usb_sol_set_hwrule( 18, 66 );
- lisy_usb_sol_set_hwrule( 19, 67 ); 
- lisy_usb_sol_set_hwrule( 20, 68 ); 
- lisy_usb_sol_set_hwrule( 21, 69 ); 
- lisy_usb_sol_set_hwrule( 22, 70 ); 
+ lisy_api_sol_set_hwrule( 17, 65 ); 
+ lisy_api_sol_set_hwrule( 18, 66 );
+ lisy_api_sol_set_hwrule( 19, 67 ); 
+ lisy_api_sol_set_hwrule( 20, 68 ); 
+ lisy_api_sol_set_hwrule( 21, 69 ); 
+ lisy_api_sol_set_hwrule( 22, 70 ); 
 
  //show green ligth for now, lisy mini is running
  lisy80_set_red_led(0);
@@ -372,7 +373,7 @@ void send_ASCII_to_display( int no, UINT16 *dispval)
  if (no) { for(i=0; i<=6; i++) str[i] = my_seg2char( dispval[i]); str[7] = '\0'; }
  else { for(i=0; i<=3; i++) str[i] = my_seg2char( dispval[i]); str[5] = '\0'; } //status display
 
- lisy_usb_send_str_to_disp(no, str);
+ lisy_api_send_str_to_disp(no, str);
 
 }
 
@@ -380,8 +381,8 @@ void send_ASCII_to_display( int no, UINT16 *dispval)
 void send_SEG7_to_display( int no, UINT16 *dispval)
 {
 
- if (no) { lisy_usb_send_SEG7_to_disp(no, 7, dispval);  }
- else { lisy_usb_send_SEG7_to_disp(no, 4, dispval); } //status display
+ if (no) { lisy_api_send_SEG7_to_disp(no, 7, dispval);  }
+ else { lisy_api_send_SEG7_to_disp(no, 4, dispval); } //status display
 
 }
 
@@ -389,8 +390,8 @@ void send_SEG7_to_display( int no, UINT16 *dispval)
 void send_SEG14_to_display( int no, UINT16 *dispval)
 {
 
- if (no) { lisy_usb_send_SEG14_to_disp(no, 7, dispval);  }
- else { lisy_usb_send_SEG14_to_disp(no, 4, dispval); } //status display
+ if (no) { lisy_api_send_SEG14_to_disp(no, 7, dispval);  }
+ else { lisy_api_send_SEG14_to_disp(no, 4, dispval); } //status display
 
 }
 
@@ -500,10 +501,10 @@ void lisy_w_display_handler_SYS11A(void)
   {
         memset(mysegments.segments,0,sizeof(mysegments.segments));
 	//for system11A display 1&2 are SEG14, 3&4 SEG7, we keep status display as ASCII
-	lisy_usb_display_set_prot(1,4);
-	lisy_usb_display_set_prot(2,4);
-	lisy_usb_display_set_prot(3,3);
-	lisy_usb_display_set_prot(4,3);
+	lisy_api_display_set_prot(1,4);
+	lisy_api_display_set_prot(2,4);
+	lisy_api_display_set_prot(3,3);
+	lisy_api_display_set_prot(4,3);
 	first=0;
   }
  
@@ -629,13 +630,13 @@ static int simulate_coin_flag = 0;
 if (first)
 {
  //get the switch status from APC andf set internal pinmame matrix
- for(i=1; i<=64; i++) core_setSw( i, lisy_usb_get_switch_status(i) );
+ for(i=1; i<=64; i++) core_setSw( i, lisy_api_get_switch_status(i) );
   
  //advance no=72
- core_setSw( S11_SWADVANCE, lisy_usb_get_switch_status(72) );
+ core_setSw( S11_SWADVANCE, lisy_api_get_switch_status(72) );
 
  //up down switch no=73
- core_setSw( S11_SWUPDN, lisy_usb_get_switch_status(73) );
+ core_setSw( S11_SWUPDN, lisy_api_get_switch_status(73) );
 
  first=0;
 }
@@ -804,7 +805,7 @@ if ( mysol != coreGlobals.solenoids)
           //no muxed solenoid active, activate ac relais
 	  if (mux_sol_active == 0) 
 	    {
-	      lisy_usb_sol_ctrl(14,action);
+	      lisy_api_sol_ctrl(14,action);
 	      current_ac_state = action;
 	      if ( ls80dbg.bitv.coils )
 		{
@@ -826,15 +827,15 @@ if ( mysol != coreGlobals.solenoids)
         //for ac relais (sol 14) we havea special routine (see above)
 	//special solenoids, we with HW rules only by ignoring special switches 65 ... 70
 	//if the pinball (e.g. pinbot) is using special solenoids 'normal' we do it here
-        if ( ( sol_no != 14) &( sol_no <= 22 )) lisy_usb_sol_ctrl(sol_no,action);
+        if ( ( sol_no != 14) &( sol_no <= 22 )) lisy_api_sol_ctrl(sol_no,action);
 
         //in case we hav solenoid #23, also activate #24 on APC
         //as APC use two solenoids for flipper (left/right)
-        if (sol_no == 23 ) { lisy_usb_sol_ctrl(23,action); lisy_usb_sol_ctrl(24,action); }
+        if (sol_no == 23 ) { lisy_api_sol_ctrl(23,action); lisy_api_sol_ctrl(24,action); }
 
 	//with A-C Relais Solenoids 1..8 are muxed, in pinmame we have the 'C-Side' as Solenoids 25..33
         //so we need to substract 24 before sending command to APC
-	if ( sol_no >=25) { lisy_usb_sol_ctrl(sol_no-24,action); }
+	if ( sol_no >=25) { lisy_api_sol_ctrl(sol_no-24,action); }
 
         //debug?
         if ( ( ls80dbg.bitv.coils ) & ( sol_no != 14))
@@ -855,7 +856,7 @@ if ( mysol != coreGlobals.solenoids)
 	      for(j=24; j<=31; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
 	      if (mux_sol_active == 0)
 		{
-	          lisy_usb_sol_ctrl(14,ac_want_to_change-1); 
+	          lisy_api_sol_ctrl(14,ac_want_to_change-1); 
                   if ( ls80dbg.bitv.coils )
                   {
                     sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: AC-Relais DELAYD change to %d",ac_want_to_change-1);
@@ -915,7 +916,7 @@ unsigned char lisy_w_switch_reader( unsigned char *action )
  if ( num > 40)
  { 
   num = 0;
-  switch_number  = lisy_usb_ask_for_changed_switch();
+  switch_number  = lisy_api_ask_for_changed_switch();
  }
  else return 80; //no asking this round
 
@@ -974,7 +975,7 @@ void lisy_w_lamp_handler( )
 	 //send to APC
 	 lamp_no = i*8 + j +1;
 	 if ( CHECK_BIT(coreGlobals.lampMatrix[i],j)) action = 1; else action = 0;
-	 lisy_usb_lamp_ctrl(lamp_no,action);
+	 lisy_api_lamp_ctrl(lamp_no,action);
          if ( ls80dbg.bitv.lamps )
          {
          sprintf(debugbuf,"LISY_W_LAMP_HANDLER: Lamp:%d, changed to %d",lamp_no,action);
@@ -1001,7 +1002,7 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
 
 
       //use command  play index and let do APC the work ;-)
-      lisy_usb_sound_play_index(board,data);
+      lisy_api_sound_play_index(board,data);
 
 }
 
@@ -1012,10 +1013,10 @@ void lisy_mini_shutdown(void)
  fprintf(stderr,"LISY Mini graceful shutdown initiated\n");
  //show the 'shutdown' message
  //set displays  one and two to ASCII with dot (6)  for boot message
- lisy_usb_display_set_prot( 1, 6);
- lisy_usb_display_set_prot( 2, 6);
- lisy_usb_send_str_to_disp( 1, "DO SHUT");
- lisy_usb_send_str_to_disp( 2, "DOWN   ");
+ lisy_api_display_set_prot( 1, 6);
+ lisy_api_display_set_prot( 2, 6);
+ lisy_api_send_str_to_disp( 1, "DO SHUT");
+ lisy_api_send_str_to_disp( 2, "DOWN   ");
 
 }
 

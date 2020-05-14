@@ -3,7 +3,7 @@
 
 
 // all the extenal global vars & routines
-//from lisy80.c or lisy1.c or lisy.c
+//from lisy80.c or lisy1.c or lisy.c or lisy_w.c
 
 extern int lisy_has24c04;
 extern int lisy_hardware_revision;
@@ -25,6 +25,7 @@ extern t_lisy_lamp_to_led_map lisy_lamp_to_led_map[52];
 extern t_lisy_home_lamp_map lisy_home_lamp_map[49];
 extern t_lisy_home_coil_map lisy_home_coil_map[10];
 
+extern int fd_api;  //file descriptor for lisy api ( eg APC )
 
 extern t_stru_lisy80_games_csv lisy80_game;
 extern t_stru_lisy1_games_csv lisy1_game;
