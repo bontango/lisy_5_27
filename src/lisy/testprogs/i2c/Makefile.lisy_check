@@ -4,7 +4,7 @@
 
 CC      = /usr/bin/gcc
 CFLAGS  = -Wall -g -D_REENTRANT -DDEBUG
-LDFLAGS = -lwiringPi
+LDFLAGS = -lwiringPi  -li2c
 
 OBJ = lisy_check.o
 
