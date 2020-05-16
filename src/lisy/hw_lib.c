@@ -42,6 +42,7 @@
 //global vars for I2C
 int fd_disp_pic;	//file descriptor for display pic
 int fd_coil_pic;	//file descriptor for coil pic
+//fd_apc via externals.h from lisy_w.c
 
 //local vars for handling values for K1(debug) and part of S1, usually from switch pic
 unsigned char K1_debug_values = 0;
@@ -203,6 +204,68 @@ void lisymini_hwlib_init( void )
   exit(1);
  }
 
+ //do some debug output if requested
+ //number of displays
+ if (ls80dbg.bitv.basic) lisy_api_print_hw_info();
+
+
+ //set all the leds controlled by the PI
+ lisy80_set_red_led(0);
+ lisy80_set_yellow_led(0);
+ lisy80_set_green_led(1);
+
+ //init internal FIFO
+ LISY80_BufferInit();
+}
+
+
+//Hardware INIT LISY mini (e.g Williams)
+void lisyapc_hwlib_init( void )
+{
+
+ char hw_id_str[80];
+ int ret;
+
+ //set GPIOs for the traffic ligth
+ pinMode ( LISY_MINI_LED_RED, OUTPUT);
+ pinMode ( LISY80_LED_YELLOW, OUTPUT);
+ pinMode ( LISY_MINI_LED_GREEN, OUTPUT);
+
+ //lets do debug
+ if (ls80dbg.bitv.basic) lisy80_debug("LISY APC Hardware init start");
+
+ //fix for LISYmini at the moment
+ lisy_hardware_revision = LISY_HW_LISY_W;
+
+ //get value of k3 dip;
+ //3 == no options active
+ //lisy_K3_value = lisymini_get_dip("K3");
+ lisy_K3_value = 3;
+
+ //now get debug options
+ K1_debug_values = lisymini_get_dip("K1");
+
+ //******************
+ //init I2C serial to APC
+ //******************
+ if ((fd_api = open( I2C_DEVICE,O_RDWR)) < 0)
+     fprintf(stderr,"ERROR: cannot open I2C BUS \n");
+
+ // Set the port options and set the address of the device we wish to speak to
+ if (ioctl(fd_api, I2C_SLAVE, APC_ADDR) < 0)
+ {
+     fprintf(stderr,"ERROR: cannot open I2C communication to APC\n");
+     lisy80_set_red_led(1);
+     lisy80_set_yellow_led(0);
+     lisy80_set_green_led(0);
+     exit(1);
+ }
+else
+     fprintf(stderr,"Info: I2C communication to APC successfull initiated\n");
+
+ //check connected hardware ID
+ ret = lisy_api_get_con_hw( hw_id_str );
+ fprintf(stderr,"Info: hardware ID is %s (%d)\n",hw_id_str,ret);
 
  //do some debug output if requested
  //number of displays

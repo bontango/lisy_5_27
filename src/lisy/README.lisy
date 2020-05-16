@@ -55,6 +55,7 @@ valid variants:
 - lisy35 -> lisy_variant: 3 - Bally
 - lisy80 -> lisy_variant: 1 - Gottlieb System80 & LISY Home Games based on System80
 - lisy_m -> lisy_variant: 4 - LISY Mini e.g. Williams System 3 to System11 via APC
+- lisy_apc -> lisy_variant: 5 - LISY APC based on LISY Mini
 the hardware init routine does:
 	- load the wiringPI library
 	- get debug options via "lisy80_dip1_debug_option" ( S1 dip switch 7)

@@ -79,6 +79,7 @@ void lisy_shutdown(void)
 //- lisy35 -> lisy_variant: 3 - Bally
 //- lisy80 -> lisy_variant: 1 - Gottlieb System80 & LISY Home Games based on System80
 //- lisy_m -> lisy_variant: 4 - LISY Mini e.g. Williams System 3 to System11 via APC
+//- lisy_apc -> lisy_variant: 5 - LISY APC based on LISY Mini
 void lisy_hw_init(int lisy_variant)
 {
 
@@ -125,6 +126,11 @@ if( lisy_variant == 4)
  { 
    //for williams we use special board, minilisy only
    lisymini_hwlib_init();
+ }
+else if( lisy_variant == 5)
+ { 
+   //for williams we use special board, minilisy only
+   lisyapc_hwlib_init();
  }
 else
  {
@@ -213,6 +219,22 @@ int lisy_set_gamename( char *arg_from_main, char *lisy_gamename)
                 else
                    fprintf(stderr,"LISYMINI: no matching game or other error\n\r");
         }
+
+ 	//LISY APC based on LISY_Mini 
+        //get the gamename from DIP Switch on LISY_mini in case gamename (last arg) is 'lisy_apc'
+        else if ( strcmp(arg_from_main,"lisy_apc") == 0)
+        {
+            //do init of LISY_Mini hardware first, as we need to read dip switch from the board to identify game to emulate
+            lisy_hw_init(5); //Variant 5
+                if ( (res=lisymini_get_gamename(lisy_gamename)) >= 0)
+                  {
+                   strcpy(arg_from_main,lisy_gamename);
+                   fprintf(stderr,"LISY_APC: we are emulating Game No:%d %s\n\r",res,lisy_gamename);
+                  }
+                else
+                   fprintf(stderr,"LISY_APC: no matching game or other error\n\r");
+        }
+
 
 	//no match so far, return 1, lets decide main what to do
 	else

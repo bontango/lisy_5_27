@@ -684,17 +684,38 @@ void lisy_api_show_boot_message(char *software_version,char *system_id, int game
   //show 'system_id' on display one -> "LISY_W"
   sprintf(buf,"%-6s",system_id);
   lisy_api_send_str_to_disp( 1, buf);
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"Info_boot: System_ID: %s",system_id);
+    lisy80_debug(debugbuf);
+  }
+
 
   //show 'gamename' on display two
   sprintf(buf,"%-6s",gamename);
   lisy_api_send_str_to_disp( 2, buf);
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"Info_boot: gamename: %s",gamename);
+    lisy80_debug(debugbuf);
+  }
 
   //show S2 Setting on display three
   sprintf(buf,"S2 %03d",game_no);
   lisy_api_send_str_to_disp( 3, buf);
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"Info_boot: S2 Setting: %d",game_no);
+    lisy80_debug(debugbuf);
+  }
 
   //show Version number on Display 4
   lisy_api_send_str_to_disp( 4, software_version);
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"Info_boot: SW Version: %s",software_version);
+    lisy80_debug(debugbuf);
+  }
 
 
   //status display countdown
@@ -707,5 +728,16 @@ void lisy_api_show_boot_message(char *software_version,char *system_id, int game
 
   //blank status display
   lisy_api_send_str_to_disp( 0, "    ");
+}
+
+//get Info about connected Hardware
+int lisy_api_get_con_hw( char *idstr )
+{
+ if ( ls80dbg.bitv.basic )
+  {
+    lisy80_debug("ask for connected hardware");
+  }
+
+  return (lisy_api_read_string(LISY_G_HW, idstr));
 }
 

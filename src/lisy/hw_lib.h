@@ -50,6 +50,7 @@ typedef union {
 void lisy80_hwlib_wiringPI_init(void);
 void lisy_hwlib_init( void );
 void lisymini_hwlib_init( void );
+void lisyapc_hwlib_init( void );
 void lisy80_hwlib_shutdown(void);
 
 int lisy80_write_byte_pic( int fd, unsigned char buf);
@@ -105,6 +106,7 @@ struct {
 #define I2C_DEVICE "/dev/i2c-1"
 #define DISP_PIC_ADDR 0x40              // Address of PIC for displays
 #define COIL_PIC_ADDR 0x41              // Address of PIC for coils
+#define APC_ADDR 0x44                   // Address of APC via I2C
 
 //Transistor assigment for the 9 Solenoids LISY80
 #define Q_SOL1 60
