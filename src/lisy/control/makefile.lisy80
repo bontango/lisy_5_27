@@ -24,6 +24,7 @@ OBJ = $(LOP)lisy80.o \
       $(LOP)opc.o \
       $(LOP)fadecandy.o \
       $(LOP)usbserial.o \
+      $(LOP)lisy_api_com.o \
       $(LOP)lisy_home.o \
       $(LOP)lisy_w.o \
       lisy80_control.o

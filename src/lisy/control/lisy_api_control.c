@@ -30,6 +30,7 @@
 #include "../fadecandy.h"
 #include "../lisy_api.h"
 #include "../usbserial.h"
+#include "../lisy_api_com.h"
 
 
 //the version
@@ -310,7 +311,7 @@ void do_solenoid_set( char *buffer)
  solenoid = (10 * (buffer[1]-48)) + buffer[2]-48;
 
  //pulse the coil
- lisy_usb_sol_pulse( solenoid);
+ lisy_api_sol_pulse( solenoid);
 
 }
 
@@ -403,14 +404,14 @@ void do_lamp_set( char *buffer)
  {
   for ( i=0; i<=nu; i++)
    {
-     lisy_usb_lamp_ctrl(i, action);
+     lisy_api_lamp_ctrl(i, action);
      lamp[i] = action;
      lamp[77] = action;
    } 
  }
  else
  {
-  lisy_usb_lamp_ctrl( lamp_no, action); 
+  lisy_api_lamp_ctrl( lamp_no, action); 
   lamp[lamp_no] = action;
   if ( ls80dbg.bitv.lamps )
          {
@@ -1453,7 +1454,7 @@ int main(int argc, char *argv[])
     get_coil_descriptions();
 
     //see initially what switches are set
-    for(i=1; i<=79; i++) switch_LISYAPI[i] = lisy_usb_get_switch_status(i);
+    for(i=1; i<=79; i++) switch_LISYAPI[i] = lisy_api_get_switch_status(i);
 
 
  // try say something about LISY80 if sound is requested
@@ -1495,10 +1496,10 @@ int main(int argc, char *argv[])
        strcpy (ifa.ifr_name, "noip");
        //construct the message
         fprintf(stderr,"LISY MINI NO IP");
-        lisy_usb_send_str_to_disp( 1, " NO IP ");
-        lisy_usb_send_str_to_disp( 2, "0000000");
-        lisy_usb_send_str_to_disp( 3, "0000000");
-        lisy_usb_send_str_to_disp( 4, "0000000");
+        lisy_api_send_str_to_disp( 1, " NO IP ");
+        lisy_api_send_str_to_disp( 2, "0000000");
+        lisy_api_send_str_to_disp( 3, "0000000");
+        lisy_api_send_str_to_disp( 4, "0000000");
      }
      else //we found an IP
      {
@@ -1507,19 +1508,19 @@ int main(int argc, char *argv[])
         line = inet_ntoa(myip->sin_addr);
 	//split the ip to four displays and store value for display routine
         sprintf(buffer,"%-7s",strtok(line, "."));
-	lisy_usb_send_str_to_disp(1,buffer);
+	lisy_api_send_str_to_disp(1,buffer);
        fprintf(stderr,"%s\n",buffer);
 
         sprintf(buffer,"%-7s",strtok(NULL, "."));
-	lisy_usb_send_str_to_disp(2,buffer);
+	lisy_api_send_str_to_disp(2,buffer);
        fprintf(stderr,"%s\n",buffer);
 
         sprintf(buffer,"%-7s",strtok(NULL, "."));
-	lisy_usb_send_str_to_disp(3,buffer);
+	lisy_api_send_str_to_disp(3,buffer);
        fprintf(stderr,"%s\n",buffer);
 
         sprintf(buffer,"%-7s",strtok(NULL, "."));
-	lisy_usb_send_str_to_disp(4,buffer);
+	lisy_api_send_str_to_disp(4,buffer);
        fprintf(stderr,"%s\n",buffer);
      }
 
