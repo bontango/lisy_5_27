@@ -395,6 +395,96 @@ void send_SEG14_to_display( int no, UINT16 *dispval)
 
 }
 
+
+//display handler System7
+void lisy_w_display_handler_SYS7(void)
+{
+  static UINT8 first = 1;
+  UINT8 i,k;
+  UINT16 status[4];
+  UINT16 sum1,sum2;
+  int len;
+
+
+  static t_mysegments_s7 mysegments;
+  t_mysegments_s7 tmp_segments;
+
+  if(first)
+  {
+        memset(mysegments.segments,0,sizeof(mysegments.segments));
+	first=0;
+  }
+ 
+  //something changed?
+  if  ( memcmp(mysegments.segments,coreGlobals.segments,sizeof(mysegments)) != 0)
+  {
+    //store it
+    memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
+    //check it display per display
+    len = sizeof(mysegments.disp.player1);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, tmp_segments.disp.player4);
+    //status display
+    sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
+    sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
+    if (sum1 != sum2 )
+	{
+	 status[0]=tmp_segments.disp.credits1;
+	 status[1]=tmp_segments.disp.credits2;
+	 status[2]=tmp_segments.disp.balls1;
+	 status[3]=tmp_segments.disp.balls2;
+	 send_ASCII_to_display(0, status);
+	}
+    //remember it
+    memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
+
+    //and print out if debug display
+    if ( ls80dbg.bitv.displays ) 
+    {
+    char c;
+    lisy80_debug("display change detected");
+    fprintf(stderr,"\nPlayer1: ");
+    for(i=0; i<=6; i++) 
+    {
+      c=my_seg2char(mysegments.disp.player1[i]); 
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
+    }
+    fprintf(stderr,"\nPlayer2: ");
+    for(i=0; i<=6; i++) 
+    {
+      c=my_seg2char(mysegments.disp.player2[i]); 
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
+    }
+
+    fprintf(stderr,"\nPlayer3: ");
+    for(i=0; i<=6; i++) 
+    {
+      c=my_seg2char(mysegments.disp.player3[i]); 
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
+    }
+    fprintf(stderr,"\nPlayer4: ");
+    for(i=0; i<=6; i++) 
+    {
+      c=my_seg2char(mysegments.disp.player4[i]); 
+      if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
+      else fprintf(stderr,"%c",c);
+    }
+
+    fprintf(stderr,"\nCredits: %c%c",my_seg2char(mysegments.disp.credits1),my_seg2char(mysegments.disp.credits2));
+    fprintf(stderr,"\nBalls: %c%c",my_seg2char(mysegments.disp.balls1),my_seg2char(mysegments.disp.balls2));
+    fprintf(stderr,"\n\n ");
+    }
+
+    //check which line has changed
+
+  }
+}
+
 //display handler System9
 void lisy_w_display_handler_SYS9(void)
 {
@@ -605,6 +695,8 @@ void lisy_w_display_handler(void)
  switch(lisymini_game.typeno)
  {
   case LISYW_TYPE_SYS7: 
+	lisy_w_display_handler_SYS7();
+       break;
   case LISYW_TYPE_SYS9: 
 	lisy_w_display_handler_SYS9();
        break;
