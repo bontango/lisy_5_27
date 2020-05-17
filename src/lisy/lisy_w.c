@@ -934,10 +934,18 @@ if ( mysol != coreGlobals.solenoids)
 	   }
 	}//sol == 14	
 
-        //for ac relais (sol 14) we havea special routine (see above)
+        //for ac relais (sol 14) we have special routine (see above)
 	//special solenoids, we with HW rules only by ignoring special switches 65 ... 70
 	//if the pinball (e.g. pinbot) is using special solenoids 'normal' we do it here
-        if ( ( sol_no != 14) &( sol_no <= 22 )) lisy_api_sol_ctrl(sol_no,action);
+	if (lisy_has_AC_Relais == 1)
+	  {
+        	if ( ( sol_no != 14) &( sol_no <= 22 )) lisy_api_sol_ctrl(sol_no,action);
+	  }
+	else
+	  {
+		//include sol 14 for systems without AC Relais
+        	if ( sol_no <= 22 ) lisy_api_sol_ctrl(sol_no,action);
+	  }
 
         //in case we hav solenoid #23, also activate #24 on APC
         //as APC use two solenoids for flipper (left/right)
@@ -957,7 +965,7 @@ if ( mysol != coreGlobals.solenoids)
 	  else if ( ( sol_no >=  25)& (lisy_has_AC_Relais == 1))
           { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d ( AC is %d)",sol_no-24,sol_no,action,current_ac_state); }
           else
-          { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( no AC Realis) ",sol_no,action,current_ac_state); }
+          { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( no AC Relais) ",sol_no,action,current_ac_state); }
 
            lisy80_debug(debugbuf);
          }
