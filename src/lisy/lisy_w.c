@@ -153,6 +153,9 @@ int g_lisymini_throttle_val = 300;
 //as pinmame internal starts with 1
 unsigned char swMatrixLISY_W[9] = { 0,0,0,0,0,0,0,0,0 };
 
+//internal flag fo AC Relais, default 0 ->not present
+unsigned char lisy_has_AC_Relais = 0;
+
 
 //init SW portion of lisy_w
 void lisy_w_init( void )
@@ -173,6 +176,20 @@ if (strcmp(lisymini_game.type,"SYS7") == 0) lisymini_game.typeno = LISYW_TYPE_SY
 else if (strcmp(lisymini_game.type,"SYS9") == 0) lisymini_game.typeno = LISYW_TYPE_SYS9;
 else if (strcmp(lisymini_game.type,"SYS11A") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11A;
 else lisymini_game.typeno = LISYW_TYPE_NONE;
+
+//set internal flags based on system type
+switch(lisymini_game.typeno)
+{
+	case LISYW_TYPE_SYS7: 
+	case LISYW_TYPE_SYS9: 
+		lisy_has_AC_Relais = 0;	
+		break;
+	case LISYW_TYPE_SYS11A: 
+		lisy_has_AC_Relais = 1;	
+		break;
+	default : 
+		lisy_has_AC_Relais = 0;	
+}
 
  //show up on calling terminal
  lisy_get_sw_version( &sw_main, &sw_sub, &commit);
@@ -885,10 +902,11 @@ if ( mysol != coreGlobals.solenoids)
         if ( CHECK_BIT(coreGlobals.solenoids,i)) action = 1; else action = 0;
 	//sol number starts with 1
         sol_no = i+1;
+
 	//in case of Solenoid 14 (AC Relais)
         //check if one of the multiplexed sols are still active
         // (RTH: TODO need another routine for Road Kings)
-	if ( sol_no == 14)
+	if ( ( sol_no == 14) & (lisy_has_AC_Relais == 1) )
 	{
 	  //lets check if any of the muxed solenoids are active now
 	  //in pinmame these are 1..8 ( AC-relais 0) and 25..33 ( AC-relais 1)
@@ -924,18 +942,22 @@ if ( mysol != coreGlobals.solenoids)
         //in case we hav solenoid #23, also activate #24 on APC
         //as APC use two solenoids for flipper (left/right)
         if (sol_no == 23 ) { lisy_api_sol_ctrl(23,action); lisy_api_sol_ctrl(24,action); }
+	//for games without AC Relais Williams use Sol 25 for flipper enable
+        if ( (sol_no == 25 ) & (lisy_has_AC_Relais == 0)) { lisy_api_sol_ctrl(23,action); lisy_api_sol_ctrl(24,action); }
 
 	//with A-C Relais Solenoids 1..8 are muxed, in pinmame we have the 'C-Side' as Solenoids 25..33
         //so we need to substract 24 before sending command to APC
-	if ( sol_no >=25) { lisy_api_sol_ctrl(sol_no-24,action); }
+	if (( sol_no >=25) & (lisy_has_AC_Relais == 1)) { lisy_api_sol_ctrl(sol_no-24,action); }
 
         //debug?
         if ( ( ls80dbg.bitv.coils ) & ( sol_no != 14))
         {
-	  if ( sol_no < 25)
+	  if ( ( sol_no < 25)& (lisy_has_AC_Relais == 1))
            { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( AC is %d)",sol_no,action,current_ac_state); }
-          else
+	  else if ( ( sol_no >=  25)& (lisy_has_AC_Relais == 1))
           { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d ( AC is %d)",sol_no-24,sol_no,action,current_ac_state); }
+          else
+          { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( no AC Realis) ",sol_no,action,current_ac_state); }
 
            lisy80_debug(debugbuf);
          }
