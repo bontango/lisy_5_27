@@ -53,7 +53,6 @@ typedef struct {
     unsigned int  soundBoard;
   } hw;
 } core_tGameData;
-
 core_tGameData *core_gameData;
 
 //fake definiton needed for mame functions
@@ -567,7 +566,7 @@ int set_coil( int no, int action)
 	{
           set_lamp( no-100, 1);
      	  delay(lisy_coil_pulse_time[no]);
-          set_lamp( no-100, 1);
+          set_lamp( no-100, 0);
 	}
 
 
