@@ -72,7 +72,7 @@ unsigned char  sound_enabled = 0;
 //int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
 //int lisy80_coil_min_pulse_mod = 0; //deaktivated by default
 extern int lisy1_coil_min_pulse_time[8]; //not used at the moment
-unsigned char lisy_coil_pulse_time[20];
+unsigned char lisy_coil_pulse_time[160]; //we need this many as we map lamps to coils
 
 
 //global var for internal game_name structure, set by  lisy35_file_get_gamename in main
@@ -561,7 +561,16 @@ int set_coil( int no, int action)
          sprintf(debugbuf,"MPF coil %d remapped to %d\n",no,no-100);
          lisy80_debug(debugbuf);
         }
-    set_lamp( no-100, action);
+    if ( action != 2)
+       set_lamp( no-100, action);
+    else //we need to pulse
+	{
+          set_lamp( no-100, 1);
+     	  delay(lisy_coil_pulse_time[no]);
+          set_lamp( no-100, 1);
+	}
+
+
     return 0;
   }
 
@@ -1080,7 +1089,8 @@ int main(int argc, char *argv[])
 
 
    //init internale vars solenoids
-   for (i=0; i<=lisy_hw.no_sol; i++) lisy_coil_pulse_time[i] = 150; //150msec pulsetime by default
+   //for (i=0; i<=lisy_hw.no_sol; i++) lisy_coil_pulse_time[i] = 150; //150msec pulsetime by default
+   for (i=0; i<=159; i++) lisy_coil_pulse_time[i] = 150; //150msec pulsetime by default
    for (i=0; i<=lisy_hw.no_sol; i++) hw_rule_for_switch[i].is_set =0;
    //init internale vars switches
    for (i=0; i<LISY_CONTROL_MAX_SWITCHES; i++) lisy_switches[i] =0;
