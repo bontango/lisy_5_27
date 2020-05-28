@@ -34,6 +34,8 @@
 #include "../fadecandy.h"
 #include "../lisy_api.h"
 #include "../usbserial.h"
+#include "../lisy_api_com.h"
+
 #include "linked_list.h"
 #include "mpfserver.h"
 
@@ -61,6 +63,10 @@ typedef struct
 } t_coreGlobals;
 t_coreGlobals coreGlobals;
 void lisy_nvram_write_to_file( void ) {  }
+void sound_stream_update(int *dum ) {  };
+unsigned char sound_stream = 0;
+unsigned char  sound_enabled = 0;
+
 
 //lisy pulse mod extension
 //int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
@@ -604,7 +610,7 @@ if (ls80dbg.bitv.coils)
     		{
      		//now pulse the coil
      		lisy1_coil_set(coil,1);
-     		delay(lisy_coil_pulse_time[coil]);
+     		delay(lisy_coil_pulse_time[no]);
      		lisy1_coil_set(coil,0);
      		}
              	break;
@@ -625,7 +631,7 @@ if (ls80dbg.bitv.coils)
                 {
                 //now pulse the coil
                 lisy35_coil_set(coil,1);
-     		delay(lisy_coil_pulse_time[coil]);
+     		delay(lisy_coil_pulse_time[no]);
                 lisy35_coil_set(coil,0);
                 }
              	break;
@@ -669,7 +675,7 @@ if (ls80dbg.bitv.coils)
     		{
      		//now pulse the coil
      		lisy80_coil_set(coil,1);
-     		delay(lisy_coil_pulse_time[coil]);
+     		delay(lisy_coil_pulse_time[no]);
      		lisy80_coil_set(coil,0);
      		}
              	break;

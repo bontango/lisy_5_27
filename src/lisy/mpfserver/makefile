@@ -3,7 +3,7 @@
 
 CC      = /usr/bin/gcc
 CFLAGS  = -g -Wunused-variable
-LDFLAGS = -lwiringPi -lSDL2 -lSDL2_mixer
+LDFLAGS = -lwiringPi -lSDL2 -lSDL2_mixer -li2c
 LOP = /home/pi//lisy/xpinmame.obj/lisy/
 
 OBJ = $(LOP)lisy80.o \
@@ -21,6 +21,7 @@ OBJ = $(LOP)lisy80.o \
       $(LOP)opc.o \
       $(LOP)fadecandy.o \
       $(LOP)usbserial.o \
+      $(LOP)lisy_api_com.o \
       $(LOP)lisy_home.o \
       $(LOP)lisy_w.o \
       linked_list.o \
