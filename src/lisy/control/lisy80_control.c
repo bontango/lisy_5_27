@@ -33,7 +33,7 @@
 
 //the version
 #define LISY80control_SOFTWARE_MAIN    0
-#define LISY80control_SOFTWARE_SUB     27
+#define LISY80control_SOFTWARE_SUB     28
 
 
 //fake definiton needed in lisy_w
@@ -142,7 +142,7 @@ void do_sound_set( char *buffer)
 {
 
  int sound_no,i;
- char wav_file_name[80];
+ //char wav_file_name[80];
 
  //the format here is 'Sxx' 
  //we trust ASCII values
@@ -223,7 +223,6 @@ void do_update_local( int sockfd, char *what)
  char *real_name,*tmp_name;
  char *line;
  char buffer[255];
- int ret_val;
 
  //we trust ASCII values
  //the format here is 'Y'
@@ -248,12 +247,12 @@ void do_update_local( int sockfd, char *what)
  sprintf(buffer,"try to get extract the update file<br><br>\n");
  sendit( sockfd, buffer);
  sprintf(buffer,"/bin/tar -xzf %s -C /home/pi/update",tmp_name);
- ret_val = system(buffer);
+ system(buffer);
 
  sprintf(buffer,"try to execute install.sh from within update pack<br><br>\n");
  sendit( sockfd, buffer);
  sprintf(buffer,"/bin/bash /home/pi/update/install.sh");
- ret_val = system(buffer);
+ system(buffer);
 
  sprintf(buffer,"update done, you may want to reboot now<br><br>\n");
  sendit( sockfd, buffer);
@@ -751,7 +750,7 @@ void get_coil_descriptions(void)
 void send_solenoid_infos( int sockfd )
 {
   int i;
-  char colorcode[80],buffer[256];
+  char colorcode[80],buffer[512];
 
      //basic info, header line
      sprintf(buffer,"Selected game is %s, internal number %d<br><br>\n",lisy80_game.long_name,lisy80_game.gamenr);
@@ -773,7 +772,7 @@ void send_solenoid_infos( int sockfd )
 void send_sound_infos( int sockfd )
 {
   int i,j,k;
-  char colorcode[80],buffer[256];
+  char colorcode[80],buffer[512];
 
      //basic info, header line
      sprintf(buffer,"Selected game is %s, internal number %d<br><br>\n",lisy80_game.long_name,lisy80_game.gamenr);
@@ -805,7 +804,7 @@ void send_dipswitch_infos( int sockfd )
  unsigned char dipvalue; 
  char dip_comment[256];
  char filename[80];
- char buffer[256];
+ char buffer[512];
 
  //basic info, header line
  sprintf(buffer,"Selected game is %s, internal number %d<br>\n",lisy80_game.long_name,lisy80_game.gamenr);
@@ -862,7 +861,7 @@ void send_dipswitch_infos( int sockfd )
 void send_lamp_infos( int sockfd )
 {
   int i,j,lamp_no;
-  char colorcode[80],buffer[256],name[10];
+  char colorcode[80],buffer[512],name[10];
  //colorcodes
   char *code_yellow = "style=\'BACKGROUND-COLOR:yellow; width: 125px; margin:auto; height: 5em;\'";
   char *code_blue = "style=\'BACKGROUND-COLOR:powderblue; width: 125px; margin:auto; height: 5em;\'";
@@ -902,7 +901,7 @@ void send_lamp_infos( int sockfd )
 
 void send_update_infos( int sockfd )
 {
-  char buffer[256];
+  char buffer[512];
   int ret_val;
 
   if ( update_path[0] != ' ')  //there was a setting of the update path
@@ -1114,7 +1113,7 @@ void send_switch_infos( int sockfd )
 {
   int ret,i,j,switch_no;
   unsigned char action;
-  char colorcode[80],buffer[256];
+  char colorcode[80],buffer[512];
   unsigned char strobe,returnval;
   //colorcodes
   char *code_red = "<td align=center style=\"background-color:red;\">";
@@ -1216,7 +1215,7 @@ void send_home_infos( int sockfd )
 //send software version(s)
 void send_software_infos( int sockfd )
 {
-     char buffer[256];
+     char buffer[512];
      char versionstring[256];
      int dum;
      FILE *fp;

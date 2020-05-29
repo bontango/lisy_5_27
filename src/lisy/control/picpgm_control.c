@@ -40,7 +40,7 @@ void do_flash( int sockfd, char *what)
  FILE *fstream;
  char *orgname, *source;
  char *line;
- char buffer[256];
+ char buffer[512];
  int ret_val,line_nu;
  //we trust ASCII values
  //the format here is 'F'
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 {
      int sockfd, newsockfd, portno;
      socklen_t clilen;
-     char buffer[256];
+     char buffer[512];
      char ip_interface[10];
      struct sockaddr_in serv_addr, cli_addr, *myip;
      int n;

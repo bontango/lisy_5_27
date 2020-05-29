@@ -904,7 +904,7 @@ void get_coil_descriptions(void)
 void send_mom_solenoid_infos( int sockfd )
 {
   int i,j,coil_no;
-  char colorcode[80],buffer[256];
+  char colorcode[80],buffer[512];
 
      //basic info, header line
      send_basic_infos(sockfd);
@@ -1028,7 +1028,7 @@ void send_dipswitch_infos( int sockfd )
  unsigned char dipvalue; 
  char dip_comment[256];
  char filename[80];
- char buffer[256];
+ char buffer[512];
 
  //basic info, header line
    send_basic_infos(sockfd);
@@ -1083,7 +1083,7 @@ void send_dipswitch_infos( int sockfd )
 void send_lamp2_infos( int sockfd )
 {
   int i,j,lamp_no;
-  char colorcode[80],buffer[256],name[10];
+  char colorcode[80],buffer[512],name[10];
   int rows, col;
 
   //colorcodes
@@ -1152,7 +1152,7 @@ void send_lamp2_infos( int sockfd )
 void send_lamp_infos( int sockfd )
 {
   int i,j,lamp_no;
-  char colorcode[80],buffer[256],name[10];
+  char colorcode[80],buffer[512],name[10];
 
   //colorcodes
   char *code_yellow = "style=\'BACKGROUND-COLOR:yellow; width: 125px; margin:auto; height: 5em;\'";
@@ -1208,7 +1208,7 @@ void send_lamp_infos( int sockfd )
 void send_cont_solenoid_infos( int sockfd )
 {
   int sol_no;
-  char colorcode[80],buffer[256],name[20];
+  char colorcode[80],buffer[512],name[20];
 
   //colorcodes
   char *code_yellow = "style=\'BACKGROUND-COLOR:yellow; width: 125px; margin:auto; height: 5em;\'";
@@ -1237,7 +1237,7 @@ void send_cont_solenoid_infos( int sockfd )
 
 void send_soption_infos( int sockfd )
 {
-  char buffer[256];
+  char buffer[512];
   char str[256];
   char message1[80];
   char message2[80];
@@ -1309,7 +1309,7 @@ void send_soption_infos( int sockfd )
 
 void send_update_infos( int sockfd )
 {
-  char buffer[256];
+  char buffer[512];
   int ret_val;
 
   if ( update_path[0] != ' ')  //there was a setting of the update path
@@ -1532,7 +1532,7 @@ void send_switch_infos( int sockfd )
 {
   int ret,i,j,switch_no;
   unsigned char action;
-  char colorcode[80],buffer[256];
+  char colorcode[80],buffer[512];
 
   //colorcodes
   char *code_red = "<td align=center style=\"background-color:red;\">";
@@ -1632,7 +1632,7 @@ else  sprintf(buffer,"<p>\n<a href=\"./lisy35_sound.php\">Sound</a><br><br> \n")
 //send software version(s)
 void send_software_infos( int sockfd )
 {
-     char buffer[256];
+     char buffer[512];
      char versionstring[256];
      int dum;
      FILE *fp;
