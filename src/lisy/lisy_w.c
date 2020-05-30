@@ -15,6 +15,7 @@
 #include "driver.h"
 #include "wpc/core.h"
 #include "wpc/s11.h"
+#include "wpc/s7.h"
 #include "lisy_w.h"
 #include "fileio.h"
 #include "hw_lib.h"
@@ -740,12 +741,23 @@ if (first)
 {
  //get the switch status from APC andf set internal pinmame matrix
  for(i=1; i<=64; i++) core_setSw( i, lisy_api_get_switch_status(i) );
-  
- //advance no=72
- core_setSw( S11_SWADVANCE, lisy_api_get_switch_status(72) );
+ 
+ //special handling for switches in coin door
+ //goes via IRQ on Williams MPU
+ //in APC advance is #72 and up/down switch #73
 
- //up down switch no=73
- core_setSw( S11_SWUPDN, lisy_api_get_switch_status(73) );
+ switch(lisymini_game.typeno)
+ {
+        case LISYW_TYPE_SYS7:
+        case LISYW_TYPE_SYS9:
+ 		core_setSw( S7_SWADVANCE, lisy_api_get_switch_status(72) );
+ 		core_setSw( S7_SWUPDN, lisy_api_get_switch_status(73) );
+                break;
+        case LISYW_TYPE_SYS11A:
+ 		core_setSw( S11_SWADVANCE, lisy_api_get_switch_status(72) );
+ 		core_setSw( S11_SWUPDN, lisy_api_get_switch_status(73) );
+                break;
+ }
 
  first=0;
 }
@@ -965,7 +977,7 @@ if ( mysol != coreGlobals.solenoids)
 	  else if ( ( sol_no >=  25)& (lisy_has_AC_Relais == 1))
           { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d ( AC is %d)",sol_no-24,sol_no,action,current_ac_state); }
           else
-          { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( no AC Relais) ",sol_no,action,current_ac_state); }
+          { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( no AC Relais) ",sol_no,action); }
 
            lisy80_debug(debugbuf);
          }
