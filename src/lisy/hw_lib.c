@@ -421,7 +421,7 @@ void lisy_hwlib_init( void )
 
  //as the eeprom should be readable at this time
  //print some stats while in debug mode
- if (ls80dbg.bitv.basic == 1 ) lisy_eeprom_printstats();
+ //if (ls80dbg.bitv.basic == 1 ) lisy_eeprom_printstats();
 
  //set GPIOs for the traffic ligth
  if ( lisy_hardware_revision == 311)
@@ -575,6 +575,7 @@ int lisy80_switch_readycheck( void )
   return( digitalRead(LISY80_BUF_READY) );
 }
 
+#define SW_PIC_INIT_DEL_IN_MS 50
 //init the pic for the switches
 //as the pic will send two bytes with
 //softwareversion, we give back the version in the int
@@ -585,7 +586,7 @@ int lisy80_switch_pic_init(void)
  //do a reset vi MCLR on init
  digitalWrite (LISY80_SWPIC_RESET, 0);
  //wait a bit
- delay(100); //100ms delay from wiringpi
+ delay(SW_PIC_INIT_DEL_IN_MS); //100ms delay from wiringpi
  //set MCLR back to low
  digitalWrite (LISY80_SWPIC_RESET, 1);
  //wait a bit
