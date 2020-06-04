@@ -16,6 +16,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 #include <wiringPi.h>
+#include <pthread.h>
 #include "../lisy1.h"
 #include "../fileio.h"
 #include "../hw_lib.h"
@@ -33,7 +34,7 @@
 
 //the version
 #define LISY1control_SOFTWARE_MAIN    0
-#define LISY1control_SOFTWARE_SUB     12
+#define LISY1control_SOFTWARE_SUB     13
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -416,12 +417,46 @@ void do_dip_set( char *buffer)
 
 // LAMPS
 
+
+//the blinking thread
+void *do_lamp_blink(void *myarg)
+{
+ int i,nu;
+ int action = 1;
+
+ pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, NULL);
+ pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
+ nu = (int *)myarg;
+
+ while(1) //run untilmainfunction send cancel
+ {
+ if (action == 0) action = 1; else action = 0;
+ for(i=0; i<=nu; i=i+2) lisy80_coil_set( i+1, action);
+
+ if (action == 0) action = 1; else action = 0;
+ for(i=1; i<=nu; i=i+2) lisy80_coil_set( i+1, action);
+
+ sleep(1);
+ if (action == 0) action = 1; else action = 0;
+ }
+ return NULL;
+
+}
+
+
 //set lamp and update internal vars
 void do_lamp_set( char *buffer)
 {
 
  int lamp_no;
  int action;
+ int i,nu;
+
+//for the blinking thread
+ static pthread_t p;
+ int myarg;
+
  //the format here is 'Lxx_on' or 'Lxx_off'
  //we trust ASCII values
  lamp_no = (10 * (buffer[1]-48)) + buffer[2]-48;
@@ -429,8 +464,42 @@ void do_lamp_set( char *buffer)
  //on or off?
  if ( buffer[5] == 'f') action=0; else  action=1;
 
- lisy80_coil_set( lamp_no + 1, action);
- lamp[lamp_no] = action;
+ nu = 36; //system1 has 36 lamps
+ //special lamp 77 means ALL lamps
+ if ( lamp_no == 77)
+ {
+  for ( i=0; i<nu; i++)
+   {
+     lisy80_coil_set( i , action);
+     lamp[i] = action;
+     lamp[77] = action;
+   }
+ }
+ //special lamp 78 means blinking lamps with pthread
+ else if ( lamp_no == 78)
+ {
+  myarg = nu;
+  //start thread here
+  lamp[lamp_no] = action;
+  if (action) //start thread
+    pthread_create (&p, NULL, do_lamp_blink, (void *)myarg);
+  else //cancel thread
+   {
+    pthread_cancel (p);
+    pthread_join (p, NULL);
+  //and set all lamps to OFF
+  for ( i=0; i<nu; i++)
+   {
+     lisy80_coil_set( i+1, action);
+     lamp[i] = action;
+   }
+  }
+ }
+ else
+ {
+  lisy80_coil_set( lamp_no + 1, action);
+  lamp[lamp_no] = action;
+ }
 
 }
 
@@ -795,6 +864,24 @@ void send_lamp_infos( int sockfd )
      sendit( sockfd, buffer);
      sprintf(buffer,"push button to switch lamp OFF or ON  Yellow lamps are ON<br><br>\n");
      sendit( sockfd, buffer);
+
+   //special lamp 77, set all lamps
+   lamp_no = 77;
+   if (lamp[lamp_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+   if (lamp[lamp_no]) sprintf(name,"L%02d_off",lamp_no); else sprintf(name,"L%02d_on",lamp_no);
+   sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'\n%s\n%s\' /> </form>\n" \
+        ,name,colorcode,"set ALL lamps","");
+     sendit( sockfd, buffer);
+   //special lamp 78, blinking lamps via thread
+   lamp_no = 78;
+   if (lamp[lamp_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+   if (lamp[lamp_no]) sprintf(name,"L%02d_off",lamp_no); else sprintf(name,"L%02d_on",lamp_no);
+   sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'\n%s\n%s\' /> </form>\n" \
+        ,name,colorcode,"ALL lamps blink","");
+     sendit( sockfd, buffer);
+   sprintf(buffer,"<br>\n");
+   sendit( sockfd, buffer);
+
 
    //send all the lamps together with the status
    //Name for system1 starts with 1 rather then zero
