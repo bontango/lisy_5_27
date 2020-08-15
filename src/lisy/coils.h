@@ -93,6 +93,7 @@ void lisy35_coil_set_sound_raw( unsigned char value);
 #define AS_2518_43_12_LAMPS 1
 #define AS_2518_52_28_LAMPS 2
 #define AS_2518_23_60_LAMPS 3
+#define AS_2518_147_LAMP_COMBO 4
 
 //soundboard variants
 #define LISY35_SB_CHIMES 0 //0 chimes

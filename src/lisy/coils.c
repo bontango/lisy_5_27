@@ -953,6 +953,7 @@ void lisy35_coil_set_direction_J1PIN8( unsigned char direction)
 // AS_2518_43_12_LAMPS 1  // AS-2518-43 12 lamps
 // AS_2518_52_28_LAMPS 2  // AS-2518-52 28 lamps
 // AS_2518_23_60_LAMPS 3  // AS-2518-23 60 lamps
+// AS_2518_147_LAMP_COMBO 4 // Combination Solenoid / Lamp Driver Board
 void lisy35_coil_set_lampdriver_variant( unsigned char variant)
 {
 
@@ -973,6 +974,9 @@ void lisy35_coil_set_lampdriver_variant( unsigned char variant)
    case AS_2518_23_60_LAMPS:
        sprintf(debugbuf,"game has a AS-2518-23 60 lamps AUX Lampdriverboard");
        mydata_coil.bitv5.EXT_CMD = LISY35_EXT_CMD_AUX_BOARD_3;
+       break;
+   case AS_2518_147_LAMP_COMBO:
+       sprintf(debugbuf,"game has a AS-2518-147 30 lamps Lampdriverboard, settings to board 1 ignored");
        break;
   }
 

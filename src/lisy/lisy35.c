@@ -454,11 +454,12 @@ void lisy35_lamp_handler( int blanking, int board, int input, int inhibit)
                                    0,0,0,0,0,0,0,0,0,0,
                                    0,0,0,0,0,0,0,0,0,0,
                                    0,0,0,0,0,0,0,0,0,0 };
-// four possible variants for Aux Board 2
+// five possible variants for Aux Board 2
 // NO_AUX_BOARD 0  // no aux board
 // AS_2518_43_12_LAMPS 1  // AS-2518-43 12 lamps
 // AS_2518_52_28_LAMPS 2  // AS-2518-52 28 lamps
 // AS_2518_23_60_LAMPS 3  // AS-2518-23 60 lamps
+//  AS_2518_147_LAMP_COMBO 4 //Lamp Solenoid Combo Goldball and Grandslam
  static unsigned char lamp2[60] = { 0,0,0,0,0,0,0,0,0,0,
                                    0,0,0,0,0,0,0,0,0,0,
                                    0,0,0,0,0,0,0,0,0,0,
@@ -477,16 +478,27 @@ void lisy35_lamp_handler( int blanking, int board, int input, int inhibit)
 
  if ( blanking == 0 ) //we set internal the matrix
  {
-  if ( board == 0 )  //main board always a AS-2518-23 60 lamps
+  if ( board == 0 )  //main board is a AS-2518-23 60 lamps or a AS-2518-147 Lamp Solenoid Combo Goldball and Grandslam
   {
-   //is it U1 ?
-   if ( inhibit & 0x01 ) { index = input; lamp[index] = 1; }
-   //is it U2 ?
-   if ( inhibit & 0x02 ) { index = input + 15; lamp[index] = 1; }
-   //is it U3 ?
-   if ( inhibit & 0x04 ) { index = input + 30; lamp[index] = 1; }
-   //is it U4 ?
-   if ( inhibit & 0x08 ) { index = input + 45; lamp[index] = 1; }
+   if ( lisy35_game.aux_lamp_variant == AS_2518_147_LAMP_COMBO)
+	{
+	 //we use 'upper half' of main board, as Combo Board uses 30 lamps with PB2 & PB3 decoded
+	//is it U3 ?
+        if ( inhibit & 0x04 ) { index = input + 30; lamp[index] = 1; }
+        //is it U4 ?
+        if ( inhibit & 0x08 ) { index = input + 45; lamp[index] = 1; }
+	}
+   else
+   	{
+   	//is it U1 ?
+   	if ( inhibit & 0x01 ) { index = input; lamp[index] = 1; }
+   	//is it U2 ?
+   	if ( inhibit & 0x02 ) { index = input + 15; lamp[index] = 1; }
+   	//is it U3 ?
+   	if ( inhibit & 0x04 ) { index = input + 30; lamp[index] = 1; }
+   	//is it U4 ?
+   	if ( inhibit & 0x08 ) { index = input + 45; lamp[index] = 1; }
+	}
   } //this was board 0, main board with 60 lamps
   else if ( board == 1)
   {
@@ -502,6 +514,17 @@ void lisy35_lamp_handler( int blanking, int board, int input, int inhibit)
 	   //signal that error
            lisy80_set_red_led(1);
 	   break;
+
+        case AS_2518_147_LAMP_COMBO:
+        //sanity check
+        //if ( ls80dbg.bitv.basic )
+        if ( 0 )
+        {
+           sprintf(debugbuf,"input:%d lamphandler board 1: AS_2518_147_LAMP_COMBO, ignored",input);
+           lisy80_debug(debugbuf);
+        }
+           break;
+
 	case AS_2518_43_12_LAMPS:
            //check index
 	   if (input >= 3) break; //index == 3 for this board is rest postion
@@ -802,7 +825,7 @@ void lisy35_set_variant(void)
    if ( lisy35_game.soundboard_variant == LISY35_SB_EXTENDED)
    {
     if (core_gameData->hw.soundBoard == SNDBRD_BY51) lisy35_coil_set_extended_SB_type(0);
-    else if (core_gameData->hw.soundBoard == SNDBRD_BY56) lisy35_coil_set_extended_SB_type(0); //Xenon
+    //else if (core_gameData->hw.soundBoard == SNDBRD_BY56) lisy35_coil_set_extended_SB_type(0); //Xenon
 	else lisy35_coil_set_extended_SB_type(1);
    }
 
@@ -821,7 +844,8 @@ void lisy35_set_variant(void)
         sprintf(debugbuf,"Info: LISY35 will use soundboard variant 1 (standard SB)");
      break;
     case LISY35_SB_EXTENDED:
-      if ((core_gameData->hw.soundBoard == SNDBRD_BY51) | (core_gameData->hw.soundBoard == SNDBRD_BY56))
+      //if ((core_gameData->hw.soundBoard == SNDBRD_BY51) | (core_gameData->hw.soundBoard == SNDBRD_BY56))
+      if ((core_gameData->hw.soundBoard == SNDBRD_BY51) )
          sprintf(debugbuf,"Info: LISY35 will use soundboard variant 2 (EXTENDED SB Type 2581-51)");
       else
          sprintf(debugbuf,"Info: LISY35 will use soundboard variant 2 (EXTENDED SB Type S&T)");
