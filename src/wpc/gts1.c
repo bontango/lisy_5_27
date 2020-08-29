@@ -35,8 +35,7 @@
 /-----------------*/
 static struct {
 	int    vblankCount;
-	int    strobe, swStrobe, bufferFilled;
-	UINT8  dispBuffer[30];
+	int    strobe, swStrobe;
 	UINT8  accu, lampData, ramE2, ramRW, ramAddr;
 	UINT16 pgolAddress;
 	UINT32 solenoids;
@@ -133,6 +132,8 @@ static WRITE_HANDLER(port_w) {
 	int enable = (data & 0x08) ? 1 : 0;
  	int rw = data & 0x40;
 	int group = 0x07 ^ (((data & 0x80) >> 5) | ((data & 0x30) >> 4));
+	static int Data_Reg_A_count = 16;
+	static int Data_Reg_B_count = 16;
 	locals.accu = data & 0x0f;
 	switch (device) {
 		case 0x02: // U5 RRIO A1752 - Switch matrix
@@ -262,49 +263,51 @@ static WRITE_HANDLER(port_w) {
 			TRACE(("%03x: I/O on U2: %s %x: %x\n", activecpu_get_pc(), rw ? "SET" : "READ", group, locals.accu));
 			break;
 		case 0x0d: // U6 GPKD 10788 - Display
-			data = PPS4_get_reg(PPS4_DB); // read display address from data bus (that's how the real chip does it!)
 			TRACE(("%03x: I/O on U6: %04x:%x\n", activecpu_get_pc(), data, locals.accu));
-			switch (data >> 4) {
-				case 0: // switches between buffers
-					if (locals.accu & 0x01)
-						locals.bufferFilled = 0;
-					else {
-						int i; for (i=0; i < 24; i++) disp_w(i, locals.dispBuffer[locals.bufferFilled ? 24 + (i % 6) : i]);
-					}
+			switch (data >> 4) { //this is the command for the display chip
+				case 3: // turn on display
+					// not implemented, do we need it?
 					break;
-				case 1: // player three score
-					locals.dispBuffer[data & 0x0f] = locals.accu;
-					disp_w(data & 0x0f, locals.accu);
+				case 7: // Blank the display of DB3 and DB4
+					// not implemented, do we need it?
 					break;
-				case 2: // player four score
-					locals.dispBuffer[6 + (data & 0x0f)] = locals.accu;
-					disp_w(6 + (data & 0x0f), locals.accu);
+				case 0xb: // Blank the display of DA1, DA2, Da3, DA4, DB1, DB2
+					// not implemented, do we need it?
 					break;
-				case 3: // player one score
-					locals.dispBuffer[12 + (data & 0x0f)] = locals.accu;
-					disp_w(12 + (data & 0x0f), locals.accu);
+				case 0xd: // Data Bus I/D5, I/D6,I/D7,I/D9 -> Data Reg. B
+					switch(Data_Reg_B_count) {
+						case 3 ... 8:
+							disp_w(Data_Reg_B_count - 3, locals.accu); //0 ... 5: system1 player 3
+							break;
+						case 11 ... 16:
+							disp_w(Data_Reg_B_count - 5, locals.accu); // 6 ... 11: system1 player 4
+							break;
+						}
+					Data_Reg_B_count--;
+					//we will recieve 16 updates each time
+					if (Data_Reg_B_count <= 0) Data_Reg_B_count = 16;
 					break;
-				case 4: // player two score
-					locals.dispBuffer[18 + (data & 0x0f)] = locals.accu;
-					disp_w(18 + (data & 0x0f), locals.accu);
-					break;
-				case 5: // store the HSTD value in second buffer, and also show it
-					locals.dispBuffer[24 + (data & 0x0f)] = locals.accu;
-					locals.bufferFilled = 1;
-					disp_w(data & 0x0f, locals.accu);
-					disp_w(6 + (data & 0x0f), locals.accu);
-					disp_w(12 + (data & 0x0f), locals.accu);
-					disp_w(18 + (data & 0x0f), locals.accu);
-					break;
-				case 7:
-					disp_w(24 + (data & 0x0f), locals.accu);
-					if ((data & 0x0f) == 3 || (data & 0x0f) == 4)
-						disp_w(40, locals.accu);
-					if ((data & 0x0f) == 6 || (data & 0x0f) == 0x0b)
-						disp_w(41, locals.accu);
+				case 0xe: //  Data Bus I/D5, I/D6,I/D7,I/D9 -> Data Reg. A
+                                        switch(Data_Reg_A_count) {
+                                                case 1 ... 2:
+                                                        disp_w(Data_Reg_A_count + 39, locals.accu); //40 ... 41 status display  'ball in play' 
+                                                        break;
+                                                case 3 ... 8:
+                                                        disp_w(Data_Reg_A_count + 9, locals.accu); //12 ... 17: system1 player 1
+                                                        break;
+                                                case 9 ... 10:
+                                                        disp_w(Data_Reg_A_count + 23, locals.accu); //32 ... 33 system1 status display credits
+                                                        break;
+                                                case 11 ... 16:
+                                                        disp_w(Data_Reg_A_count + 7, locals.accu); //18 ... 23: system1 player 2
+                                                        break;
+                                                }
+                                        Data_Reg_A_count--;
+					//we will recieve 16 updates each time
+                                        if (Data_Reg_A_count <= 0) Data_Reg_A_count = 16;
 					break;
 				default:
-					TRACE(("%03x: Write to unknown display %x: %02x\n", activecpu_get_pc(), data >> 4, locals.accu));
+					TRACE(("%03x: unknown command for display %x: %02x\n", activecpu_get_pc(), data >> 4, locals.accu));
 			}
 			break;
 		default:
