@@ -517,10 +517,14 @@ void lisy35_lamp_handler( int blanking, int board, int input, int inhibit)
 
         case AS_2518_147_LAMP_COMBO:
         //sanity check
-        //if ( ls80dbg.bitv.basic )
-        if ( 0 )
+        if ( ls80dbg.bitv.basic )
         {
-           sprintf(debugbuf,"input:%d lamphandler board 1: AS_2518_147_LAMP_COMBO, ignored",input);
+           //is it U3 ?
+           if ( inhibit & 0x04 ) { index = input + 30; }
+           //is it U4 ?
+           if ( inhibit & 0x08 ) { index = input + 45; }
+
+           sprintf(debugbuf,"index:%d lamphandler board 1: AS_2518_147_LAMP_COMBO, ignored",index);
            lisy80_debug(debugbuf);
         }
            break;
