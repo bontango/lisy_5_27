@@ -69,22 +69,6 @@ static char status[5] = "    ";
       default : datchar = ' '; break;
 	}
 
-  //suppress of heading Zero
-  //pinmame does show '01' '02' .. for Ball in Play instead of ' 1', ' 2', ' 3'
-  //traces have shown that both ' ' and '0' is send to the first digit of ball in play
-  //we suppres ths '0' herein case second digit is not zero, hoping that we do no need it at other places
-  
-  //check if first digit of status display should be set
-  if ( ( display == 0)  & ( digit == 1))
-  {
-    //is second digit is not zero suppress setting '0'
-    if ( ( status[0] != '0')  & ( datchar == '0') )
-     {
-        if ( ls80dbg.bitv.displays ) lisy80_debug("suppressing heading zero for ball in play\n");
-	return;
-     }
-  }
-
   //with 6digit support just store value for possible debugging
   if (!ls80opt.bitv.sevendigit )
   {
