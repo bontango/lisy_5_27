@@ -24,6 +24,7 @@
 
 //our pointers to preloaded sounds
 Mix_Chunk *lisysound[257];   
+Mix_Chunk *lisysound_alt[LISY35_SOUND_MAX_ALTERNATIVE_FILES][257]; // bank for alternative sounds (used by lisy35)
 
 
 /*
@@ -119,29 +120,52 @@ int lisy35_sound_stream_init(void)
   Mix_Volume(-1, lisy_volume);
 
     //try to preload all sounds
-    for( i=1; i<=255; i++)
-     {
-       if ( lisy35_sound_stru[i].soundnumber != 0)
-       {
-       //construct the filename, according to options red from csv file
-       sprintf(wav_file_name,"/boot/%s/%s.wav",lisy35_sound_stru[i].path,lisy35_sound_stru[i].name);
-       //put 'loop' fix to zero for now
-       lisysound[i] = Mix_LoadWAV(wav_file_name);
-       if(lisysound[i] == NULL) {
-                fprintf(stderr,"Unable to load WAV file: %s\n", Mix_GetError());
-        }
- 	else if ( ls80dbg.bitv.sound )
-  	{
-   	  sprintf(debugbuf,"preload file:%s as sound number %d",wav_file_name,i);
-   	  lisy80_debug(debugbuf);
-  	}
-      }// if soundnumber != 0
-     } // for i
+	for( i=1; i<=255; i++)
+	{
+		if ( lisy35_sound_stru[i].soundnumber != 0)
+		{
+			//construct the filename, according to options red from csv file
+			sprintf(wav_file_name,"/boot/%s/%s.wav",lisy35_sound_stru[i].path,lisy35_sound_stru[i].name);
+			lisysound[i] = Mix_LoadWAV(wav_file_name);
+			if(lisysound[i] == NULL) 
+			{
+				fprintf(stderr,"Unable to load WAV file: %s - %s\n",wav_file_name, Mix_GetError());
+			}
+			else 
+			{
+				lisy35_sound_stru[i].how_many_versions = 1;
+				lisy35_sound_stru[i].last_version_played = 0;
+				if ( ls80dbg.bitv.sound )
+				{
+					sprintf(debugbuf,"preloaded file:%s as sound number %d\n",wav_file_name,i);
+					lisy80_debug(debugbuf);
+				}
+				// see if there are alternative sounds (suffix "-2", "-3", "-4"... at the end of file name, example "sound-3.wav")
+				for ( int alt = 2 ; alt <= LISY35_SOUND_MAX_ALTERNATIVE_FILES + 1; alt++)
+				{
+					sprintf(wav_file_name,"/boot/%s/%s-%d.wav",lisy35_sound_stru[i].path,lisy35_sound_stru[i].name,alt);
+					lisysound_alt[alt - 2][i] = Mix_LoadWAV(wav_file_name);
+					if(lisysound_alt[alt - 2][i] != NULL) 
+					{
+						lisy35_sound_stru[i].how_many_versions++;
+						if (ls80dbg.bitv.sound)
+						{
+							sprintf(debugbuf,"found alternative #%d for sound %d\n",alt,i);
+							lisy80_debug(debugbuf);
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+		}// if soundnumber != 0
+	} // for i
 
 
  return 0;
 }
-
 /*
  * open sound device and set parameters
  */
@@ -271,22 +295,73 @@ void lisy80_play_wav(int sound_no)
 void lisy35_play_wav(int sound_no)
 {
 
- int ret;
+	int ret;
 
- if ( ls80dbg.bitv.sound )
-  {
-   sprintf(debugbuf,"lisy35_play_wav: want to play sound number: %d mapped to sound:%d",sound_no,lisy35_sound_stru[sound_no].soundnumber);
-   lisy80_debug(debugbuf);
-  }
+	if ( ls80dbg.bitv.sound )
+	{
+		sprintf(debugbuf,"lisy35_play_wav: want to play sound number: %d mapped to sound:%d, for which %d versions are loaded",sound_no,lisy35_sound_stru[sound_no].soundnumber, lisy35_sound_stru[sound_no].how_many_versions);
+		lisy80_debug(debugbuf);
+	}
 
-  //Play our (pre loaded) sound file on separate channel
-  if ( lisy35_sound_stru[sound_no].soundnumber != 0)
-  {
-  ret = Mix_PlayChannel( sound_no, lisysound[sound_no], 0);
-  if(ret == -1) {
-         fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
-        }
-  }
+	//Play our (pre loaded) sound file on separate channel
+	if ( lisy35_sound_stru[sound_no].soundnumber != 0)
+	{
+		Mix_Chunk *soundtoplay;
+		
+		// check if the regular sound must be played, or if there is an alternative sound to play
+		lisy35_sound_stru[sound_no].last_version_played += 1;
+		if (lisy35_sound_stru[sound_no].last_version_played > lisy35_sound_stru[sound_no].how_many_versions)
+		{
+			// if we're at the end of the alternative sound list, go back to sound 1
+			lisy35_sound_stru[sound_no].last_version_played = 1;
+		}
+		if(lisy35_sound_stru[sound_no].last_version_played == 1)
+		{
+			// play from the regular bank of sounds
+			soundtoplay = lisysound[sound_no];
+		}
+		else
+		{
+			// play from the alternative bank of sounds
+			soundtoplay = lisysound_alt[lisy35_sound_stru[sound_no].last_version_played - 2][sound_no];
+		}
+
+		if ( ls80dbg.bitv.sound )
+		{
+			sprintf(debugbuf,"sound version %d playing...", lisy35_sound_stru[sound_no].last_version_played);
+			lisy80_debug(debugbuf);
+		}
+		
+		// decode option
+		// 0=normal play, 1=loop, 2=stop loops
+		int loop = 0;
+		if (lisy35_sound_stru[sound_no].option == LISY35_SOUND_OPTION_LOOP) 
+		{
+			loop = -1;
+		}
+		
+		//check if this sound can stop loop sounds
+		if (lisy35_sound_stru[sound_no].option == LISY35_SOUND_OPTION_STOP_LOOP) 
+		{
+			//yes, check running state for all loop sounds and cancel them if running
+			for(int i=1; i<=257; i++)
+			{
+				if (lisy35_sound_stru[i].soundnumber != 0 && lisy35_sound_stru[i].option == 1 && Mix_Playing(i) != 0) 
+				{
+					if ( ls80dbg.bitv.sound ) lisy80_debug("found running loop, we cancel it\n");
+					Mix_HaltChannel(i);
+				}
+			}
+		}
+  
+		// play sound
+		ret = Mix_PlayChannel( sound_no, soundtoplay, loop);
+		
+		if(ret == -1) 
+		{
+			fprintf(stderr,"Unable to play WAV file: %s\n", Mix_GetError());
+		}
+	}
 }
 
 /*
