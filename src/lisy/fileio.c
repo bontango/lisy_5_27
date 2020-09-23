@@ -1450,3 +1450,25 @@ for(i=1; i<=9;i++)
 
  return 0;
 }
+
+//read the text file on /lisy partition
+//give back string for welcome message
+//fill structure stru_lisymini_games_csv
+int  lisy_file_get_welcome_msg(char *message)
+{
+
+ FILE *fstream = fopen(LISY_WELCOME_MSG_FILE,"r");
+   if(fstream == NULL)
+   {
+      fprintf(stderr,"\n LISYI: opening %s failed ",LISY_WELCOME_MSG_FILE);
+      return -1 ;
+   }
+
+   if ( fgets(message,200,fstream)!=NULL)
+	return 0;
+   else
+	return -2;
+   
+fclose(fstream);
+
+}

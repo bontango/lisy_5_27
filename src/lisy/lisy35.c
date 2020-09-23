@@ -100,10 +100,21 @@ void lisy35_init( void )
  // try say something about LISY35 if soundcard is installed
  if ( lisy35_has_soundcard )
  {
+  char message[200];
+
   //set volume according to poti
   lisy_adjust_volume();
-  sprintf(debugbuf,"/bin/echo \"Welcome to LISY 35 Version %s running on %s\" | /usr/bin/festival --tts",s_lisy_software_version,lisy35_game.long_name);
+  //try to read welcome message from file
+  if ( lisy_file_get_welcome_msg(message) >= 0)
+  {
+    if ( ls80dbg.bitv.basic )
+    {
+      sprintf(debugbuf,"Info: welcome Message is: %s",message);
+      lisy80_debug(debugbuf);
+    }
+  sprintf(debugbuf,"/bin/echo \"%s\" | /usr/bin/festival --tts",message);
   system(debugbuf);
+  }
  }
 
  //show green ligth for now, lisy35 is running
