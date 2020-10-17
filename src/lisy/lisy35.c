@@ -1088,6 +1088,18 @@ void lisy35_solenoid_handler(unsigned char data, unsigned char soundselect)
        sprintf(debugbuf,"momentary solenoids: %d",moment_data);
        lisy80_debug(debugbuf);
      }
+
+     //JustBoom Sound? in case of chimes we may want to play wav files here
+     if ( lisy35_has_own_sounds ) 
+	{
+	 //play sound if solenoids 4 to 7 are activated 
+	 if ( ( lisy35_game.soundboard_variant == LISY35_SB_CHIMES ) & ( moment_data >= 4 ) & (moment_data <= 7) )
+		{
+		 //we translate solenoids 4..7 to soun ds 1..4
+ 	  	 lisy35_play_wav( moment_data -3);
+		}
+	} //has own sounds
+
    }//if new momentary data available
   }//solenoids selected
 }//solenoid_handler
