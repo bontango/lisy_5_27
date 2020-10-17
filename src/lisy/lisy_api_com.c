@@ -90,6 +90,11 @@ int lisy_api_read_string(unsigned char cmd, char *content)
         return -1;
     }
   content[i] = nextbyte;
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"API_read_string: Byte no %d is (0x%02x)\"%c\"",i,nextbyte,nextbyte);
+    lisy80_debug(debugbuf);
+  }
   i++;
   } while ( nextbyte != '\0');
 
@@ -165,9 +170,6 @@ int lisy_api_print_hw_info(void)
    char answer[80];
    int i,j,n,ret;
    unsigned char my_switch_status[80];
-
-  //number of displays
-  if ( lisy_api_read_byte(LISY_G_NO_DISP, &no_of_displays) < 0) return (-1);
 
     if ( lisy_api_read_string(LISY_G_LISY_VER, answer) < 0) return (-1);
     sprintf(debugbuf,"LISY_Mini: Client has SW version: %s",answer);
@@ -739,5 +741,101 @@ int lisy_api_get_con_hw( char *idstr )
   }
 
   return (lisy_api_read_string(LISY_G_HW, idstr));
+}
+
+//get status of (external or virtuel) DIP switch
+unsigned char lisy_api_get_dip_switch( unsigned char number)
+{
+
+ int ret;
+ unsigned char cmd,status;
+ unsigned char cmd_data[2];
+
+     cmd = LISY_G_SW_SETTING;
+
+  //send cmd
+  cmd_data[0] = cmd;
+  //send switch number
+  cmd_data[1] = number;
+
+      //send cmd
+     if ( lisy_api_write( cmd_data,2,ls80dbg.bitv.switches) != 2)
+      {
+        printf("Error get switch status writing to serial\n");
+        return -1;
+      }
+
+ //receive answer
+  if ( ( ret = read(fd_api,&status,1)) != 1)
+    {
+        printf("Error reading from serial dip switch value, return:%d %s\n",ret,strerror(errno));
+        return -1;
+    }
+
+ return status;
+
+}
+
+//Rmake sure connected hardware is of type 'idstr'
+//will also sync in case there are still bytes in the send/recv queue
+int lisy_api_check_con_hw( char *idstr )
+{
+  char nextbyte;
+  int i,n,ret;
+  unsigned char cmd;
+  char content[10];
+
+  cmd = LISY_G_HW;
+
+ if ( ls80dbg.bitv.basic )
+  {
+    sprintf(debugbuf,"check if connected hardware is\"%s\"",idstr);
+    lisy80_debug(debugbuf);
+  }
+
+ //send command
+ if ( lisy_api_write( &cmd,1,ls80dbg.bitv.basic) != 1)
+    {
+        printf("Error writing to serial %s\n",strerror(errno));
+        return -1;
+    }
+
+ //receive answer
+ i=0;
+ do {
+  if ( ( ret = read(fd_api,&nextbyte,1)) != 1)
+    {
+        printf("Error reading from serial, return:%d %s\n",ret,strerror(errno));
+        return -1;
+    }
+  content[i] = nextbyte;
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"API_read_string: Byte no %d is (0x%02x)\"%c\"",i,nextbyte,nextbyte);
+    lisy80_debug(debugbuf);
+  }
+
+  //check if idstr mactch content
+  if ( idstr[i] == content[i]) i++;
+
+
+  } while ( strncmp( idstr,content,strlen(idstr)) != 0); //read until idstr is content
+  //will block when not
+
+  //read trailing \0
+    if ( ( ret = read(fd_api,&nextbyte,1)) != 1)
+    {
+        printf("Error reading from serial, return:%d %s\n",ret,strerror(errno));
+        return -1;
+    }
+
+  //USB debug?
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"connected HW is: %s",content);
+    lisy80_debug(debugbuf);
+  }
+
+ return(0);
 }
 

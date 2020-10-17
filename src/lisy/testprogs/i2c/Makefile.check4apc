@@ -1,0 +1,16 @@
+# lisy80 Makefile
+# RTH 07.2017
+# for check4apc.c prog
+
+CC      = /usr/bin/gcc
+CFLAGS  = -Wall -g -D_REENTRANT -DDEBUG
+LDFLAGS = -li2c
+
+OBJ = check4apc.o
+
+tester: $(OBJ)
+	$(CC) $(CFLAGS) -o check4apc $(OBJ) $(LDFLAGS)
+
+%.o: ../%.c ../%.h
+	$(CC) $(CFLAGS) -c $<
+

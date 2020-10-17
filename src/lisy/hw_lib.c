@@ -225,7 +225,6 @@ void lisymini_hwlib_init( void )
 void lisyapc_hwlib_init( void )
 {
 
- char hw_id_str[80];
  int ret;
 
  //set GPIOs for the traffic ligth
@@ -265,9 +264,9 @@ void lisyapc_hwlib_init( void )
 else
      fprintf(stderr,"Info: I2C communication to APC successfull initiated\n");
 
- //check connected hardware ID
- ret = lisy_api_get_con_hw( hw_id_str );
- fprintf(stderr,"Info: hardware ID is %s (%d)\n",hw_id_str,ret);
+ //make sure  connected hardware ID is APC
+ ret = lisy_api_check_con_hw( "APC" );
+ fprintf(stderr,"Info: check ID for 'APC' returns %d\n",ret);
 
  //do some debug output if requested
  //number of displays

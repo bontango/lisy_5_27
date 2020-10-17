@@ -1,0 +1,16 @@
+# lisy80 Makefile
+# RTH 07.2017
+# for getDIPfromAPC.c prog
+
+CC      = /usr/bin/gcc
+CFLAGS  = -Wall -g -D_REENTRANT -DDEBUG
+LDFLAGS = -li2c
+
+OBJ = getDIPfromAPC.o
+
+tester: $(OBJ)
+	$(CC) $(CFLAGS) -o getDIPfromAPC $(OBJ) $(LDFLAGS)
+
+%.o: ../%.c ../%.h
+	$(CC) $(CFLAGS) -c $<
+
