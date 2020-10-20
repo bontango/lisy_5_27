@@ -1,7 +1,9 @@
 /* getDIPfromAPC.c
    based on check4apc.c
-   Version 0.1
-   bontango 10.2020
+   Version 0.2
+   bontango 20.2020
+
+   new protokoll
 
  - Setting 2 -> Alle Options DIP Schalter als Wert von 0 - 255
 
@@ -17,6 +19,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <linux/i2c-dev.h>
@@ -37,12 +40,12 @@
 
 int main(int argc, char *argv[])
 {
- int i,file, ret;
+ int i,j,file, ret;
  unsigned char dipno;
  unsigned char dipval;
  unsigned char data[10];
  int verbose = 0;
- char nextbyte;
+ int8_t  nextbyte;
  char content[10];
  char idstr[10];
 
@@ -91,6 +94,7 @@ int main(int argc, char *argv[])
 
 //receive answer
  i=0;
+ j=0;
  do {
   if ( ( ret = read(file,&nextbyte,1)) != 1)
     {
@@ -100,14 +104,14 @@ int main(int argc, char *argv[])
   content[i] = nextbyte;
   if(verbose)
   {
-    printf("API_read_string: Byte no %d is (0x%02x)\"%c\"\n",i,nextbyte,nextbyte);
+    printf("API_read_string: Byte no %d is %i (0x%02x)\"%c\"\n",j,(int8_t)nextbyte,nextbyte,nextbyte);
   }
 
   //check if idstr mactch content
   if ( idstr[i] == content[i]) i++;
+  j++;
 
-
-  } while ( strncmp( idstr,content,strlen(idstr)) != 0); //read until idstr is content
+  } while ( ( strncmp( idstr,content,strlen(idstr)) != 0) & (j < 10) ); //read until idstr is content
   //will block when not
 
   //read trailing \0
@@ -136,7 +140,22 @@ int main(int argc, char *argv[])
   return -1;
  }
 
- //read answer
+ //read answer, first byte
+ if ( ( ret = read(file,&dipval,1)) != 1)
+    {
+        printf("Error reading from I2C, return:%d %s\n",ret,strerror(errno));
+        return -1;
+    }
+
+ if(verbose)
+ {
+   printf("return: %d bytes red\n", dipval);
+ }
+
+ if (dipval != 3) return -2;
+
+
+ //read answer, second byte
  if ( ( ret = read(file,&dipval,1)) != 1)
     {
         printf("Error reading from I2C, return:%d %s\n",ret,strerror(errno));
