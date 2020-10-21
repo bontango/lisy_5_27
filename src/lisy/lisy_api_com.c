@@ -23,6 +23,8 @@
 #include "externals.h"
 #include "lisy_api_com.h"
 
+#define LISY_API_SLEEP_TIME 1000 //we sleep 1000us ( 1ms) until we repeat cmd
+#define LISY_API_NO_OF_RETRIES 100   //we retry number of times
 
 //local vars
 int fd_api;
@@ -30,11 +32,14 @@ static long lisy_api_counter = 0;
 
 //lisy routine for writing to usb serial device
 //we do it here in order to beable to log all bytes send to APC
+//and to be able to repeat command in case apc is not ready
 //exceptions are 'init' and switch poll routine 'lisy_api_ask_for_changed_switch'
 int lisy_api_write( unsigned char *data, int count, int debug  )
 {
 
     int i;
+    unsigned char feedback;
+    unsigned char retries = 0;
     char helpstr[10];
 
     //do some statistics
@@ -60,7 +65,35 @@ int lisy_api_write( unsigned char *data, int count, int debug  )
     }
    }
 
-   return( write( fd_api,data,count));
+ //send command, repeat until feedback (first retruned byte) is number of bytes
+ // 0 means, not read, need to retry
+ // 0xff means internal error
+ do
+ {
+   //send cmd
+   if ( write( fd_api,data,count) != count ) return(-1);
+
+   //read feedback (1st byte) which is number of received bytes by APC
+   if ( read(fd_api,&feedback,1) != 1) return (-2);
+
+   //check feedback for errors
+   if ( feedback == 0xff)
+    { return (-3); }
+   else if ( feedback == 0)
+   {
+        if( ++retries > LISY_API_NO_OF_RETRIES ) return(-4);
+        usleep(LISY_API_SLEEP_TIME);
+        //USB debug?
+        if(ls80dbg.bitv.basic)
+        {
+         sprintf(debugbuf,"API_read_byte: cmd (%d) repeated %d times (%d max)",data[0],retries,LISY_API_NO_OF_RETRIES);
+         lisy80_debug(debugbuf);
+        }
+    }
+ } while ( feedback != count);
+
+
+   return(count);
 }
 
 
@@ -448,7 +481,8 @@ int lisy_api_send_str_to_disp(unsigned char num, char *str)
 unsigned char lisy_api_ask_for_changed_switch(void)
 {
 
- unsigned char my_switch,cmd;
+ unsigned char feedback,cmd;
+ unsigned char my_switch = 0x7f;
  int ret;
 
  //do some statistics
@@ -457,8 +491,18 @@ unsigned char lisy_api_ask_for_changed_switch(void)
  //send command
  cmd = LISY_G_CHANGED_SW;
  if ( write( fd_api,&cmd,1) != 1) return (-2);
+
+
 //receive answer
- if ( read(fd_api,&my_switch,1) != 1) return (-1);
+//first byte nned to be one (number of received bytes)
+//we do not retry here as it is a poll anyway
+ if ( read(fd_api,&feedback,1) != 1) return (-1);
+
+//only if feedback == 1
+if( feedback == 1)
+ { if ( read(fd_api,&my_switch,1) != 1) return (-1); }
+else
+ { lisy80_debug("polled switch returns 0 -busy-!"); }
 
  //USB debug? only if reurn is not 0x7f == no switch changed
  if((ls80dbg.bitv.switches) & ( my_switch != 0x7f))
@@ -755,11 +799,13 @@ unsigned char lisy_api_get_dip_switch( unsigned char number)
 
   //send cmd
   cmd_data[0] = cmd;
+  //number of setting group
+  cmd_data[1] = 1;
   //send switch number
-  cmd_data[1] = number;
+  cmd_data[2] = number;
 
       //send cmd
-     if ( lisy_api_write( cmd_data,2,ls80dbg.bitv.switches) != 2)
+     if ( lisy_api_write( cmd_data,3,ls80dbg.bitv.switches) != 3)
       {
         printf("Error get switch status writing to serial\n");
         return -1;
@@ -771,6 +817,13 @@ unsigned char lisy_api_get_dip_switch( unsigned char number)
         printf("Error reading from serial dip switch value, return:%d %s\n",ret,strerror(errno));
         return -1;
     }
+
+  if(ls80dbg.bitv.basic)
+  {
+    sprintf(debugbuf,"API_get_dip_switch: Dip Switch number %d is %d",number,status);
+    lisy80_debug(debugbuf);
+  }
+
 
  return status;
 

@@ -1472,3 +1472,49 @@ int  lisy_file_get_welcome_msg(char *message)
 fclose(fstream);
 
 }
+
+//read the csv file on /lisy partition and the DIP switch setting
+//give back line number; -1 in case we had an error
+//fill structure stru_lisymini_games_csv
+int  lisyapc_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game)
+{
+
+ char buffer[1024];
+ char *line;
+ unsigned char dip_switch_val;
+ int line_no;
+ int first_line = 1;
+ unsigned char found = 0;
+
+ //get value of dipswitch
+ dip_switch_val = lisyapc_get_dip("S2");
+ //set also global gamenr var to dip switch value, needed for dip switch settings
+ lisymini_game->gamenr = dip_switch_val;
+
+ FILE *fstream = fopen(LISYMINI_GAMES_CSV,"r");
+   if(fstream == NULL)
+   {
+      fprintf(stderr,"\n LISYMINI: opening %s failed ",LISYMINI_GAMES_CSV);
+      return -1 ;
+   }
+
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     line_no = atoi(strtok(line, ";")); 	//line number
+     if ( dip_switch_val == line_no)
+        { 
+     	  strcpy(lisymini_game->gamename,strtok(NULL, ";"));	//game name short version
+     	  strcpy(lisymini_game->long_name,strtok(NULL, ";"));	//game long name
+     	  strcpy(lisymini_game->type,strtok(NULL, ";"));	//game type
+     	  lisymini_game->throttle = atoi(strtok(NULL, ";"));	//throttle value per Bally game
+     	  strcpy(lisymini_game->comment,strtok(NULL, ";"));	//comment if available
+	  found = 1; //found it
+          break;
+	}
+   } //while
+   fclose(fstream);
+
+  //give back the name and the number of the game
+  if (found) return(line_no); else return(-1);
+}

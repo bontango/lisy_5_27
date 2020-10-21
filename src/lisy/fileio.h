@@ -87,6 +87,7 @@ int lisy35_file_write_dipfile( int mode, char *line );
 int  lisy35_file_get_soundopts(void);
 
 int lisymini_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game);
+int lisyapc_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game);
 
 int  lisy_file_get_welcome_msg(char *message);
 
