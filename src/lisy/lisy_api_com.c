@@ -23,7 +23,7 @@
 #include "externals.h"
 #include "lisy_api_com.h"
 
-#define LISY_API_SLEEP_TIME 1000 //we sleep 1000us ( 1ms) until we repeat cmd
+#define LISY_API_SLEEP_TIME 1000 //we sleep 1000us ( 1ms) until we try again to read the answer
 #define LISY_API_NO_OF_RETRIES 100   //we retry number of times
 
 //local vars
@@ -65,13 +65,16 @@ int lisy_api_write( unsigned char *data, int count, int debug  )
     }
    }
 
- //send command, repeat until feedback (first retruned byte) is number of bytes
+ //send command, the read answer
+ //send cmd
+ if ( write( fd_api,data,count) != count ) return(-1);
+
+
+ // repeat reading until feedback (first retruned byte) is number of bytes
  // 0 means, not read, need to retry
  // 0xff means internal error
  do
  {
-   //send cmd
-   if ( write( fd_api,data,count) != count ) return(-1);
 
    //read feedback (1st byte) which is number of received bytes by APC
    if ( read(fd_api,&feedback,1) != 1) return (-2);
