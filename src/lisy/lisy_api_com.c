@@ -485,6 +485,7 @@ unsigned char lisy_api_ask_for_changed_switch(void)
 {
 
  unsigned char feedback,cmd;
+ unsigned char retries = 0;
  unsigned char my_switch = 0x7f;
  int ret;
 
@@ -493,19 +494,41 @@ unsigned char lisy_api_ask_for_changed_switch(void)
 
  //send command
  cmd = LISY_G_CHANGED_SW;
- if ( write( fd_api,&cmd,1) != 1) return (-2);
 
 
-//receive answer
-//first byte nned to be one (number of received bytes)
-//we do not retry here as it is a poll anyway
- if ( read(fd_api,&feedback,1) != 1) return (-1);
 
-//only if feedback == 1
-if( feedback == 1)
- { if ( read(fd_api,&my_switch,1) != 1) return (-1); }
-else
- { lisy80_debug("polled switch returns 0 -busy-!"); }
+ //send command, than read answer
+ //send cmd
+ if ( write( fd_api,&cmd,1) != 1 ) return(-1);
+
+
+ // repeat reading until feedback (first retruned byte) is number of bytes
+ // 0 means, not read, need to retry
+ // 0xff means internal error
+ do
+ {
+
+   //read feedback (1st byte) which is number of received bytes by APC
+   if ( read(fd_api,&feedback,1) != 1) return (-2);
+
+   //check feedback for errors
+   if ( feedback == 0xff)
+    { return (-3); }
+   else if ( feedback == 0)
+   {
+        if( ++retries > LISY_API_NO_OF_RETRIES ) return(-4);
+        usleep(LISY_API_SLEEP_TIME);
+        //USB debug?
+        if(ls80dbg.bitv.basic)
+        {
+         sprintf(debugbuf,"API_read_byte: cmd (%d) repeated %d times (%d max)",cmd,retries,LISY_API_NO_OF_RETRIES);
+         lisy80_debug(debugbuf);
+        }
+    }
+ } while ( feedback != 1);
+
+ //now receive answer
+ if ( read(fd_api,&my_switch,1) != 1) return (-1); 
 
  //USB debug? only if reurn is not 0x7f == no switch changed
  if((ls80dbg.bitv.switches) & ( my_switch != 0x7f))
