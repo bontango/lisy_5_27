@@ -412,6 +412,17 @@ if (ret < 80) //ret is switchnumber
     lisy_timer( 0, 1, 0);
  }
 
+//set volume each time replay is pressed
+if ( lisy1_has_soundcard )
+{
+ if ( CHECK_BIT(swMatrixLISY1[3],0)) //is bit set?
+         {
+          lisy_adjust_volume();
+          if ( ls80dbg.bitv.basic) lisy80_debug("Volume setting initiated by REPLAY Switch");
+         }
+}
+
+
 if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
 {
 //system1 Replay switch strobe:3 ret:0
