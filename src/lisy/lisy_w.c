@@ -811,7 +811,6 @@ if ( ret == 72) {
  switch(lisymini_game.typeno)
  {
         case LISYW_TYPE_SYS7:
-        case LISYW_TYPE_SYS9:
           core_setSw( S7_SWADVANCE, action );
           if ( ls80dbg.bitv.switches )
           {
@@ -819,6 +818,7 @@ if ( ret == 72) {
              lisy80_debug(debugbuf);
           }
 	  break;
+        case LISYW_TYPE_SYS9:
         case LISYW_TYPE_SYS11A:
           core_setSw( S11_SWADVANCE, action );
           if ( ls80dbg.bitv.switches )
@@ -835,7 +835,6 @@ if ( ret == 73) {
  switch(lisymini_game.typeno)
  {
         case LISYW_TYPE_SYS7:
-        case LISYW_TYPE_SYS9:
           core_setSw( S7_SWUPDN, action );
           if ( ls80dbg.bitv.switches )
           {
@@ -843,6 +842,7 @@ if ( ret == 73) {
              lisy80_debug(debugbuf);
           }
           break;
+        case LISYW_TYPE_SYS9:
         case LISYW_TYPE_SYS11A:
           core_setSw( S11_SWUPDN, action );
           if ( ls80dbg.bitv.switches )
