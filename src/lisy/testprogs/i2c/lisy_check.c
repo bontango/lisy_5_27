@@ -1,7 +1,7 @@
 /* lisy_check
    based on i2cdetect
-   Version 0.4
-   bontango 05.2020
+   Version 0.5
+   bontango 11.2020
 */
 
 #include <sys/types.h>
@@ -31,7 +31,7 @@
   2 -> lisy80 HW Version 3.21
   3 -> lisy1 baed on Lisy80 HW Version 3.21
   4 -> lisy35 for Bally/Stern  based on Lisy80 HW Version 3.21
-  5 -> LISY_Mini via I2C, a version without PICs to control other boards via USB (e.g. APC)
+  5 -> LISY_Mini via serial, a version without PICs integrated on APC v3.x
   6 -> LISY_Mini via USB, a version without PICs to control other boards via USB (e.g. APC)
  -1 -> on error
 
@@ -40,7 +40,6 @@
 
 #define I2C_DEVICE "/dev/i2c-1"
 #define DISP_PIC_ADDR 0x40              // I2C Address of PIC for displays
-#define APC_ADDR 0x44              // I2C Address of APC
 #define LS80DPCMD_GET_SW_VERSION_MAIN 2
 #define LS80DPCMD_GET_HW_REV 100
 
@@ -74,36 +73,6 @@ int main(int argc, char *argv[])
   printf("we are in verbose mode\n");
  } 
 
- //we probe for APC device via I2C first
- file = open(I2C_DEVICE, O_RDWR);
- if ( file < 0 )
-  {
-   printf("could not open bus at /dev/i2c-1\n");
-   return -1;
- }
-
- /* Set slave address */
- if (ioctl(file, I2C_SLAVE, APC_ADDR) < 0) {
-        fprintf(stderr, "Error: Could not set "
-                        "address to 0x%02x: %s\n", APC_ADDR,
-                                strerror(errno));
-                return -1;
- }
-
- if (verbose) printf("check i2c bus /dev/i2c-1 at address 0x44\n");
- res = i2c_smbus_read_byte(file);
- if (res >= 0 )
-  {
-    if (verbose) printf("APC at address 0x44 detected\n");
-    close(file);
-    exit(5) ;
-  }
-else
-  {
-    if (verbose) printf("nothing at APC address 0x44 \n");
-  }
-
-
 
  //do a quick check if we are running on LISY_mini
  //before trying to access I2C
@@ -119,10 +88,23 @@ else
  pinMode ( 14, INPUT); 
  if ( digitalRead (14))
  {
-  if (verbose)  printf("LISY_Mini via GPIO detected detected\n");
-  return(6);
+   //could still be LISY_Mini via USB or Raspberry sitting on a APC
+   //we check for serial USB device, if it exists we assume a LISY_MIni
+   //otherwise we assume a LISY/Pi on an APC via serial
+ 
+   file = open("/dev/ttyACM0", O_RDWR);
+   if ( file < 0 )
+  {
+   if (verbose)  printf("LISY via GPIO detected (no USB device present)\n");
+   return(5);
+  }
+  else
+  {
+   if (verbose)  printf("LISY_Mini via USB /dev/ttyACM0 detected\n");
+   return(6);
+  }
  }
-
+ 
 
  // we check software version of display pic
  // with sw >=4  we have the ID in the PIC, no 24C04 anymore!
