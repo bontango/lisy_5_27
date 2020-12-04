@@ -11,6 +11,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h> 
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
@@ -1400,7 +1402,7 @@ void do_upload( int sockfd, char *what)
 
 int main(int argc, char *argv[])
 {
-     int sockfd, newsockfd, portno;
+     int sockfd, newsockfd, portno, file;
      socklen_t clilen;
      char buffer[256];
      char ip_interface[10];
@@ -1429,7 +1431,22 @@ int main(int argc, char *argv[])
 
      //check which pinball we are going to control
      //this will also call lisy_hw_init
-     strcpy(lisy_variant,"lisy_m");
+
+   //could still be LISY_Mini via USB or Raspberry sitting on a APC
+   //we check for serial USB device, if it exists we assume a LISY_MIni
+   //otherwise we assume a LISY/Pi on an APC via serial
+
+   file = open("/dev/ttyACM0", O_RDWR);
+   if ( file < 0 )
+  {
+   //no USB device
+   strcpy(lisy_variant,"lisy_apc");
+  }
+  else
+  {
+    strcpy(lisy_variant,"lisy_m");
+  }
+
      if ( (res = lisy_set_gamename(lisy_variant, lisy_gamename)) != 0)
  	   {
              fprintf(stderr,"LISYMINI: no matching game or other error\n\r");
