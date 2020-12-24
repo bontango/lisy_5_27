@@ -623,6 +623,8 @@ void lisy_api_display_set_prot(uint8_t display_no,uint8_t protocol)
 void lisy_api_sound_play_index( unsigned char board, unsigned char index )
 {
         uint8_t cmd;
+        uint8_t data;
+	int ret;
         unsigned char cmd_data[3];
 
  if ( ls80dbg.bitv.sound )
@@ -642,14 +644,43 @@ void lisy_api_sound_play_index( unsigned char board, unsigned char index )
 
      if ( lisy_api_write( cmd_data,3,ls80dbg.bitv.sound) != 3)
         fprintf(stderr,"sound play file error writing to serial\n");
+
+     //check if remote side is ready to receive next command
+    ret = lisy_api_read_byte(LISY_BACK_WHEN_READY, &data);
+    if ( ret <= 0)
+     {
+  	if(ls80dbg.bitv.basic)
+  	{ 
+         if (ret == 0)
+	 {
+    	  sprintf(debugbuf,"Error: LISY_BACK_WHEN_READY: timeout occured");
+    	  lisy80_debug(debugbuf);
+	 }
+	 else
+	 {
+    	  sprintf(debugbuf,"Error: LISY_BACK_WHEN_READY: returned %d",ret);
+    	  lisy80_debug(debugbuf);
+	 }
+  	}
+     }
+    else
+     {
+  	if( ls80dbg.bitv.basic & ( data != 0) )
+  	{
+    	 sprintf(debugbuf,"LISY_BACK_WHEN_READY: returned 0x%02x",data);
+    	 lisy80_debug(debugbuf);
+  	}
+
+     }
+
 }
 
 
 //play soundfile API 0x34
 void lisy_api_sound_play_file( unsigned char board, char *filename )
 {
-	uint8_t cmd;
-	int i,len;
+	uint8_t cmd,data;
+	int i,len,ret;
         unsigned char cmd_data[80];
 
  if ( ls80dbg.bitv.sound )
@@ -673,6 +704,36 @@ void lisy_api_sound_play_file( unsigned char board, char *filename )
 
      if ( lisy_api_write( cmd_data,len+4,ls80dbg.bitv.sound) != len+4)
         fprintf(stderr,"sound play file error writing to serial\n");
+
+
+     //check if remote side is ready to receive next command
+    ret = lisy_api_read_byte(LISY_BACK_WHEN_READY, &data);
+    if ( ret <= 0)
+     {
+        if(ls80dbg.bitv.basic)
+        {
+         if (ret == 0)
+         {
+          sprintf(debugbuf,"Error: LISY_BACK_WHEN_READY: timeout occured");
+          lisy80_debug(debugbuf);
+         }
+         else
+         {
+          sprintf(debugbuf,"Error: LISY_BACK_WHEN_READY: returned %d",ret);
+          lisy80_debug(debugbuf);
+         }
+        }
+     }
+    else
+     {
+        if( ls80dbg.bitv.basic & ( data != 0) )
+        {
+         sprintf(debugbuf,"LISY_BACK_WHEN_READY: returned 0x%02x",data);
+         lisy80_debug(debugbuf);
+        }
+
+     }
+
 }
 
 
