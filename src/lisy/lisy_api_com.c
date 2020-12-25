@@ -133,6 +133,55 @@ unsigned char lisy_api_read_byte(unsigned char cmd, unsigned char *data)
 
 }
 
+//read one byte, and return data into *data
+//blocking version, we wait 5 seconds before send error back
+//return -2 in case we had problems to send  cmd
+//return -1 in case we had problems to receive byte
+//return 0 otherwise
+unsigned char lisy_api_read_byte_wblock(unsigned char cmd, unsigned char *data)
+{
+ uint8_t tries = 0;
+ int ret;
+
+ //send command
+ if ( lisy_api_write( &cmd,1,ls80dbg.bitv.basic) != 1) return (-2);
+
+ //receive answer ; 50 tries with 100msec driver timeout
+ while ( tries < 50)
+ {
+  ret = read(fd_api,data,1);
+  if ( ret == 0) tries++;
+  else if ( ret == 1)
+   {
+     //USB debug?
+     if(ls80dbg.bitv.basic)
+     {
+       sprintf(debugbuf,"API_read_byte: 0x%02x",*data);
+       lisy80_debug(debugbuf);
+     }
+     return(0);
+   }
+  else
+   {
+     //USB debug?
+     if(ls80dbg.bitv.basic)
+     {
+       sprintf(debugbuf,"API_read_byte_wblock returned %d",ret);
+       lisy80_debug(debugbuf);
+     }
+     return(-1);
+   }
+  } //while tries < 50
+
+   //USB debug?
+     if(ls80dbg.bitv.basic)
+     {
+       sprintf(debugbuf,"API_read_byte_wblock timeout occured after %d tries",tries);
+       lisy80_debug(debugbuf);
+     }
+     return(-1);
+ }
+
 //this command has an option
 //read answer of two byte, and return data into *data1 and *data2
 //return -2 in case we had problems to send  cmd
@@ -646,7 +695,7 @@ void lisy_api_sound_play_index( unsigned char board, unsigned char index )
         fprintf(stderr,"sound play file error writing to serial\n");
 
      //check if remote side is ready to receive next command
-    ret = lisy_api_read_byte(LISY_BACK_WHEN_READY, &data);
+    ret = lisy_api_read_byte_wblock(LISY_BACK_WHEN_READY, &data);
     if ( ret <= 0)
      {
   	if(ls80dbg.bitv.basic)
@@ -707,7 +756,7 @@ void lisy_api_sound_play_file( unsigned char board, char *filename )
 
 
      //check if remote side is ready to receive next command
-    ret = lisy_api_read_byte(LISY_BACK_WHEN_READY, &data);
+    ret = lisy_api_read_byte_wblock(LISY_BACK_WHEN_READY, &data);
     if ( ret <= 0)
      {
         if(ls80dbg.bitv.basic)
