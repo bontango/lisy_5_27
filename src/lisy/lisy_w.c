@@ -156,6 +156,8 @@ unsigned char swMatrixLISY_W[9] = { 0,0,0,0,0,0,0,0,0 };
 
 //internal flag fo AC Relais, default 0 ->not present
 unsigned char lisy_has_AC_Relais = 0;
+//special rouines needed for RoadKings
+unsigned char lisy_is_RoadKings = 0;
 
 
 //init SW portion of lisy_w
@@ -175,6 +177,8 @@ void lisy_w_init( void )
 //set the internal type
 if (strcmp(lisymini_game.type,"SYS7") == 0) lisymini_game.typeno = LISYW_TYPE_SYS7;
 else if (strcmp(lisymini_game.type,"SYS9") == 0) lisymini_game.typeno = LISYW_TYPE_SYS9;
+else if (strcmp(lisymini_game.type,"SYS11") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11;
+else if (strcmp(lisymini_game.type,"SYS11RK") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11RK; //Road Kings;
 else if (strcmp(lisymini_game.type,"SYS11A") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11A;
 else lisymini_game.typeno = LISYW_TYPE_NONE;
 
@@ -184,6 +188,14 @@ switch(lisymini_game.typeno)
 	case LISYW_TYPE_SYS7: 
 	case LISYW_TYPE_SYS9: 
 		lisy_has_AC_Relais = 0;	
+		break;
+	case LISYW_TYPE_SYS11: 
+		lisy_has_AC_Relais = 0;	
+		break;
+	case LISYW_TYPE_SYS11RK: 			//Road Kings is first game with AC Relais
+          	//lisy_has_AC_Relais = 1;                       //but has different numbering then later SYS11A
+          	lisy_is_RoadKings = 1;
+		lisy_has_AC_Relais = 0; //RTH for first test
 		break;
 	case LISYW_TYPE_SYS11A: 
 		lisy_has_AC_Relais = 1;	
@@ -718,7 +730,9 @@ void lisy_w_display_handler(void)
   case LISYW_TYPE_SYS9: 
 	lisy_w_display_handler_SYS9();
        break;
+  case LISYW_TYPE_SYS11: 
   case LISYW_TYPE_SYS11A: 
+  case LISYW_TYPE_SYS11RK: 
 	lisy_w_display_handler_SYS11A();
        break;
  }
