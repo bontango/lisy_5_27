@@ -833,6 +833,8 @@ if ( ret == 72) {
           }
 	  break;
         case LISYW_TYPE_SYS9:
+        case LISYW_TYPE_SYS11:
+        case LISYW_TYPE_SYS11RK:
         case LISYW_TYPE_SYS11A:
           core_setSw( S11_SWADVANCE, action );
           if ( ls80dbg.bitv.switches )
@@ -857,6 +859,8 @@ if ( ret == 73) {
           }
           break;
         case LISYW_TYPE_SYS9:
+        case LISYW_TYPE_SYS11:
+        case LISYW_TYPE_SYS11RK:
         case LISYW_TYPE_SYS11A:
           core_setSw( S11_SWUPDN, action );
           if ( ls80dbg.bitv.switches )
