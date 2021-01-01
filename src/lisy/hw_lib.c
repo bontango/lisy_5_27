@@ -262,7 +262,28 @@ void lisyapc_hwlib_init( void )
  fprintf(stderr,"Info: check ID for 'APC' returns %d\n",ret);
 
  //now get debug options
- K1_debug_values = lisyapc_get_dip("K1");
+ if (ls80dbg.bitv.basic)
+ { 
+   K1_debug_values = lisyapc_get_dip("K1");
+
+   sprintf(debugbuf,"LISY APC basic DEBUG activ, APC optionbyte is: %d",K1_debug_values);
+   lisy80_debug(debugbuf);
+
+   //debug options are coming from switch APC, adaption needed
+   ls80dbg.bitv.displays = CHECK_BIT( K1_debug_values, 0);
+   ls80dbg.bitv.switches = CHECK_BIT( K1_debug_values, 1);
+   ls80dbg.bitv.lamps = CHECK_BIT( K1_debug_values, 2);
+   ls80dbg.bitv.coils = CHECK_BIT( K1_debug_values, 3);
+   ls80dbg.bitv.sound = CHECK_BIT( K1_debug_values, 4);
+
+
+   if ( ls80dbg.bitv.displays ) lisy80_debug("LISY80 DEBUG activ for displays");
+   if ( ls80dbg.bitv.switches ) lisy80_debug("LISY80 DEBUG activ for switches");
+   if ( ls80dbg.bitv.lamps ) lisy80_debug("LISY80 DEBUG activ for lamps");
+   if ( ls80dbg.bitv.coils ) lisy80_debug("LISY80 DEBUG activ for coils");
+   if ( ls80dbg.bitv.sound ) lisy80_debug("LISY80 DEBUG activ for sound");
+   }
+   else ls80dbg.byte = 0; 
 
  //do some debug output if requested
  //number of displays
@@ -1222,9 +1243,9 @@ static unsigned char first = 1;
  //give back value wanted
  if(strcmp(wantdip,"S1") == 0) return lisy_api_get_dip_switch(2);
  else if(strcmp(wantdip,"S2") == 0) return lisy_api_get_dip_switch(3); //S2 is gamenumber
- else if(strcmp(wantdip,"K1") == 0) return ( 0x1F && lisy_api_get_dip_switch(4)); //debug options
- else if(strcmp(wantdip,"K2") == 0) return ( 0x60 && lisy_api_get_dip_switch(4));
- else if(strcmp(wantdip,"K3") == 0) return ( 0x80 && lisy_api_get_dip_switch(4));
+ else if(strcmp(wantdip,"K1") == 0) return ( 0x1F & lisy_api_get_dip_switch(4)); //debug options
+ else if(strcmp(wantdip,"K2") == 0) return ( 0x60 & lisy_api_get_dip_switch(4));
+ else if(strcmp(wantdip,"K3") == 0) return ( 0x80 & lisy_api_get_dip_switch(4));
  else return 0;
 
 
