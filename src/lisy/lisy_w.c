@@ -180,6 +180,8 @@ else if (strcmp(lisymini_game.type,"SYS9") == 0) lisymini_game.typeno = LISYW_TY
 else if (strcmp(lisymini_game.type,"SYS11") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11;
 else if (strcmp(lisymini_game.type,"SYS11RK") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11RK; //Road Kings;
 else if (strcmp(lisymini_game.type,"SYS11A") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11A;
+else if (strcmp(lisymini_game.type,"SYS11B") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11B;
+else if (strcmp(lisymini_game.type,"SYS11C") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11C;
 else lisymini_game.typeno = LISYW_TYPE_NONE;
 
 //set internal flags based on system type
@@ -196,6 +198,8 @@ switch(lisymini_game.typeno)
           	lisy_has_SS_Relais = 1;                 //but has different numbering then later SYS11A
 		break;					//it is Sol#12  and is called Solenoid Select Relais
 	case LISYW_TYPE_SYS11A: 
+	case LISYW_TYPE_SYS11B: 
+	case LISYW_TYPE_SYS11C: 
 		lisy_has_AC_Relais = 1;	
 		break;
 	default : 
@@ -731,6 +735,8 @@ void lisy_w_display_handler(void)
   case LISYW_TYPE_SYS11: 
   case LISYW_TYPE_SYS11A: 
   case LISYW_TYPE_SYS11RK: 
+  case LISYW_TYPE_SYS11B: 
+  case LISYW_TYPE_SYS11C: 
 	lisy_w_display_handler_SYS11A();
        break;
  }
@@ -766,6 +772,8 @@ if (first)
  		core_setSw( S7_SWUPDN, lisy_api_get_switch_status(73) );
                 break;
         case LISYW_TYPE_SYS11A:
+        case LISYW_TYPE_SYS11B:
+        case LISYW_TYPE_SYS11C:
  		core_setSw( S11_SWADVANCE, lisy_api_get_switch_status(72) );
  		core_setSw( S11_SWUPDN, lisy_api_get_switch_status(73) );
                 break;
@@ -834,6 +842,8 @@ if ( ret == 72) {
         case LISYW_TYPE_SYS11:
         case LISYW_TYPE_SYS11RK:
         case LISYW_TYPE_SYS11A:
+        case LISYW_TYPE_SYS11B:
+        case LISYW_TYPE_SYS11C:
           core_setSw( S11_SWADVANCE, action );
           if ( ls80dbg.bitv.switches )
           {
@@ -860,6 +870,8 @@ if ( ret == 73) {
         case LISYW_TYPE_SYS11:
         case LISYW_TYPE_SYS11RK:
         case LISYW_TYPE_SYS11A:
+        case LISYW_TYPE_SYS11B:
+        case LISYW_TYPE_SYS11C:
           core_setSw( S11_SWUPDN, action );
           if ( ls80dbg.bitv.switches )
           {
