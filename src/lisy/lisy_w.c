@@ -159,6 +159,10 @@ unsigned char lisy_has_AC_Relais = 0;
 //internal flag fo SS Relais, default 0 ->not present ( RoadKings only)
 unsigned char lisy_has_SS_Relais = 0;
 
+//internal for lisy_w.c
+//to have an delayed nvram write
+//initial to 1 to save nvram in case of not exiting at star ( Factory Reset Message)
+static unsigned char want_to_write_nvram = 1;
 
 //init SW portion of lisy_w
 void lisy_w_init( void )
@@ -254,6 +258,24 @@ if (first)
   //store start time first, which is number of microseconds since wiringPiSetup (wiringPI lib)
   last = micros();
  }
+
+ //do some usefull stuff
+ //do we need to write to nvram?
+ if ( want_to_write_nvram )
+ {
+     if ( lisy_timer( 3000, 0, 3)) //three seconds delay
+      {
+        lisy_timer( 0, 1, 3); //reset timer
+        want_to_write_nvram = 0;
+        lisy_nvram_write_to_file();
+        //debug
+        if ( ls80dbg.bitv.basic )
+        {
+         lisy80_debug("timer experid, nvram delayed write");
+        }
+      }
+ }
+
 
  // if we are faster than throttle value which 
  //is per default 3000 usec (3 msec)
@@ -1058,10 +1080,18 @@ if ( mysol != coreGlobals.solenoids)
 
         //in case we hav solenoid #23, also activate #24 on APC
         //as APC use two solenoids for flipper (left/right)
-        if (sol_no == 23 ) { lisy_api_sol_ctrl(23,action); lisy_api_sol_ctrl(24,action); }
+        if (sol_no == 23 ) { 
+		lisy_api_sol_ctrl(23,action);
+		lisy_api_sol_ctrl(24,action);
+		lisy_nvram_write_to_file();
+			 }
 
 	//for games without AC Relais Williams use Sol 25 for flipper enable
-        if ( (sol_no == 25 ) & (lisy_has_AC_Relais == 0)) { lisy_api_sol_ctrl(23,action); lisy_api_sol_ctrl(24,action); }
+        if ( (sol_no == 25 ) & (lisy_has_AC_Relais == 0)) {
+		 lisy_api_sol_ctrl(23,action);
+		 lisy_api_sol_ctrl(24,action);
+		 lisy_nvram_write_to_file();
+			 }
 
 	//with A-C Relais Solenoids 1..8 are muxed, in pinmame we have the 'C-Side' as Solenoids 25..32
         //so we need to substract 24 before sending command to APC
