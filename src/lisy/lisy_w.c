@@ -1086,8 +1086,8 @@ if ( mysol != coreGlobals.solenoids)
 		lisy_nvram_write_to_file();
 			 }
 
-	//for games without AC Relais Williams use Sol 25 for flipper enable
-        if ( (sol_no == 25 ) & (lisy_has_AC_Relais == 0)) {
+	//for games without AC or SS Relais Williams use Sol 25 for flipper enable
+        if ( (sol_no == 25 ) & (lisy_has_AC_Relais == 0) & (lisy_has_SS_Relais == 0) ) {
 		 lisy_api_sol_ctrl(23,action);
 		 lisy_api_sol_ctrl(24,action);
 		 lisy_nvram_write_to_file();
@@ -1099,14 +1099,12 @@ if ( mysol != coreGlobals.solenoids)
 
 	//with Solenoid Select (SS) Relais Solenoids 5,13,14,15 are muxed, in pinmame we have the 'C-Side' as Solenoids 25..28
         //so we need to substract before sending command to APC
-	if ( lisy_has_SS_Relais == 1)
+	if (( sol_no >=25) & ( lisy_has_SS_Relais == 1))
 	 { 
-                if (sol_no == 25 ) real_sol = 5;
-                else if (sol_no == 26 ) real_sol = 13;
-                else if (sol_no == 27 ) real_sol = 14;
-                else if (sol_no == 28 ) real_sol = 15;
-
-		lisy_api_sol_ctrl(real_sol,action);
+                if (sol_no == 25 ) { real_sol = 5; lisy_api_sol_ctrl(real_sol,action); }
+                else if (sol_no == 26 ) { real_sol = 13; lisy_api_sol_ctrl(real_sol,action); }
+                else if (sol_no == 27 ) { real_sol = 14; lisy_api_sol_ctrl(real_sol,action); }
+                else if (sol_no == 28 ) { real_sol = 15; lisy_api_sol_ctrl(real_sol,action); }
 	 }
 
         //debug? 
