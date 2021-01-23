@@ -740,6 +740,111 @@ UINT16 rt;
   }
 }
 
+/*
+********   SYSTEM 11C  *************
+s11.h:#define s11_dispS11c  s11_dispS11b2
+
+const struct core_dispLayout s11_dispS11b2[] = {
+  DISP_SEG_16(0,CORE_SEG16),DISP_SEG_16(1,CORE_SEG16),{0}
+};
+
+core.h:#define CORE_SEG16    0 // 16 segments
+core.h:#define DISP_SEG_16(row,type)    {4*row, 0, 20*row, 16, type}
+
+from core.h
+struct core_dispLayout {
+  UINT16 top, left, start, length, type;
+
+results in:
+Row 1: 0
+Row 2: 8
+*/
+
+ typedef union {
+       core_tSeg segments;
+       //assigment accoring to s11games.c & core.c/.h see above
+       struct {
+          UINT16 row1[16]; //0..15
+          UINT16 row2[16]; //16..31
+          UINT16 dum2[CORE_SEGCOUNT-32]; //the rest
+      } disp;
+  } t_mysegments_s11C;
+
+
+//display handler System11C
+void lisy_w_display_handler_SYS11C(void)
+{
+  static UINT8 first = 1;
+  UINT8 i,k;
+  int len;
+
+
+  static t_mysegments_s11C mysegments;
+  t_mysegments_s11C tmp_segments;
+
+  if(first)
+  {
+        memset(mysegments.segments,0,sizeof(mysegments.segments));
+	//for system11C display 1&2 are SEG14, we keep status display as ASCII
+	lisy_api_display_set_prot(1,4);
+	lisy_api_display_set_prot(2,4);
+	first=0;
+  }
+ 
+  //something changed?
+  if  ( memcmp(mysegments.segments,coreGlobals.segments,sizeof(mysegments)) != 0)
+  {
+    //store it
+    memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
+    //check it display per display
+    len = sizeof(mysegments.disp.row1);
+    if( memcmp( tmp_segments.disp.row1,mysegments.disp.row1,len) != 0) send_SEG14_to_display(1, tmp_segments.disp.row1);
+    if( memcmp( tmp_segments.disp.row2,mysegments.disp.row2,len) != 0) send_SEG14_to_display(2, tmp_segments.disp.row2);
+
+    //remember it
+    memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
+
+    //and print out if debug display
+    if ( ls80dbg.bitv.displays ) 
+    {
+char c;
+UINT16 rt;
+    fprintf(stderr,"\nrow1: ");
+    for(i=0; i<=15; i++) 
+    {
+      rt = mysegments.disp.row1[i];
+      fprintf(stderr,"0x%04x ",rt);
+    }
+//test RTH print chars
+    fprintf(stderr,"\nrow1: ");
+    for(i=0; i<=15; i++)
+    {
+      c=my_seg14_2char(mysegments.disp.row1[i]);
+      fprintf(stderr,"%c",c);
+    }
+
+    fprintf(stderr,"\nrow2: ");
+    for(i=0; i<=15; i++)
+    {
+      rt = mysegments.disp.row2[i];
+      fprintf(stderr,"0x%04x ",rt);
+    }
+//test RTH print chars
+    fprintf(stderr,"\nrow2: ");
+    for(i=0; i<=15; i++)
+    {
+      c=my_seg14_2char(mysegments.disp.row2[i]);
+      fprintf(stderr,"%c",c);
+
+    }
+
+    fprintf(stderr,"\n\n ");
+
+   } //debug
+    //check which line has changed
+  }
+}
+
 
 //display handler
 //we switch here according to system type
@@ -758,8 +863,10 @@ void lisy_w_display_handler(void)
   case LISYW_TYPE_SYS11A: 
   case LISYW_TYPE_SYS11RK: 
   case LISYW_TYPE_SYS11B: 
-  case LISYW_TYPE_SYS11C: 
 	lisy_w_display_handler_SYS11A();
+       break;
+  case LISYW_TYPE_SYS11C: 
+	lisy_w_display_handler_SYS11C();
        break;
  }
 }
