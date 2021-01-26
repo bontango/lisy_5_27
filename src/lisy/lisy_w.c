@@ -657,10 +657,10 @@ void lisy_w_display_handler_SYS11A(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.player1);
-    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_SEG14_to_display(1, len, tmp_segments.disp.player1);
-    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_SEG14_to_display(2, len, tmp_segments.disp.player2);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_SEG7_to_display(3, len, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_SEG7_to_display(4, len, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_SEG14_to_display(1, len/2, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_SEG14_to_display(2, len/2, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_SEG7_to_display(3, len/2, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_SEG7_to_display(4, len/2, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
@@ -795,8 +795,8 @@ void lisy_w_display_handler_SYS11C(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.row1);
-    if( memcmp( tmp_segments.disp.row1,mysegments.disp.row1,len) != 0) send_SEG14_to_display(1, len, tmp_segments.disp.row1);
-    if( memcmp( tmp_segments.disp.row2,mysegments.disp.row2,len) != 0) send_SEG14_to_display(2, len, tmp_segments.disp.row2);
+    if( memcmp( tmp_segments.disp.row1,mysegments.disp.row1,len) != 0) send_SEG14_to_display(1, len/2, tmp_segments.disp.row1);
+    if( memcmp( tmp_segments.disp.row2,mysegments.disp.row2,len) != 0) send_SEG14_to_display(2, len/2, tmp_segments.disp.row2);
 
     //remember it
     memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
