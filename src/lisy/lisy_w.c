@@ -753,7 +753,7 @@ struct core_dispLayout {
 
 results in:
 Row 1: 0
-Row 2: 8
+Row 2: 20
 */
 
  typedef union {
@@ -761,8 +761,9 @@ Row 2: 8
        //assigment accoring to s11games.c & core.c/.h see above
        struct {
           UINT16 row1[16]; //0..15
-          UINT16 row2[16]; //16..31
-          UINT16 dum2[CORE_SEGCOUNT-32]; //the rest
+          UINT16 dum1[4]; //16..19
+          UINT16 row2[16]; //20..35
+          UINT16 dum2[CORE_SEGCOUNT-36]; //the rest
       } disp;
   } t_mysegments_s11C;
 
