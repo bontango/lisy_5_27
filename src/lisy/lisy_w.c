@@ -419,33 +419,31 @@ char my_seg2char( UINT16 segvalue )
 
 //send ASCII characters o display
 //use my_seg2char routine to translate williams 7segment to ASCII
-void send_ASCII_to_display( int no, UINT16 *dispval)
+void send_ASCII_to_display( int no, int len, UINT16 *dispval)
 {
  int i;
- char str[8]; //include null termination
+ char str[20]; //include null termination
 
- if (no) { for(i=0; i<=6; i++) str[i] = my_seg2char( dispval[i]); str[7] = '\0'; }
- else { for(i=0; i<=3; i++) str[i] = my_seg2char( dispval[i]); str[5] = '\0'; } //status display
+ for(i=0; i<=len-1; i++) str[i] = my_seg2char( dispval[i]);
+ str[len] = '\0';
 
  lisy_api_send_str_to_disp(no, str);
 
 }
 
 //send SEG7 data to display
-void send_SEG7_to_display( int no, UINT16 *dispval)
+void send_SEG7_to_display( int no, int len, UINT16 *dispval)
 {
 
- if (no) { lisy_api_send_SEG7_to_disp(no, 7, dispval);  }
- else { lisy_api_send_SEG7_to_disp(no, 4, dispval); } //status display
+ lisy_api_send_SEG7_to_disp(no, len, dispval);
 
 }
 
 //send SEG14 data to display
-void send_SEG14_to_display( int no, UINT16 *dispval)
+void send_SEG14_to_display( int no, int len, UINT16 *dispval)
 {
 
- if (no) { lisy_api_send_SEG14_to_disp(no, 7, dispval);  }
- else { lisy_api_send_SEG14_to_disp(no, 4, dispval); } //status display
+ lisy_api_send_SEG14_to_disp(no, len, dispval);
 
 }
 
@@ -476,10 +474,10 @@ void lisy_w_display_handler_SYS7(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.player1);
-    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, tmp_segments.disp.player1);
-    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, tmp_segments.disp.player2);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, len, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, len, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, len, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, len, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
@@ -489,7 +487,7 @@ void lisy_w_display_handler_SYS7(void)
 	 status[1]=tmp_segments.disp.credits2;
 	 status[2]=tmp_segments.disp.balls1;
 	 status[3]=tmp_segments.disp.balls2;
-	 send_ASCII_to_display(0, status);
+	 send_ASCII_to_display(0, 4, status);
 	}
     //remember it
     memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
@@ -565,10 +563,10 @@ void lisy_w_display_handler_SYS9(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.player1);
-    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, tmp_segments.disp.player1);
-    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, tmp_segments.disp.player2);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, len, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, len, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, len, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, len, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
@@ -578,7 +576,7 @@ void lisy_w_display_handler_SYS9(void)
 	 status[1]=tmp_segments.disp.credits2;
 	 status[2]=tmp_segments.disp.balls1;
 	 status[3]=tmp_segments.disp.balls2;
-	 send_ASCII_to_display(0, status);
+	 send_ASCII_to_display(0, 4, status);
 	}
     //remember it
     memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
@@ -659,12 +657,10 @@ void lisy_w_display_handler_SYS11A(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.player1);
-    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_SEG14_to_display(1, tmp_segments.disp.player1);
-    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_SEG14_to_display(2, tmp_segments.disp.player2);
-    //if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, tmp_segments.disp.player3);
-    //if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, tmp_segments.disp.player4);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_SEG7_to_display(3, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_SEG7_to_display(4, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_SEG14_to_display(1, len, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_SEG14_to_display(2, len, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_SEG7_to_display(3, len, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_SEG7_to_display(4, len, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
@@ -674,7 +670,7 @@ void lisy_w_display_handler_SYS11A(void)
 	 status[1]=tmp_segments.disp.credits2;
 	 status[2]=tmp_segments.disp.balls1;
 	 status[3]=tmp_segments.disp.balls2;
-	 send_ASCII_to_display(0, status);
+	 send_ASCII_to_display(0, 4, status);
 	}
     //remember it
     memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
@@ -798,8 +794,8 @@ void lisy_w_display_handler_SYS11C(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.row1);
-    if( memcmp( tmp_segments.disp.row1,mysegments.disp.row1,len) != 0) send_SEG14_to_display(1, tmp_segments.disp.row1);
-    if( memcmp( tmp_segments.disp.row2,mysegments.disp.row2,len) != 0) send_SEG14_to_display(2, tmp_segments.disp.row2);
+    if( memcmp( tmp_segments.disp.row1,mysegments.disp.row1,len) != 0) send_SEG14_to_display(1, len, tmp_segments.disp.row1);
+    if( memcmp( tmp_segments.disp.row2,mysegments.disp.row2,len) != 0) send_SEG14_to_display(2, len, tmp_segments.disp.row2);
 
     //remember it
     memcpy(mysegments.segments,coreGlobals.segments,sizeof(mysegments));
