@@ -8,6 +8,10 @@
 #include "wmssnd.h"
 #include "s6.h"
 
+#if defined(PINMAME) && defined(LISY_SUPPORT)
+#include "lisy/lisy_w.h"
+#endif /* PINMAME && LISY_SUPPORT */
+
 #define S6_PIA0 0
 #define S6_PIA1 1
 #define S6_PIA2 2
@@ -267,6 +271,9 @@ static INTERRUPT_GEN(s6_vblank) {
   /*-- display --*/
   if ((s6locals.vblankCount % S6_DISPLAYSMOOTH) == 0) {
     memcpy(coreGlobals.segments, s6locals.segments, sizeof(coreGlobals.segments));
+#if defined(LISY_SUPPORT)
+    lisy_w_display_handler( );
+#endif
     memcpy(s6locals.segments, s6locals.pseg, sizeof(s6locals.segments));
 
     /*update leds*/
