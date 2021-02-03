@@ -1246,6 +1246,9 @@ if ( mysol != coreGlobals.solenoids)
       //send to APC in case something changed
       if( CHECK_BIT(mysol,i) != CHECK_BIT(coreGlobals.solenoids,i) )
       {
+	//ignore coil activations for coils we have a hw rule set
+	if ( lisy_m_APC_coil_HW_rule[i] != 0 ) return;
+
 	//do we activate or do we deactivate
         if ( CHECK_BIT(coreGlobals.solenoids,i)) action = 1; else action = 0;
 	//sol number starts with 1
