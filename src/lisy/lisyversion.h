@@ -1,1 +1,1 @@
-#define GITVERSION  "5.27-18-g9e2aeb3"
+#define GITVERSION  "5.27-19-gd6059a3"
