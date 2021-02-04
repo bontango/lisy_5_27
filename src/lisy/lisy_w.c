@@ -77,26 +77,6 @@ Credits: 20 28 Balls: 0 8
   } t_mysegments_s11;
 
 /*
-********   SYSTEM 6  *************
-*/
- typedef union {
-       core_tSeg segments;
-       //assigment accoring to s7games.c & core.c/.h see above
-       struct {
-          UINT16 balls1; //0
-          UINT16 player1[7]; //1..7
-          UINT16 balls2;  //8
-          UINT16 player2[7]; //9..15
-          UINT16 dum1[4]; //16..19
-          UINT16 credits1; //20
-          UINT16 player3[7]; //21..27
-          UINT16 credits2; //28
-          UINT16 player4[7]; //29..35
-          UINT16 dum2[CORE_SEGCOUNT-36]; //the rest
-      } disp;
-  } t_mysegments_s6;
-
-
 
 
 /*
@@ -209,7 +189,10 @@ void lisy_w_init( void )
 
 //set the internal type
 if (strcmp(lisymini_game.type,"SYS7") == 0) lisymini_game.typeno = LISYW_TYPE_SYS7;
+else if (strcmp(lisymini_game.type,"SYS3") == 0) lisymini_game.typeno = LISYW_TYPE_SYS3;
+else if (strcmp(lisymini_game.type,"SYS4") == 0) lisymini_game.typeno = LISYW_TYPE_SYS4;
 else if (strcmp(lisymini_game.type,"SYS6") == 0) lisymini_game.typeno = LISYW_TYPE_SYS6;
+else if (strcmp(lisymini_game.type,"SYS6A") == 0) lisymini_game.typeno = LISYW_TYPE_SYS6A;
 else if (strcmp(lisymini_game.type,"SYS9") == 0) lisymini_game.typeno = LISYW_TYPE_SYS9;
 else if (strcmp(lisymini_game.type,"SYS11") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11;
 else if (strcmp(lisymini_game.type,"SYS11RK") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11RK; //Road Kings;
@@ -221,7 +204,10 @@ else lisymini_game.typeno = LISYW_TYPE_NONE;
 //set internal flags based on system type
 switch(lisymini_game.typeno)
 {
+	case LISYW_TYPE_SYS3: 
+	case LISYW_TYPE_SYS4: 
 	case LISYW_TYPE_SYS6: 
+	case LISYW_TYPE_SYS6A: 
 	case LISYW_TYPE_SYS7: 
 	case LISYW_TYPE_SYS9: 
 		lisy_has_AC_Relais = 0;	
@@ -504,6 +490,43 @@ void send_SEG14_to_display( int no, int len, UINT16 *dispval)
 }
 
 
+/* System 6 ******/
+/* from s6.c
+  6 Digit Structure, Alpha Position, and Layout
+  ----------------------------------------------
+  (00)(01)(02)(03)(04)(05) (08)(09)(10)(11)(12)(13)
+
+  (16)(17)(18((19)(20)(21) (24)(25)(26)(27)(28)(29)
+
+           (14)(15)   (06)(07)
+
+  0-5 =         Player 1
+  6-7 =         Right Side (ball in play)
+  8-13 =        Player 2
+  14-15 =       Left side (credits)
+  16-21 =       Player 3
+  24-29 =       Player 4
+*/
+
+ typedef union {
+       core_tSeg segments;
+       //assigment accoring to s7games.c & core.c/.h see above
+       struct {
+          UINT16 player1[6]; //0..5
+          UINT16 balls1; //6
+          UINT16 balls2;  //7
+          UINT16 player2[6]; //8..13
+          UINT16 credits1; //14
+          UINT16 credits2; //15
+          UINT16 player3[6]; //16..21
+	  UINT16 dum1[2]; // 22,23
+          UINT16 player4[6]; //24..29
+          UINT16 dum2[CORE_SEGCOUNT-30]; //the rest
+      } disp;
+  } t_mysegments_s6;
+
+
+
 //display handler System6
 void lisy_w_display_handler_SYS6(void)
 {
@@ -530,10 +553,10 @@ void lisy_w_display_handler_SYS6(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.player1);
-    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, len, tmp_segments.disp.player1);
-    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, len, tmp_segments.disp.player2);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, len, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, len, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, len/2, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, len/2, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, len/2, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, len/2, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
@@ -554,14 +577,14 @@ void lisy_w_display_handler_SYS6(void)
     char c;
     lisy80_debug("display change detected");
     fprintf(stderr,"\nPlayer1: ");
-    for(i=0; i<=6; i++) 
+    for(i=0; i<=5; i++) 
     {
       c=my_seg2char(mysegments.disp.player1[i]); 
       if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
       else fprintf(stderr,"%c",c);
     }
     fprintf(stderr,"\nPlayer2: ");
-    for(i=0; i<=6; i++) 
+    for(i=0; i<=5; i++) 
     {
       c=my_seg2char(mysegments.disp.player2[i]); 
       if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
@@ -569,14 +592,14 @@ void lisy_w_display_handler_SYS6(void)
     }
 
     fprintf(stderr,"\nPlayer3: ");
-    for(i=0; i<=6; i++) 
+    for(i=0; i<=5; i++) 
     {
       c=my_seg2char(mysegments.disp.player3[i]); 
       if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
       else fprintf(stderr,"%c",c);
     }
     fprintf(stderr,"\nPlayer4: ");
-    for(i=0; i<=6; i++) 
+    for(i=0; i<=5; i++) 
     {
       c=my_seg2char(mysegments.disp.player4[i]); 
       if ( c>=0x80 ) { c=c-0x80; fprintf(stderr,"%c",c); fprintf(stderr,"."); }
@@ -592,6 +615,8 @@ void lisy_w_display_handler_SYS6(void)
 
   }
 }
+
+
 //display handler System7
 void lisy_w_display_handler_SYS7(void)
 {
@@ -618,10 +643,10 @@ void lisy_w_display_handler_SYS7(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.player1);
-    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, len, tmp_segments.disp.player1);
-    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, len, tmp_segments.disp.player2);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, len, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, len, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, len/2, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, len/2, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, len/2, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, len/2, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
@@ -707,10 +732,10 @@ void lisy_w_display_handler_SYS9(void)
     memcpy(tmp_segments.segments,coreGlobals.segments,sizeof(mysegments));
     //check it display per display
     len = sizeof(mysegments.disp.player1);
-    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, len, tmp_segments.disp.player1);
-    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, len, tmp_segments.disp.player2);
-    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, len, tmp_segments.disp.player3);
-    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, len, tmp_segments.disp.player4);
+    if( memcmp( tmp_segments.disp.player1,mysegments.disp.player1,len) != 0) send_ASCII_to_display(1, len/2, tmp_segments.disp.player1);
+    if( memcmp( tmp_segments.disp.player2,mysegments.disp.player2,len) != 0) send_ASCII_to_display(2, len/2, tmp_segments.disp.player2);
+    if( memcmp( tmp_segments.disp.player3,mysegments.disp.player3,len) != 0) send_ASCII_to_display(3, len/2, tmp_segments.disp.player3);
+    if( memcmp( tmp_segments.disp.player4,mysegments.disp.player4,len) != 0) send_ASCII_to_display(4, len/2, tmp_segments.disp.player4);
     //status display
     sum1 = tmp_segments.disp.balls1 + tmp_segments.disp.balls2 + tmp_segments.disp.credits1 + tmp_segments.disp.credits2;
     sum2 = mysegments.disp.balls1 + mysegments.disp.balls2 + mysegments.disp.credits1 + mysegments.disp.credits2;
@@ -994,9 +1019,12 @@ void lisy_w_display_handler(void)
 
  switch(lisymini_game.typeno)
  {
+  case LISYW_TYPE_SYS3: 
+  case LISYW_TYPE_SYS4: 
   case LISYW_TYPE_SYS6: 
 	lisy_w_display_handler_SYS6();
        break;
+  case LISYW_TYPE_SYS6A: 
   case LISYW_TYPE_SYS7: 
 	lisy_w_display_handler_SYS7();
        break;
