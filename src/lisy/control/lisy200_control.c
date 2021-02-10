@@ -750,8 +750,8 @@ void get_lamp2_descriptions(void)
 }
 
 //read the switch descriptions from the file
-#define LISY35_SWITCHES_PATH "/boot/lisy/lisy35/control/switch_descriptions/"
-#define LISY35_SWITCHES_FILE "_lisy35_switches.csv"
+#define LISY200_SWITCHES_PATH "/boot/lisy/lisyH/control/switch_descriptions/"
+#define LISY200_SWITCHES_FILE "lisy200_switches.csv"
 void get_switch_descriptions(void)
 {
 
@@ -765,8 +765,8 @@ void get_switch_descriptions(void)
 
 
 
- //construct the filename; using global var lisy80_gamenr
- sprintf(switch_file_name,"%s%03d%s",LISY35_SWITCHES_PATH,lisy35_game.gamenr,LISY35_SWITCHES_FILE);
+ //construct the filename; 
+ sprintf(switch_file_name,"%s%s",LISY200_SWITCHES_PATH,LISY200_SWITCHES_FILE);
 
  //try to read the file with game nr
  fstream = fopen(switch_file_name,"r");
@@ -774,19 +774,8 @@ void get_switch_descriptions(void)
    {
       fprintf(stderr,"LISY35 Info: switch descriptions according to %s\n\r",switch_file_name);
    }
-   else
-   {
-    //second try: to read the file with default
-    //construct the new filename; using 'default'
-    sprintf(switch_file_name,"%sdefault%s",LISY35_SWITCHES_PATH,LISY35_SWITCHES_FILE);
-    fstream = fopen(switch_file_name,"r");
-      if(fstream != NULL)
-      {
-      fprintf(stderr,"LISY35 Info: switch descriptions according to %s\n\r",switch_file_name);
-      }
-    }//second try
 
-  //check if first or second try where successfull
+  //check if first where successfull
   if(fstream == NULL)
       {
         fprintf(stderr,"LISY35 Info: DIP switch descriptions not found \n\r");
@@ -816,7 +805,7 @@ void get_switch_descriptions(void)
                 }
           else  strcpy ( switch_description_line2[switch_no], "");
         }
-        else fprintf(stderr,"LISY35 Info: Switch descriptions wrong info \n\r");
+        else fprintf(stderr,"LISY200 Info: Switch descriptions wrong info \n\r");
    }
 
 }
@@ -1552,9 +1541,6 @@ void send_switch_infos( int sockfd )
 
 
   //update internal switch matrix with buffer from switch pic
-  //swMatrix[0] is pinmame internal (sound?)
-  //swMatrix[1..6] is bally,
-  //swMatrix[7] is  'special switches' bit7:Test; bit6:S33;
  do
     {
      ret = lisy35_switch_reader( &action );
@@ -1570,8 +1556,8 @@ void send_switch_infos( int sockfd )
    send_basic_infos(sockfd);
 
 
-     //printf 6 lines with 8 switches each (48 switches)
-     for(i=0; i<=5; i++) //this is the line 
+     //printf 8 lines with 8 switches each (64 switches)
+     for(i=0; i<=7; i++) //this is the line 
      {
       sprintf(buffer,"<tr style=\"background-color:lawngreen;\" border=\"1\">\n");
       sendit( sockfd, buffer);

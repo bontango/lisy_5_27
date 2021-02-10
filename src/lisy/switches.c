@@ -43,7 +43,7 @@ if( ls80dbg.bitv.switches )
    } 
    else if ( ( lisy_hardware_revision == 350 ) || ( lisy_hardware_revision == LISY_HW_LISY_H_SS ))  //switch numbering for Bally
    {
-        switch_no = returnval + strobe * 8;
+        switch_no = 1 + returnval + strobe * 8;
         sprintf(debugbuf,"LISY35 Switch_reader: Switch%d, action:%d\n\r",switch_no,action);
         lisy80_debug(debugbuf);
    }
