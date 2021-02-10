@@ -33,6 +33,7 @@
   4 -> lisy35 for Bally/Stern  based on Lisy80 HW Version 3.21
   5 -> LISY_Mini via serial, a version without PICs integrated on APC v3.x
   6 -> LISY_Mini via USB, a version without PICs to control other boards via USB (e.g. APC)
+  7 -> LISY_Home with StarShip mod
  -1 -> on error
 
   use option -v (or anything else as second argument) for being verbose testing
@@ -182,6 +183,10 @@ int main(int argc, char *argv[])
         case 81 ... 120:
 		       if (verbose) printf("LISY35(Bally) detected\n");
 		       return(4);
+                       break;
+        case 200:
+		       if (verbose) printf("LISY_Home with StarShip mod detected\n");
+		       return(7);
                        break;
         default: return(-1);
                        break;
