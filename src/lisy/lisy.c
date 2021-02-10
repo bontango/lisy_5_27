@@ -64,9 +64,9 @@ void lisy_shutdown(void)
 {
  if ( lisy_hardware_revision == 100 )
     lisy1_shutdown( );
- else if ( lisy_hardware_revision == 350 )
+ else if ( ( lisy_hardware_revision == 350 ) || ( lisy_hardware_revision == LISY_HW_LISY_H_SS ))
     lisy35_shutdown( );
- else if ( ( lisy_hardware_revision == LISY_HW_LISY_W ) | ( lisy_hardware_revision == LISY_HW_LISY_APC ))
+ else if ( ( lisy_hardware_revision == LISY_HW_LISY_W ) || ( lisy_hardware_revision == LISY_HW_LISY_APC ))
     lisy_mini_shutdown( );
  else
     lisy80_shutdown( );
