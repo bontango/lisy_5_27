@@ -4,11 +4,36 @@
 
 CC      = /usr/bin/gcc
 CFLAGS  = -Wall -g -D_REENTRANT -DDEBUG
-LDFLAGS = -lwiringPi
+LDFLAGS = -lwiringPi -lSDL2 -lSDL2_mixer -li2c
+#LDFLAGS = -lwiringPi
 
-OBJ = utils.o hw_lib.o switches.o displays.o coils.o eeprom.o fileio.o lisy.o getdip4andS2.o
+#OBJ = utils.o hw_lib.o switches.o displays.o coils.o eeprom.o fileio.o lisy.o getdip4andS2.o
+# Lisy object path, we use .o files from lisy
+LOP = /home/pi//lisy/xpinmame.obj/lisy/
 
-tester: $(OBJ)
+
+OBJ = $(LOP)lisy80.o \
+      $(LOP)lisy1.o \
+      $(LOP)lisy35.o \
+      $(LOP)lisy.o \
+      $(LOP)fileio.o \
+      $(LOP)utils.o \
+      $(LOP)hw_lib.o \
+      $(LOP)switches.o \
+      $(LOP)displays.o \
+      $(LOP)coils.o \
+      $(LOP)eeprom.o \
+      $(LOP)sound.o \
+      $(LOP)opc.o \
+      $(LOP)fadecandy.o \
+      $(LOP)usbserial.o \
+      $(LOP)lisy_api_com.o \
+      $(LOP)lisy_home.o \
+      $(LOP)lisy_w.o \
+      getdip4andS2.o
+
+
+getdip4andS2: $(OBJ)
 	$(CC) $(CFLAGS) -o getdip4andS2 $(OBJ) $(LDFLAGS)
 
 %.o: ../%.c ../%.h

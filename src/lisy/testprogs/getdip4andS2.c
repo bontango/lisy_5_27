@@ -1,40 +1,65 @@
 /*
  getdip4andS2.c.c
- June 2017
+ V 2.0
+ February 2021
  bontango
 */
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdio.h>
-#include <sys/time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <net/if.h>
+#include <arpa/inet.h>
 #include <wiringPi.h>
-#include "../hw_lib.h"
-#include "../utils.h"
-#include "../displays.h"
+#include "../lisy_w.h"
 #include "../fileio.h"
+#include "../hw_lib.h"
+#include "../displays.h"
+#include "../coils.h"
+#include "../switches.h"
+#include "../utils.h"
+#include "../eeprom.h"
+#include "../sound.h"
 #include "../lisy.h"
+#include "../fadecandy.h"
+#include "../lisy_api.h"
+#include "../usbserial.h"
+#include "../lisy_api_com.h"
 
+//fake definiton needed in lisy_w
+void core_setSw(int myswitch, unsigned char action) {  };
 
-//global vars we nned but do not use here
-unsigned char swMatrix[9];
-t_stru_lisy1_games_csv lisy1_game;
-t_stru_lisy35_games_csv lisy35_game;
-t_stru_lisy80_games_csv lisy80_game;
-t_stru_lisy80_sounds_csv lisy80_sound_stru[32];
+//fake definiton needed in lisy1
+void cpunum_set_clockscale(int cpu, float clockscale) {  };
 
-//global var for coil min pulse time option ( RTH: not used yet )
-int lisy80_coil_min_pulse_time[10] = { 0,0,0,0,0,0,0,0,0,0};
-int lisy80_coil_min_pulse_mod = 0; //deaktivated by default
+//fake definiton needed in lisy80
+typedef struct {
+ struct {
+    unsigned int  soundBoard;
+  } hw;
+} core_tGameData;
 
+core_tGameData *core_gameData;
 
-
-//dummy inits
-void lisy1_init( int lisy80_throttle_val) { }
-void lisy80_init( int lisy80_throttle_val) { }
-void lisy35_init( int lisy80_throttle_val) { }
-//dummy shutdowns
-void lisy1_shutdown( void ) { }
-void lisy80_shutdown( void ) { }
-void lisy35_shutdown( void ) { }
+//fake definiton needed for mame functions
+typedef struct
+{
+ unsigned char lampMatrix[2];
+} t_coreGlobals;
+t_coreGlobals coreGlobals;
+void lisy_nvram_write_to_file( void ) {  }
+void sound_stream_update(int *dum ) {  };
+unsigned char sound_stream = 0;
+unsigned char  sound_enabled = 0;
 
 //read dip4 of S1 ( mpf option
 //and valueR of S2 (game selektion)
@@ -59,7 +84,7 @@ int main( int argc, char **argv )
   printf("%03d\n",dip_switch_val);
 
   //and give back value of dip4
-  return ls80opt.bitv.mpf;
+  return ls80opt.bitv.sevendigit;
 
 }
 
