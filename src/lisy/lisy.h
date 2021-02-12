@@ -3,7 +3,6 @@
 
 // here we have all the xternals for lisy1.c and lisy80.c
 extern int lisy_hardware_revision;
-extern int lisy_hardware_ID;
 extern ls80dbg_t ls80dbg;
 extern ls80opt_t ls80opt;
 extern int lisy_time_to_quit_flag;
@@ -29,6 +28,7 @@ void lisy_sound_handler( unsigned char board, unsigned char data );
 #define LISY_HW_LISY_W  121             //LISYx_W (Williams) based on LISY_MINI1
 #define LISY_HW_LISY_APC  122             //LISYx_APC (Williams) APC with integrated LISY
 #define LISY_HW_LISY_H_SS  200             //LISY_Home Starship special
+#define LISY_HW_LISY_H_TuJ  201             //LISY_Home Tom and Jerry  special
 
 //the LISY HW ID, one revision can have multiple hw IDS
 #define LISY_HW_ID_NONE 0  //old lisy versions without HW ID

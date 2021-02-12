@@ -25,7 +25,6 @@ t_stru_lisy_env lisy_env;
 //global var for handling different hardware revisions
 //set in lisy_hwlib_init
 int lisy_hardware_revision;
-int lisy_hardware_ID; //only for Software PIC >= 4
 unsigned char lisy_K3_value = 3;  //default no jumpers
 
 //global var for handling different eeprom handling

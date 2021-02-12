@@ -183,8 +183,8 @@ void lisy80_coil_sound_set( int sound)
 void coil_coil_set( int coil, int action)
 {
 
-   //eventhandler for LISY_HOME?
-   if ( lisy_hardware_ID == LISY_HW_ID_HOME)
+   //eventhandler for LISY_HOME Tom and Jerry?
+   if ( lisy_hardware_revision == LISY_HW_LISY_H_TuJ)
          {
 		lisy_home_event_handler( LISY_HOME_EVENT_COIL, coil, action, NULL);
 	 }
