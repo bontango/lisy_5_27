@@ -1043,3 +1043,27 @@ void lisyh_coil_select_lamp_driver(void)
     lisy80_write_byte_coil_pic(  mydata_coil.byte );
 
 }
+
+//set solenoid on LISY_Home solenoid driver board
+void lisyh_coil_set( int coil, int action)
+{
+
+        --coil; //we have only 6 bit, so we start at zero for coil 1
+
+        // build control byte
+        mydata_coil.bitv.COIL = coil;
+        mydata_coil.bitv.ACTION = action;
+        mydata_coil.bitv.IS_CMD = 0;        //this is a coil setting
+
+    //debug?
+    if (  ls80dbg.bitv.coils )
+    {
+     sprintf(debugbuf,"set LISY_home coil %d to %d",coil+1,action);
+     lisy80_debug(debugbuf);
+    }//debug
+
+
+        //write to PIC
+        lisy80_write_byte_coil_pic(  mydata_coil.byte );
+}
+

@@ -88,6 +88,8 @@ t_stru_lisy35_games_csv lisy35_game;
 t_stru_lisy80_games_csv lisy80_game;
 //global var for all contnious solenoids
 unsigned char cont_sol[5];
+//global var for all solenoids
+unsigned char solenoid[49];
 //global var for all lamps
 unsigned char lamp[80];
 unsigned char lamp2[80];
@@ -411,7 +413,7 @@ void do_mom_solenoid_set( char *buffer)
 
 }
 
-//pulse specific continous solenoid
+//set specific continous solenoid
 void do_cont_solenoid_set( char *buffer)
 {
  int solenoid;
@@ -524,6 +526,32 @@ void *do_lamp_blink(void *myarg)
  if (action == 0) action = 1; else action = 0;
  }
  return NULL;
+
+}
+
+
+//set solenoid and update internal vars
+void do_solenoid_set( char *buffer)
+{
+ unsigned char sol;
+ int action;
+
+ //the format here is 'Axx_on' or 'Axx_off'
+ //we trust ASCII values
+ sol = (10 * (buffer[1]-48)) + buffer[2]-48;
+
+ //on or off?
+ if ( buffer[5] == 'f') action=0; else  action=1;
+
+ //set the coil
+ lisyh_coil_set( sol, action);
+ solenoid[sol] = action;
+
+}
+
+//set LED and update internal vars
+void do_led_set( char *buffer)
+{
 
 }
 
@@ -891,6 +919,74 @@ void get_coil_descriptions(void)
 
 
 //send all the infos about the solenoids
+//LISY Home version
+void send_solenoid_infos( int sockfd )
+{
+  int i,j,coil_no;
+  char colorcode[80],buffer[512],name[20];
+
+  //colorcodes
+  char *code_yellow = "style=\'BACKGROUND-COLOR:yellow; width: 125px; margin:auto; height: 5em;\'";
+  char *code_blue = "style=\'BACKGROUND-COLOR:powderblue; width: 125px; margin:auto; height: 5em;\'";
+
+
+     //basic info, header line
+     send_basic_infos(sockfd);
+     sprintf(buffer,"push button to switch solenoid OFF or ON  Yellow solenoids are ON<br><br>\n");
+     sendit( sockfd, buffer);
+
+  //48 solenoids for  LISY Home
+
+  //start with 4 lines 8 solenoids each
+  for(j=0; j<=3; j++)
+  {
+   for(i=1; i<=8; i++)
+    {
+     coil_no = j * 8 + i;
+     if (solenoid[coil_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+     if (solenoid[coil_no]) sprintf(name,"A%02d_off",coil_no); else sprintf(name,"A%02d_on",coil_no);
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'%s\' %s >Coil %02d<BR/>%s<BR/>%s</button></form>\n",name,colorcode,coil_no,"normal","coil");
+  sendit( sockfd, buffer);
+    }
+  sprintf(buffer,"<br>\n");
+  sendit( sockfd, buffer);
+  }
+
+  //the relays 1..4 ( 33 .. 36 internal )
+  for(coil_no=33; coil_no<=36; coil_no++)
+  {
+     if (solenoid[coil_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+     if (solenoid[coil_no]) sprintf(name,"A%02d_off",coil_no); else sprintf(name,"A%02d_on",coil_no);
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'%s\' %s >Relay %02d<BR/>%s<BR/>%s</button></form>\n",name,colorcode,coil_no-32,"24Volt","Relay");
+  sendit( sockfd, buffer);
+    }
+  //extension 1..4 ( 37 .. 40 internal )
+  for(coil_no=37; coil_no<=40; coil_no++)
+  {
+     if (solenoid[coil_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+     if (solenoid[coil_no]) sprintf(name,"A%02d_off",coil_no); else sprintf(name,"A%02d_on",coil_no);
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'%s\' %s >Extension %02d<BR/>%s<BR/>%s</button></form>\n",name,colorcode,coil_no-36,"optional","Extension");
+  sendit( sockfd, buffer);
+    }
+
+  sprintf(buffer,"<br>\n");
+  sendit( sockfd, buffer);
+
+  //extension 5..12 ( 41 .. 48 internal )
+  for(coil_no=41; coil_no<=48; coil_no++)
+  {
+     if (solenoid[coil_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+     if (solenoid[coil_no]) sprintf(name,"A%02d_off",coil_no); else sprintf(name,"A%02d_on",coil_no);
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'%s\' %s >Extension %02d<BR/>%s<BR/>%s</button></form>\n",name,colorcode,coil_no-36,"optional","Extension");
+  sendit( sockfd, buffer);
+    }
+
+  sprintf(buffer,"<br>\n");
+  sendit( sockfd, buffer);
+
+}
+
+//send all the infos about the solenoids
 void send_mom_solenoid_infos( int sockfd )
 {
   int i,j,coil_no;
@@ -1141,6 +1237,10 @@ void send_lamp2_infos( int sockfd )
    sendit( sockfd, buffer);
    }
 
+}
+
+void send_led_infos( int sockfd )
+{
 }
 
 void send_lamp_infos( int sockfd )
@@ -1584,14 +1684,18 @@ void send_home_infos( int sockfd )
    sprintf(buffer,"<h2>LISY200 Webeditor Home Page</h2> \n");
    sendit( sockfd, buffer);
 
-   sprintf(buffer,"This is LISY200control fo StarShip version %d.%d<br>\n",LISY200control_SOFTWARE_MAIN,LISY200control_SOFTWARE_SUB);
+   sprintf(buffer,"This is LISY_control fo StarShip version %d.%d<br>\n",LISY200control_SOFTWARE_MAIN,LISY200control_SOFTWARE_SUB);
    sendit( sockfd, buffer);
    send_basic_infos(sockfd);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_switches.php\">Switches</a><br><br> \n");
    sendit( sockfd, buffer);
+   sprintf(buffer,"<p>\n<a href=\"./lisyh_leds.php\">LEDs (no mapping )</a><br><br> \n");
+   sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_lamps.php\">Lamps (first board)</a><br><br> \n");
    sendit( sockfd, buffer);
-   sprintf(buffer,"<p>\n<a href=\"./lisy35_lamps2.php\">Lamps (secondary board)</a><br><br> \n");
+   //sprintf(buffer,"<p>\n<a href=\"./lisy35_lamps2.php\">Lamps (secondary board)</a><br><br> \n");
+   //sendit( sockfd, buffer);
+   sprintf(buffer,"<p>\n<a href=\"./lisyh_solenoids.php\">Solenoids (no mapping) </a><br><br> \n");
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_mom_solenoids.php\">Momentary Solenoids</a><br><br> \n");
    sendit( sockfd, buffer);
@@ -1899,6 +2003,8 @@ int main(int argc, char *argv[])
 
     //init internal continous solenoid vars as well
     for(i=0; i<=4; i++) cont_sol[i] = 0;
+    //init internal solenoid vars as well
+    for(i=0; i<=48; i++) solenoid[i] = 0;
 
     //init sound
     //init internal sound vars as well
@@ -1919,7 +2025,7 @@ int main(int argc, char *argv[])
  if ( ls80opt.bitv.JustBoom_sound )
  {
   //set volume according to poti
-  sprintf(debugbuf,"/bin/echo \"Welcome to LISY 200 Control Version 0.%d\" | /usr/bin/festival --tts",LISY200control_SOFTWARE_SUB);
+  sprintf(debugbuf,"/bin/echo \"Welcome to LISY_Home (Starship) Control Version 0.%d\" | /usr/bin/festival --tts",LISY200control_SOFTWARE_SUB);
   system(debugbuf);
  }
 
@@ -2011,10 +2117,14 @@ int main(int argc, char *argv[])
      else if ( strcmp( buffer, "nvram") == 0) { send_nvram_infos(newsockfd); close(newsockfd); }
      //overview & control switches, send all the infos to teh webserver
      else if ( strcmp( buffer, "switches") == 0) { send_switch_infos(newsockfd); close(newsockfd); }
+     //overview & leds, send all the infos to teh webserver
+     else if ( strcmp( buffer, "leds") == 0) { send_led_infos(newsockfd); close(newsockfd); }
      //overview & control lamps, send all the infos to teh webserver
      else if ( strcmp( buffer, "lamps") == 0) { send_lamp_infos(newsockfd); close(newsockfd); }
      //overview & control lamps, send all the infos to teh webserver (second lampdriverboard)
      else if ( strcmp( buffer, "lamps2") == 0) { send_lamp2_infos(newsockfd); close(newsockfd); }
+     //overview and control solenoids, send all the infos to teh webserver
+     else if ( strcmp( buffer, "solenoids") == 0) { send_solenoid_infos(newsockfd); close(newsockfd); }
      //overview and control solenoids, send all the infos to teh webserver
      else if ( strcmp( buffer, "mom_solenoids") == 0) { send_mom_solenoid_infos(newsockfd); close(newsockfd); }
      //overview and cobtrol sounds, send all the infos to teh webserver
@@ -2033,6 +2143,10 @@ int main(int argc, char *argv[])
      else if ( strcmp( buffer, "soption") == 0) { send_soption_infos(newsockfd); close(newsockfd); }
      //should we exit?
      else if ( strcmp( buffer, "exit") == 0) do_exit = 1;
+     //we interpret all Messages with an uppercase 'A' as solenoid setting (no mapping here)
+     else if (buffer[0] == 'A') do_solenoid_set(buffer);
+     //we interpret all Messages with an uppercase 'B' as LED setting (no mapping here)
+     else if (buffer[0] == 'B') do_led_set(buffer);
      //we interpret all Messages with an uppercase 'V' as dip settings
      else if (buffer[0] == 'V') do_dip_set(buffer);
      //we interpret all Messages with an uppercase 'K' as dip comment settings

@@ -40,6 +40,9 @@ void lisyh_coil_select_solenoid_driver(void);
 void lisyh_coil_select_lamp_driver(void);
 void lisy35_coil_set_sound_raw( unsigned char value);
 
+void lisyh_coil_set( int coil, int action);
+
+
 /* pulse time for coils in milli sec */
 #define COIL_PULSE_TIME 150
 
