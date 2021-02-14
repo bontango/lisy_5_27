@@ -90,6 +90,8 @@ t_stru_lisy80_games_csv lisy80_game;
 unsigned char cont_sol[5];
 //global var for all solenoids
 unsigned char solenoid[49];
+//global var for all lines & leds
+unsigned char led[97];
 //global var for all lamps
 unsigned char lamp[80];
 unsigned char lamp2[80];
@@ -552,6 +554,27 @@ void do_solenoid_set( char *buffer)
 //set LED and update internal vars
 void do_led_set( char *buffer)
 {
+ unsigned char myled, line;
+ int action;
+
+ //the format here is 'Bxx_on' or 'Bxx_off'
+ //we trust ASCII values
+ myled = (10 * (buffer[1]-48)) + buffer[2]-48;
+
+ //on or off?
+ if ( buffer[5] == 'f') action=0; else  action=1;
+
+ //remember
+ led[myled] = action;
+
+ //calculate which line myled is 1..96
+ // split to 3 lines (1..3) and 32leds each
+ if ( myled >64) { myled = myled - 64; line = 3; }
+ else if ( myled >32) { myled = myled - 32; line = 2; }
+ else { line = 1; }
+
+ //set the led
+ lisyh_led_set( myled, line, action);
 
 }
 
@@ -1241,6 +1264,39 @@ void send_lamp2_infos( int sockfd )
 
 void send_led_infos( int sockfd )
 {
+
+  int i,j,k,led_no;
+  char colorcode[80],buffer[512],name[20];
+
+  //colorcodes
+  char *code_yellow = "style=\'BACKGROUND-COLOR:yellow; width: 125px; margin:auto; height: 5em;\'";
+  char *code_blue = "style=\'BACKGROUND-COLOR:powderblue; width: 125px; margin:auto; height: 5em;\'";
+
+
+     //basic info, header line
+     send_basic_infos(sockfd);
+     sprintf(buffer,"push button to switch LED OFF or ON  Yellow LEDs are ON<br><br>\n");
+     sendit( sockfd, buffer);
+
+  //96 LEDs for LISY Home; split to 3 lines
+
+  //3 blocks with 4 lines 8 solenoids each
+ for(k=1; k<=3; k++)
+ { 
+  for(j=0; j<=3; j++)
+  {
+   for(i=1; i<=8; i++)
+    {
+     led_no = (k-1) * 32 + j * 8 + i;
+     if (led[led_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+     if (led[led_no]) sprintf(name,"B%02d_off",led_no); else sprintf(name,"B%02d_on",led_no);
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'%s\' %s >LED %02d<BR/>%s<BR/>%d</button></form>\n",name,colorcode,led_no,"line",k);
+  sendit( sockfd, buffer);
+    }
+  sprintf(buffer,"<br>\n");
+  sendit( sockfd, buffer);
+  }
+ }
 }
 
 void send_lamp_infos( int sockfd )
