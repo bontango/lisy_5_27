@@ -1,6 +1,6 @@
 /* lisy_check
    based on i2cdetect
-   Version 0.5
+   Version 0.7
    bontango 11.2020
 */
 
@@ -80,6 +80,8 @@ int main(int argc, char *argv[])
  // this means we have a 10K pull up at pin 23 GPIO11 (14)
  // which has the red LED connected for LISY1/80/35
  // we test it with making GPIO11 (wiringpi 14) an input
+ // activate the pull down resistor
+ // wair a bit
  // and read the value. It will be 1 for LISY_Mini and 0 for other LISYs or
  // if the PI is 'standalone'
 
@@ -87,6 +89,8 @@ int main(int argc, char *argv[])
  if ( wiringPiSetup() < 0) return(-1);
 
  pinMode ( 14, INPUT); 
+ pullUpDnControl ( 14, PUD_DOWN);
+ delay(200);
  if ( digitalRead (14))
  {
    //could still be LISY_Mini via USB or Raspberry sitting on a APC
@@ -106,6 +110,7 @@ int main(int argc, char *argv[])
   }
  }
  
+   if (verbose)  printf("GPIO11 has low level, assuming no LISY Mini\n");
 
  // we check software version of display pic
  // with sw >=4  we have the ID in the PIC, no 24C04 anymore!
@@ -142,6 +147,8 @@ int main(int argc, char *argv[])
    printf("could not write to I2C device\n");
    return -1;
  }
+
+  if (verbose)  printf("Software version display PIC is %d\n",data);
 
  //we now have main sw version in data
  if ( data >= 4)
