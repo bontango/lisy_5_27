@@ -1033,6 +1033,13 @@ void lisyh_coil_select_solenoid_driver(void)
     //write to PIC
     lisy80_write_byte_coil_pic(  mydata_coil.byte );
 
+    //debug?
+    if ((  ls80dbg.bitv.coils ) || (  ls80dbg.bitv.lamps ))
+    {
+     lisy80_debug("LISY_home solenoid driver selected");
+    }
+
+
 }
 
 //lisy home, select lampdriver and line ( 1..3)
@@ -1045,6 +1052,14 @@ void lisyh_coil_select_led_driver_line(unsigned char line)
 
     //write to PIC
     lisy80_write_byte_coil_pic(  mydata_coil.byte );
+
+    //debug?
+    if ((  ls80dbg.bitv.coils ) || (  ls80dbg.bitv.lamps ))
+    {
+     sprintf(debugbuf,"LISY_home LED driver line %d selected",line);
+     lisy80_debug(debugbuf);
+    }//debug
+
 
 }
 
