@@ -506,6 +506,17 @@ void send_SEG14_to_display( int no, int len, UINT16 *dispval)
   14-15 =       Left side (credits)
   16-21 =       Player 3
   24-29 =       Player 4
+
+const struct core_dispLayout s6_6digit_disp[] = {
+  // Player 1            Player 2
+  {0, 0, 0,6,CORE_SEG7}, {0,18, 8,6,CORE_SEG7},
+  // Player 3            Player 4
+  {2, 0,20,6,CORE_SEG7}, {2,18,28,6,CORE_SEG7},
+  // Right Side          Left Side
+  {4, 9,14,2,CORE_SEG7}, {4,14, 6,2,CORE_SEG7}, {0}
+};
+
+RTH: so the structure 'picture' is wrong?
 */
 
  typedef union {
@@ -518,10 +529,11 @@ void send_SEG14_to_display( int no, int len, UINT16 *dispval)
           UINT16 player2[6]; //8..13
           UINT16 credits1; //14
           UINT16 credits2; //15
-          UINT16 player3[6]; //16..21
-	  UINT16 dum1[2]; // 22,23
-          UINT16 player4[6]; //24..29
-          UINT16 dum2[CORE_SEGCOUNT-30]; //the rest
+	  UINT16 dum1[4]; // 16..19
+          UINT16 player3[6]; //20..25
+	  UINT16 dum2[2]; // 26,27
+          UINT16 player4[6]; //28..33
+          UINT16 dum3[CORE_SEGCOUNT-34]; //the rest
       } disp;
   } t_mysegments_s6;
 
