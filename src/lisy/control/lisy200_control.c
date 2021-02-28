@@ -36,7 +36,7 @@
 
 //the version
 #define LISY200control_SOFTWARE_MAIN    0
-#define LISY200control_SOFTWARE_SUB     1
+#define LISY200control_SOFTWARE_SUB     2
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -89,7 +89,7 @@ t_stru_lisy80_games_csv lisy80_game;
 //global var for all contnious solenoids
 unsigned char cont_sol[5];
 //global var for all solenoids
-unsigned char solenoid[49];
+unsigned char solenoid[80];
 //global var for all lines & leds
 unsigned char led[97];
 //global var for all lamps
@@ -505,7 +505,7 @@ void do_dip_set( char *buffer)
 // LAMPS
 
 
-//the blinking thread
+//the blinking thread for lamps
 void *do_lamp_blink(void *myarg)
 {
  int i,nu;
@@ -531,12 +531,41 @@ void *do_lamp_blink(void *myarg)
 
 }
 
+//the blinking thread for solenoids
+void *do_solenoid_blink(void *myarg)
+{
+ int i,nu;
+ int action = 1;
+
+ pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, NULL);
+ pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
+ nu = (int *)myarg;
+
+ while(1) //run untilmainfunction send cancel
+ {
+ if (action == 0) action = 1; else action = 0;
+ for(i=1; i<=nu; i=i+2) lisyh_coil_set( i, action);
+
+ if (action == 0) action = 1; else action = 0;
+ for(i=2; i<=nu; i=i+2) lisyh_coil_set( i, action);
+
+ sleep(1);
+ if (action == 0) action = 1; else action = 0;
+ }
+ return NULL;
+
+}
+
 
 //set solenoid and update internal vars
 void do_solenoid_set( char *buffer)
 {
  unsigned char sol;
- int action;
+ int i,action;
+ //for the blinking thread
+ static pthread_t p;
+ int myarg;
 
  //the format here is 'Axx_on' or 'Axx_off'
  //we trust ASCII values
@@ -545,10 +574,43 @@ void do_solenoid_set( char *buffer)
  //on or off?
  if ( buffer[5] == 'f') action=0; else  action=1;
 
- //set the coil
- lisyh_coil_set( sol, action);
- solenoid[sol] = action;
 
+ //special solenoid 77 means ALL solenoid
+ if ( sol == 77)
+ {
+  for ( i=1; i<=48; i++)
+   {
+     lisyh_coil_set( i, action);
+     solenoid[i] = action;
+     solenoid[77] = action;
+   }
+ }
+ //special lamp 78 means blinking solenoids with pthread
+ else if ( sol == 78)
+ {
+  myarg = 48;
+  //start thread here
+  solenoid[sol] = action;
+  if (action) //start thread
+    pthread_create (&p, NULL, do_solenoid_blink, (void *)myarg);
+  else //cancel thread
+   {
+    pthread_cancel (p);
+    pthread_join (p, NULL);
+  //and set all lamps to OFF
+  for ( i=1; i<=48; i++)
+   {
+     lisyh_coil_set( i, action);
+     solenoid[i] = action;
+   }
+  }
+ }
+ else
+ {
+   //set the coil
+   lisyh_coil_set( sol, action);
+   solenoid[sol] = action;
+ }
 }
 
 //set LED and update internal vars
@@ -958,8 +1020,24 @@ void send_solenoid_infos( int sockfd )
      sprintf(buffer,"push button to switch solenoid OFF or ON  Yellow solenoids are ON<br><br>\n");
      sendit( sockfd, buffer);
 
-  //48 solenoids for  LISY Home
+   //special solenoid 77, set all solenoids
+   coil_no = 77;
+   if (solenoid[coil_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+   if (solenoid[coil_no]) sprintf(name,"A%02d_off",coil_no); else sprintf(name,"A%02d_on",coil_no);
+   sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'\n%s\n%s\' /> </form>\n" \
+        ,name,colorcode,"set ALL solenoids","");
+     sendit( sockfd, buffer);
+   //special solenoid 78, blinking solenoid via thread
+   coil_no = 78;
+   if (solenoid[coil_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
+   if (solenoid[coil_no]) sprintf(name,"A%02d_off",coil_no); else sprintf(name,"A%02d_on",coil_no);
+   sprintf(buffer,"<form action=\'\' method=\'post\'><input type=\'submit\' name=\'%s\' %s value=\'\n%s\n%s\' /> </form>\n" \
+        ,name,colorcode,"ALL solenoids blink","");
+     sendit( sockfd, buffer);
+   sprintf(buffer,"<br>\n");
+   sendit( sockfd, buffer);
 
+  //48 solenoids for  LISY Home
   //start with 4 lines 8 solenoids each
   for(j=0; j<=3; j++)
   {
