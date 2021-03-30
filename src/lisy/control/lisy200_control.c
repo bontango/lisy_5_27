@@ -91,7 +91,7 @@ unsigned char cont_sol[5];
 //global var for all solenoids
 unsigned char solenoid[80];
 //global var for all lines & leds
-unsigned char led[97];
+unsigned char led[197];
 //global var for all lamps
 unsigned char lamp[80];
 unsigned char lamp2[80];
@@ -619,20 +619,21 @@ void do_led_set( char *buffer)
  unsigned char myled, line;
  int action;
 
- //the format here is 'Bxx_on' or 'Bxx_off'
+ //the format here is 'Bxxx_on' or 'Bxxx_off'
  //we trust ASCII values
- myled = (10 * (buffer[1]-48)) + buffer[2]-48;
+ myled = (100*(buffer[1]-48) + 10*(buffer[2]-48)) + buffer[3]-48;
 
  //on or off?
- if ( buffer[5] == 'f') action=0; else  action=1;
+ if ( buffer[6] == 'f') action=0; else  action=1;
 
  //remember
  led[myled] = action;
 
- //calculate which line myled is 1..96
- // split to 3 lines (1..3) and 32leds each
- if ( myled >64) { myled = myled - 64; line = 3; }
- else if ( myled >32) { myled = myled - 32; line = 2; }
+ //calculate which line myled is 1..192
+ // split to 4 lines (1..4) and 48leds each
+ if ( myled >144) { myled = myled - 144; line = 4; }
+ else if ( myled >96) { myled = myled - 96; line = 3; }
+ else if ( myled >48) { myled = myled - 48; line = 2; }
  else { line = 1; }
 
  //set the led
@@ -1356,24 +1357,24 @@ void send_led_infos( int sockfd )
      sprintf(buffer,"push button to switch LED OFF or ON  Yellow LEDs are ON<br><br>\n");
      sendit( sockfd, buffer);
 
-  //96 LEDs for LISY Home; split to 3 lines
+  //192 LEDs for LISY Home; split to 4 lines with 48 each
 
-  //3 blocks with 4 lines 8 solenoids each
- for(k=1; k<=3; k++)
+  //4 blocks with 4 lines 12 solenoids each
+ for(k=1; k<=4; k++)
  { 
   for(j=0; j<=3; j++)
   {
-   for(i=1; i<=8; i++)
+   for(i=1; i<=12; i++)
     {
-     led_no = (k-1) * 32 + j * 8 + i;
+     led_no = (k-1) * 48 + j * 12 + i;
      if (led[led_no]) strcpy(colorcode,code_yellow); else  strcpy(colorcode,code_blue);
-     if (led[led_no]) sprintf(name,"B%02d_off",led_no); else sprintf(name,"B%02d_on",led_no);
-     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'%s\' %s >LED %02d<BR/>%s<BR/>%d</button></form>\n",name,colorcode,led_no,"line",k);
+     if (led[led_no]) sprintf(name,"B%03d_off",led_no); else sprintf(name,"B%03d_on",led_no);
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'%s\' %s >LED %02d<BR/>%s<BR/>%d</button></form>\n",name,colorcode,led_no-((k-1)*48),"line",k);
   sendit( sockfd, buffer);
     }
-  sprintf(buffer,"<br>\n");
-  sendit( sockfd, buffer);
   }
+  sprintf(buffer,"<br><br><br>\n");
+  sendit( sockfd, buffer);
  }
 }
 

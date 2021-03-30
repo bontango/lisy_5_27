@@ -232,3 +232,17 @@ void lisy_home_event_handler( int id, int arg1, int arg2, char *str)
      }
 
 }
+
+
+//do the led setting on starship
+//aware of mapping
+void lisy_home_ss_lamp_set( int lamp, int action)
+{
+  int i;
+
+  //how many mappings?
+  for ( i=0; i<lisy_home_ss_lamp_map[lamp].no_of_maps; i++)
+  {
+   lisyh_led_set( lisy_home_ss_lamp_map[lamp].mapped_to_led[i], lisy_home_ss_lamp_map[lamp].mapped_to_line[i], action);
+  } 
+}

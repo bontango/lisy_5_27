@@ -1360,6 +1360,8 @@ int  lisymini_file_get_gamename(t_stru_lisymini_games_csv *lisymini_game)
 //read the csv file for lisy Home lamp & coil mapping /lisy partition
 //give -1 in case we had an error
 //fill structure 
+//RTH OLD need to be adapted to Tom&Jerry
+//see Starship example
 int  lisy_file_get_home_mappings(void)
 {
  char buffer[1024];
@@ -1555,3 +1557,50 @@ int  lisy_m_file_get_hwrules(void)
   return 0;
 }
 
+//read the csv file for lisy Home Starship lamp to LED mapping /lisy partition
+//give -1 in case we had an error
+//fill structure 
+int  lisy_file_get_home_ss_lamp_mappings(void)
+{
+ char buffer[1024];
+ char *line;
+ char file_name[80];
+ int no;
+ int is_coil;
+ int first_line = 1;
+ FILE *fstream;
+ int i,dum;
+
+//map to default no mapping / no activation
+for(i=0; i<=59;i++) 
+  { 
+     lisy_home_ss_lamp_map[i].no_of_maps = 0;
+  }
+
+//LAMPS construct the filename
+//Lamp ;Line of LED;LED Number;Comment
+sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE);
+
+ fstream = fopen(file_name,"r");
+  if(fstream == NULL)
+  {
+      fprintf(stderr,"LISY_Home: opening %s failed, using defaults for lamps\n",file_name);
+  }
+  else
+  {
+   first_line = 1;
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     no = atoi(strtok(line, ";")); 	//lamp number
+     if ( no > 59 ) continue; //skip line if lamp number is out of range
+     lisy_home_ss_lamp_map[no].no_of_maps = lisy_home_ss_lamp_map[no].no_of_maps +1;
+     if ( lisy_home_ss_lamp_map[no].no_of_maps > 6 ) continue; //6 mappings in maximum
+     lisy_home_ss_lamp_map[no].mapped_to_line[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
+     lisy_home_ss_lamp_map[no].mapped_to_led[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
+   } //while
+   fclose(fstream);
+  }
+
+ return 0;
+}

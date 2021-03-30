@@ -23,6 +23,7 @@ extern int lisy_has_fadecandy;
 extern t_lisy_lamp_to_led_map lisy_lamp_to_led_map[52];
 extern t_lisy_home_lamp_map lisy_home_lamp_map[49];
 extern t_lisy_home_coil_map lisy_home_coil_map[10];
+extern t_lisy_home_ss_lamp_map lisy_home_ss_lamp_map[60];
 
 extern int lisy_m_APC_coil_HW_rule[32];
 
@@ -36,6 +37,7 @@ extern t_stru_lisymini_games_csv lisymini_game;
 void lisy1_init( void );
 void lisy80_init( void );
 void lisy35_init( void );
+void lisy35_ss_init( void );
 void lisy_w_init( void );
 
 

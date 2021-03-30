@@ -19,6 +19,18 @@ t_lisy_home_coil_map;
 int lisy_home_init_event(void);
 void lisy_home_event_handler( int id, int arg1, int arg2, char *str);
 
+//new starship, old one (tom&Jerry) to be adapted
+typedef struct
+{
+  unsigned char no_of_maps;
+  unsigned char mapped_to_line[6];
+  unsigned char mapped_to_led[6];
+}
+t_lisy_home_ss_lamp_map;
+
+void lisy_home_ss_lamp_set( int lamp, int action);
+
+
 //the IDs for the event handler
 #define LISY_HOME_EVENT_INIT 0
 #define LISY_HOME_EVENT_SOUND 1

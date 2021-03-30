@@ -403,25 +403,6 @@ void coil_set_str ( char *str, int action)
 
 }
 
-/*
-//control the LED  set via PIC I2C com
-//not needed anymore
-void coil_led_set( int action)
-{
-
-        // build control byte 
-	if (action)
-           mydata_coil.bitv2.COMMAND = LS80COILCMD_LED_ON;
-	else
-           mydata_coil.bitv2.COMMAND = LS80COILCMD_LED_OFF;
-        mydata_coil.bitv2.IS_CMD = 1;        //we are sending a command here
-
-        //write to PIC
-        lisy80_write_byte_coil_pic(  mydata_coil.byte );
-
-}
-*/
-
 //control the green (Bally) LED set via PIC I2C com
 //only 8 times at boot time, as same line is strobe#2 for lamps afterwards
 void coil_bally_led_set( int action)
@@ -788,6 +769,9 @@ lisy35_lamp_set
 	board 0 or 1
         lamp -> nr of lamp:  0..59
         action -> 0-off, 1-on
+
+	in case of lisy_home variant
+	we call the mapping setting in lisy_home.c
 */
 
 void lisy35_lamp_set ( int board, int lamp, int action)
@@ -795,6 +779,12 @@ void lisy35_lamp_set ( int board, int lamp, int action)
 
  static unsigned char active_lampboard = 0;
 
+  if ( lisy_hardware_revision == 200 )
+ {
+   lisy_home_ss_lamp_set( lamp, action);
+ }
+ else
+ {
  //check for which board the lamp setting is
  if(board == 0) //board0 main board
  {
@@ -821,6 +811,7 @@ void lisy35_lamp_set ( int board, int lamp, int action)
 
         //write to PIC
         lisy80_write_byte_coil_pic(  mydata_coil.byte );
+ }//not lisy_home variant
 }
 
 
@@ -1096,7 +1087,7 @@ void lisyh_coil_set( int coil, int action)
 }
 
 //set LED on LISY_Home solenoid driver board
-//3 lines with 32 LEDs each
+//4 lines with 48 LEDs each
 void lisyh_led_set( int led, int line, int action)
 {
 
