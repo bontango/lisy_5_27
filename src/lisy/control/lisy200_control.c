@@ -714,8 +714,8 @@ void do_lamp_set( char *buffer)
 }
 
 //read the lamp descriptions from the file
-#define LISY35_LAMPS_PATH "/boot/lisy/lisy35/control/lamp_descriptions/"
-#define LISY35_LAMPS_FILE "_lisy35_lamps.csv"
+#define LISY200_LAMPS_PATH "/boot/lisy/lisyH/control/lamp_descriptions/"
+#define LISY200_LAMPS_FILE "lisy200_lamps.csv"
 void get_lamp_descriptions(void)
 {
 
@@ -730,7 +730,7 @@ void get_lamp_descriptions(void)
 
 
  //construct the filename; using global var lisy80_gamenr
- sprintf(lamp_file_name,"%s%03d%s",LISY35_LAMPS_PATH,lisy35_game.gamenr,LISY35_LAMPS_FILE);
+ sprintf(lamp_file_name,"%s%s",LISY200_LAMPS_PATH,LISY200_LAMPS_FILE);
 
  //try to read the file with game nr
  fstream = fopen(lamp_file_name,"r");
@@ -742,18 +742,18 @@ void get_lamp_descriptions(void)
    {
     //second try: to read the file with default
     //construct the new filename; using 'default'
-    sprintf(lamp_file_name,"%sdefault%s",LISY35_LAMPS_PATH,LISY35_LAMPS_FILE);
+    sprintf(lamp_file_name,"%sdefault%s",LISY200_LAMPS_PATH,LISY200_LAMPS_FILE);
     fstream = fopen(lamp_file_name,"r");
       if(fstream != NULL)
       {
-      fprintf(stderr,"LISY35 Info: lamp descriptions according to %s\n\r",lamp_file_name);
+      fprintf(stderr,"LISY200 Info: lamp descriptions according to %s\n\r",lamp_file_name);
       }
     }//second try
 
   //check if first or second try where successfull
   if(fstream == NULL)
       {
-        fprintf(stderr,"LISY35 Info: lamp descriptions not found \n\r");
+        fprintf(stderr,"LISY200 Info: lamp descriptions not found \n\r");
         return ;
         }
   //now assign teh descriptions
@@ -805,7 +805,7 @@ void get_lamp2_descriptions(void)
 
 
  //construct the filename; using global var lisy80_gamenr
- sprintf(lamp_file_name,"%s%03d%s",LISY35_LAMPS_PATH,lisy35_game.gamenr,LISY35_LAMPS2_FILE);
+ sprintf(lamp_file_name,"%s%03d%s",LISY200_LAMPS_PATH,lisy35_game.gamenr,LISY35_LAMPS2_FILE);
 
  //try to read the file with game nr
  fstream = fopen(lamp_file_name,"r");
@@ -817,7 +817,7 @@ void get_lamp2_descriptions(void)
    {
     //second try: to read the file with default
     //construct the new filename; using 'default'
-    sprintf(lamp_file_name,"%sdefault%s",LISY35_LAMPS_PATH,LISY35_LAMPS2_FILE);
+    sprintf(lamp_file_name,"%sdefault%s",LISY200_LAMPS_PATH,LISY35_LAMPS2_FILE);
     fstream = fopen(lamp_file_name,"r");
       if(fstream != NULL)
       {
@@ -886,13 +886,13 @@ void get_switch_descriptions(void)
  fstream = fopen(switch_file_name,"r");
    if(fstream != NULL)
    {
-      fprintf(stderr,"LISY35 Info: switch descriptions according to %s\n\r",switch_file_name);
+      fprintf(stderr,"LISY200 Info: switch descriptions according to %s\n\r",switch_file_name);
    }
 
   //check if first where successfull
   if(fstream == NULL)
       {
-        fprintf(stderr,"LISY35 Info: DIP switch descriptions not found \n\r");
+        fprintf(stderr,"LISY200 Info: DIP switch descriptions not found \n\r");
         return ;
         }
   //now assign teh descriptions
@@ -928,8 +928,8 @@ void get_switch_descriptions(void)
 //SOLENOIDS
 
 //read the coil descriptions from the file
-#define LISY35_COILS_PATH "/boot/lisy/lisy35/control/coil_descriptions/"
-#define LISY35_COILS_FILE "_lisy35_coils.csv"
+#define LISY200_COILS_PATH "/boot/lisy/lisyH/control/coil_descriptions/"
+#define LISY200_COILS_FILE "lisy200_coils.csv"
 void get_coil_descriptions(void)
 {
 
@@ -944,7 +944,7 @@ void get_coil_descriptions(void)
 
 
  //construct the filename; using global var lisy80_gamenr
- sprintf(coil_file_name,"%s%03d%s",LISY35_COILS_PATH,lisy35_game.gamenr,LISY35_COILS_FILE);
+ sprintf(coil_file_name,"%s%s",LISY200_COILS_PATH,LISY200_COILS_FILE);
 
  //try to read the file with game nr
  fstream = fopen(coil_file_name,"r");
@@ -956,18 +956,18 @@ void get_coil_descriptions(void)
    {
     //second try: to read the file with default
     //construct the new filename; using 'default'
-    sprintf(coil_file_name,"%sdefault%s",LISY35_COILS_PATH,LISY35_COILS_FILE);
+    sprintf(coil_file_name,"%sdefault%s",LISY200_COILS_PATH,LISY200_COILS_FILE);
     fstream = fopen(coil_file_name,"r");
       if(fstream != NULL)
       {
-      fprintf(stderr,"LISY35 Info: coil descriptions according to %s\n\r",coil_file_name);
+      fprintf(stderr,"LISY200 Info: coil descriptions according to %s\n\r",coil_file_name);
       }
     }//second try
 
   //check if first or second try where successfull
   if(fstream == NULL)
       {
-        fprintf(stderr,"LISY35 Info: coil descriptions not found \n\r");
+        fprintf(stderr,"LISY200 Info: coil descriptions not found \n\r");
         return ;
         }
   //now assign teh descriptions
