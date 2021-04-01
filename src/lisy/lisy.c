@@ -41,6 +41,8 @@ t_lisy_home_coil_map lisy_home_coil_map[10];
 t_lisy_home_lamp_map lisy_home_lamp_map[49];
 //table for lamp mapping Starship fileio
 t_lisy_home_ss_lamp_map lisy_home_ss_lamp_map[60];
+//table for coil mapping Starship fileio
+t_lisy_home_ss_coil_map lisy_home_ss_coil_map[20];
 
 //global var for debugging
 //typedef is defined in hw_lib.h

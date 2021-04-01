@@ -1604,3 +1604,48 @@ sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE);
 
  return 0;
 }
+
+//read the csv file for lisy Home Starship coil to coil mapping /lisy partition
+//give -1 in case we had an error
+//fill structure 
+int  lisy_file_get_home_ss_coil_mappings(void)
+{
+ char buffer[1024];
+ char *line;
+ char file_name[80];
+ int no;
+ int is_coil;
+ int first_line = 1;
+ FILE *fstream;
+ int i,dum;
+
+//map to default no mapping / no activation
+for(i=0; i<=20;i++) 
+  { 
+     lisy_home_ss_coil_map[i].mapped_to_coil = 0;
+  }
+
+//COILS construct the filename
+//coil ;coil Number;Comment
+sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE);
+
+ fstream = fopen(file_name,"r");
+  if(fstream == NULL)
+  {
+      fprintf(stderr,"LISY_Home: opening %s failed, using defaults for coils\n",file_name);
+  }
+  else
+  {
+   first_line = 1;
+   while( (line=fgets(buffer,sizeof(buffer),fstream))!=NULL)
+   {
+     if (first_line) { first_line=0; continue; } //skip first line (Header)
+     no = atoi(strtok(line, ";")); 	//coil number
+     if ( no > 19 ) continue; //skip line if coil number is out of range
+     lisy_home_ss_coil_map[no].mapped_to_coil = atoi(strtok(NULL, ";")); 
+   } //while
+   fclose(fstream);
+  }
+
+ return 0;
+}

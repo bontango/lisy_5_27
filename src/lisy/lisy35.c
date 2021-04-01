@@ -160,6 +160,7 @@ void lisy35_ss_init( void )
  //Starship mspecific inits
  // do the mapping
  lisy_file_get_home_ss_lamp_mappings();
+ lisy_file_get_home_ss_coil_mappings();
  //select solenoidboard by default
  lisyh_coil_select_solenoid_driver();
 

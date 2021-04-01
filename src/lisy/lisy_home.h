@@ -30,6 +30,15 @@ t_lisy_home_ss_lamp_map;
 
 void lisy_home_ss_lamp_set( int lamp, int action);
 
+//new starship, old one (tom&Jerry) to be adapted
+typedef struct
+{
+  int mapped_to_coil;
+}
+t_lisy_home_ss_coil_map;
+
+
+void lisy_home_ss_coil_set( int coil, int action);
 
 //the IDs for the event handler
 #define LISY_HOME_EVENT_INIT 0

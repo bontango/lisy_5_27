@@ -356,36 +356,52 @@ void lisy35_coil_set ( int coil, int action)
 				}	
 			break;
 		       case 16:
+  				if ( lisy_hardware_revision == 200 )
+   					lisy_home_ss_coil_set( coil, action);
+				else {
 				position = 2;  // cont1 is PB6
 				//active low
 				if (action == 0) SET_BIT( cont_coil, position);
 				  else CLEAR_BIT( cont_coil, position);
 				//do the setting
 				lisy35_cont_coil_set(cont_coil);
+				}
 			        break;
 		       case 17:
+  				if ( lisy_hardware_revision == 200 )
+   					lisy_home_ss_coil_set( coil, action);
+				else {
 				position = 0;  // cont2 is PB4 'internal via PIC not used here'
 				//active low
 				if (action == 0) SET_BIT( cont_coil, position);
 				  else CLEAR_BIT( cont_coil, position);
 				//do the setting
 				lisy35_cont_coil_set(cont_coil);
+				}
 			        break;
 		       case 18:
+  				if ( lisy_hardware_revision == 200 )
+   					lisy_home_ss_coil_set( coil, action);
+				else {
 				position = 3;  // cont3 is PB7 'internal via PIC not used here'
 				//active low
 				if (action == 0) SET_BIT( cont_coil, position);
 				  else CLEAR_BIT( cont_coil, position);
 				//do the setting
 				lisy35_cont_coil_set(cont_coil);
+				}
 			        break;
 		       case 19:
+  				if ( lisy_hardware_revision == 200 )
+   					lisy_home_ss_coil_set( coil, action);
+				else {
 				position = 1;  // cont4 is PB5
 				//active low
 				if (action == 0) SET_BIT( cont_coil, position);
 				  else CLEAR_BIT( cont_coil, position);
 				//do the setting
 				lisy35_cont_coil_set(cont_coil);
+				}
 			        break;
 	}
 

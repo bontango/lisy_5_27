@@ -246,3 +246,11 @@ void lisy_home_ss_lamp_set( int lamp, int action)
    lisyh_led_set( lisy_home_ss_lamp_map[lamp].mapped_to_led[i], lisy_home_ss_lamp_map[lamp].mapped_to_line[i], action);
   } 
 }
+
+//do the ciol setting on starship
+//aware of mapping
+void lisy_home_ss_coil_set( int coil, int action)
+{
+   lisyh_coil_set( lisy_home_ss_coil_map[coil].mapped_to_coil, action);
+}
+

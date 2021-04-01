@@ -24,6 +24,7 @@ extern t_lisy_lamp_to_led_map lisy_lamp_to_led_map[52];
 extern t_lisy_home_lamp_map lisy_home_lamp_map[49];
 extern t_lisy_home_coil_map lisy_home_coil_map[10];
 extern t_lisy_home_ss_lamp_map lisy_home_ss_lamp_map[60];
+extern t_lisy_home_ss_coil_map lisy_home_ss_coil_map[20];
 
 extern int lisy_m_APC_coil_HW_rule[32];
 
