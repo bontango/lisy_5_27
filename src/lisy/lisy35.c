@@ -809,7 +809,8 @@ if (first)
   //store start time first, which is number of microseconds since wiringPiSetup (wiringPI lib)
   last = micros();
   //now we have core data so let us set internal soundboard type
-  lisy35_set_soundboard_variant();
+  if ( lisy_hardware_revision != 200 ) //not fo starship
+     lisy35_set_soundboard_variant();
  }
  
  //if hw_check is not finished run with full speed, will reduce booting time
