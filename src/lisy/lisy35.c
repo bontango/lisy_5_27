@@ -163,6 +163,7 @@ void lisy35_ss_init( void )
  lisy_file_get_home_ss_coil_mappings();
  //select solenoidboard by default
  lisyh_coil_select_solenoid_driver();
+ lisyh_coil_select_led_driver_line(1);
 
  //collect latest informations and start the lisy logger
  lisy_env.has_soundcard = lisy35_has_soundcard;

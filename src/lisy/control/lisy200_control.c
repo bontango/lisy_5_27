@@ -36,7 +36,7 @@
 
 //the version
 #define LISY200control_SOFTWARE_MAIN    0
-#define LISY200control_SOFTWARE_SUB     2
+#define LISY200control_SOFTWARE_SUB     4
 
 //fake definiton needed in lisy_w
 void core_setSw(int myswitch, unsigned char action) {  };
@@ -113,6 +113,13 @@ char display_D2A[8]="";
 char display_D3A[8]="";
 char display_D4A[8]="";
 char display_D5A[8]="";
+//global vars for GI setting RGB
+char line5_R[4]="0";
+char line5_G[4]="0";
+char line5_B[4]="0";
+char line6_R[4]="0";
+char line6_G[4]="0";
+char line6_B[4]="0";
 //hostname settings
 char hostname[10]=" "; //' ' indicates that there is no new hostname
 //hostname settings
@@ -308,7 +315,48 @@ void do_ext_sound_set( char *buffer)
 
 }
 
+//set the GI RGB according to buffer message
+void do_ss_GI_set( char *buffer)
+{
+ int GI_no;
+ char str[21];
+ int mycolor[6]; //RGB for line5 & 6
 
+ //we trust ASCII values
+ GI_no = buffer[1]-48;
+
+ //the format here is 'Gx_' 
+ // red and green is swapped for GI ws2811!!
+  switch( GI_no )
+  {
+   case 1:
+	strcpy(line5_R,&buffer[3]);
+	mycolor[1] = atoi(line5_R);
+	break;
+   case 2:
+	strcpy(line5_G,&buffer[3]);
+	mycolor[0] = atoi(line5_G);
+	break;
+   case 3:
+	strcpy(line5_B,&buffer[3]);
+	mycolor[2] = atoi(line5_B);
+	break;
+   case 4:
+	strcpy(line6_R,&buffer[3]);
+	mycolor[4] = atoi(line6_R);
+	break;
+   case 5:
+	strcpy(line6_G,&buffer[3]);
+	mycolor[3] = atoi(line6_G);
+	break;
+   case 6:
+	strcpy(line6_B,&buffer[3]);
+	mycolor[5] = atoi(line6_B);
+	//now do the setting
+	lisyh_led_set_GI_color( mycolor );
+	break;
+  }
+}
 
 //set the display according to buffer message
 void do_display_set( char *buffer)
@@ -1678,6 +1726,31 @@ void send_hostname_infos( int sockfd )
 
 }
 
+void send_ss_GI_infos( int sockfd )
+{
+  char buffer[256];
+
+  //start with some header
+   send_basic_infos(sockfd);
+
+ //see how many display we have
+   sprintf(buffer,"select RGB value (0..255) and send data<br>\n");
+   sendit( sockfd, buffer);
+   //send
+   sprintf(buffer,"<p>line5 red: <input type=\"text\" name=\"G1\" size=\"3\" maxlength=\"3\" value=\"%s\" /></p>",line5_R);
+   sendit( sockfd, buffer);
+   sprintf(buffer,"<p>line5 green: <input type=\"text\" name=\"G2\" size=\"3\" maxlength=\"3\" value=\"%s\" /></p>",line5_G);
+   sendit( sockfd, buffer);
+   sprintf(buffer,"<p>line5 blue: <input type=\"text\" name=\"G3\" size=\"3\" maxlength=\"3\" value=\"%s\" /></p>",line5_B);
+   sendit( sockfd, buffer);
+   sprintf(buffer,"<p>line6 red: <input type=\"text\" name=\"G4\" size=\"3\" maxlength=\"3\" value=\"%s\" /></p>",line6_R);
+   sendit( sockfd, buffer);
+   sprintf(buffer,"<p>line6 green: <input type=\"text\" name=\"G5\" size=\"3\" maxlength=\"3\" value=\"%s\" /></p>",line6_G);
+   sendit( sockfd, buffer);
+   sprintf(buffer,"<p>line6 blue: <input type=\"text\" name=\"G6\" size=\"3\" maxlength=\"3\" value=\"%s\" /></p>",line6_B);
+   sendit( sockfd, buffer);
+
+}
 
 void send_display_infos( int sockfd )
 {
@@ -1828,8 +1901,8 @@ void send_home_infos( int sockfd )
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_lamps.php\">Lamps (first board)</a><br><br> \n");
    sendit( sockfd, buffer);
-   //sprintf(buffer,"<p>\n<a href=\"./lisy35_lamps2.php\">Lamps (secondary board)</a><br><br> \n");
-   //sendit( sockfd, buffer);
+   sprintf(buffer,"<p>\n<a href=\"./ss_GI.php\">GI (line 5 & 6)</a><br><br> \n");
+   sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisyh_solenoids.php\">Solenoids (no mapping) </a><br><br> \n");
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_mom_solenoids.php\">Momentary Solenoids</a><br><br> \n");
@@ -2246,7 +2319,7 @@ int main(int argc, char *argv[])
      n = read(newsockfd,buffer,255);
      if (n < 0) error("ERROR reading from socket");
 
-     //the home screen woth all available commands
+     //the home screen with all available commands
      if ( strcmp( buffer, "home") == 0) { send_home_infos(newsockfd); close(newsockfd); }
      //software used, send all the infos to teh webserver
      else if ( strcmp( buffer, "software") == 0) { send_software_infos(newsockfd); close(newsockfd); }
@@ -2258,8 +2331,8 @@ int main(int argc, char *argv[])
      else if ( strcmp( buffer, "leds") == 0) { send_led_infos(newsockfd); close(newsockfd); }
      //overview & control lamps, send all the infos to teh webserver
      else if ( strcmp( buffer, "lamps") == 0) { send_lamp_infos(newsockfd); close(newsockfd); }
-     //overview & control lamps, send all the infos to teh webserver (second lampdriverboard)
-     else if ( strcmp( buffer, "lamps2") == 0) { send_lamp2_infos(newsockfd); close(newsockfd); }
+     //GI testing for Starship
+     else if ( strcmp( buffer, "ss_GI") == 0) { send_ss_GI_infos(newsockfd); close(newsockfd); }
      //overview and control solenoids, send all the infos to teh webserver
      else if ( strcmp( buffer, "solenoids") == 0) { send_solenoid_infos(newsockfd); close(newsockfd); }
      //overview and control solenoids, send all the infos to teh webserver
@@ -2292,6 +2365,8 @@ int main(int argc, char *argv[])
      else if (buffer[0] == 'L') do_lamp_set(buffer);
      //we interpret all Messages with an uppercase 'S' as sound settings
      else if (buffer[0] == 'S') do_sound_set(buffer);
+     //we interpret all Messages with an uppercase 'G' as GI settings
+     else if (buffer[0] == 'G') do_ss_GI_set(buffer);
      //we interpret all Messages with an uppercase 'E' as Extended sound settings
      else if (buffer[0] == 'E') do_ext_sound_set(buffer);
      //we interpret all Messages with an uppercase 'C' as coil (solenoid) settings
