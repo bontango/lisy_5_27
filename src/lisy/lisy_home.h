@@ -39,7 +39,7 @@ t_lisy_home_ss_coil_map;
 
 
 void lisy_home_ss_mom_coil_set( unsigned char value);
-void lisy_home_ss_cont_coil_set( unsigned char value);
+void lisy_home_ss_cont_coil_set( unsigned char cont_data);
 
 
 //the IDs for the event handler

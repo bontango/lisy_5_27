@@ -441,6 +441,15 @@ void coil_bally_led_set( int action)
 //set continous  solenoid on LISY35
 void lisy35_cont_coil_set( unsigned char value )
 {
+    //debug?
+    if (  ls80dbg.bitv.coils )
+    {
+     char str[34];
+     my_itoa(value, str, 2);
+     sprintf(debugbuf,"set cont sol (PB4..7): %s",str);
+     lisy80_debug(debugbuf);
+    }//debug
+
   	if ( lisy_hardware_revision == 200 )
    		lisy_home_ss_cont_coil_set(value);
 	else {
@@ -452,14 +461,6 @@ void lisy35_cont_coil_set( unsigned char value )
         //write to PIC
         lisy80_write_byte_coil_pic( mydata_coil.byte );
 
-    //debug?
-    if (  ls80dbg.bitv.coils )
-    {
-     char str[34];
-     my_itoa(value, str, 2);
-     sprintf(debugbuf,"set cont sol (PB4..7): %s",str);
-     lisy80_debug(debugbuf);
-    }//debug
  }
 }
 

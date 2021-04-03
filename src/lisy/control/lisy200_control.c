@@ -2196,12 +2196,10 @@ int main(int argc, char *argv[])
     lisy35_set_soundboard_var();
 
     //init lamps
-    //lisy35_lamp_init( );
-    //RTH need to do?
+    lisy35_lamp_init( );
 
     //init coils
-    //lisy35_coil_init( );
-    //RTH need to do?
+    lisy35_coil_init( );
 
     //collect latest informations and start the lisy logger
     strcpy(lisy_env.variant,"LISY35_control");

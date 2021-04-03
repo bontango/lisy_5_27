@@ -250,12 +250,51 @@ void lisy_home_ss_lamp_set( int lamp, int action)
 //map momentary solenoids to lisy home
 void lisy_home_ss_mom_coil_set( unsigned char value)
 {
-   //lisyh_coil_set( lisy_home_ss_coil_map[coil].mapped_to_coil, action);
+  static unsigned char old_coil_active[15] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+  unsigned char current_coil_active[15];
+  int i;
+
+  //value is 0..14 for Solenoids 1..15, 15 for all OFF
+  memset(current_coil_active, 0, sizeof(current_coil_active));
+  if ( value < 15 ) current_coil_active[value] = 1;
+
+  for( i=0; i<=14; i++)
+	{
+	 if ( old_coil_active[i] != current_coil_active[i])
+	  {
+           lisyh_coil_set( lisy_home_ss_coil_map[i+1].mapped_to_coil, current_coil_active[i]);
+	   old_coil_active[i] = current_coil_active[i];
+	  } 
+	}
 }
 
 //map continous solenoids to lisy home
-void lisy_home_ss_cont_coil_set( unsigned char value)
+//coils 16,17,18,19
+void lisy_home_ss_cont_coil_set( unsigned char cont_data)
 {
-   //lisyh_coil_set( lisy_home_ss_coil_map[coil].mapped_to_coil, action);
+
+   	lisyh_coil_set( lisy_home_ss_coil_map[19].mapped_to_coil, !CHECK_BIT( cont_data, 3));
+   	lisyh_coil_set( lisy_home_ss_coil_map[18].mapped_to_coil, !CHECK_BIT( cont_data, 2));
+   	lisyh_coil_set( lisy_home_ss_coil_map[17].mapped_to_coil, !CHECK_BIT( cont_data, 1));
+   	lisyh_coil_set( lisy_home_ss_coil_map[16].mapped_to_coil, !CHECK_BIT( cont_data, 0));
+/*
+
+        if( CHECK_BIT( cont_data, 3) && !CHECK_BIT( old_cont_data, 3))
+         if( !CHECK_BIT( cont_data, 3) && CHECK_BIT( old_cont_data, 3))
+   	     lisyh_coil_set( lisy_home_ss_coil_map[19].mapped_to_coil, 0);
+         if( CHECK_BIT( cont_data, 2) && !CHECK_BIT( old_cont_data, 2))
+   	     lisyh_coil_set( lisy_home_ss_coil_map[18].mapped_to_coil, 1);
+         if( !CHECK_BIT( cont_data, 2) && CHECK_BIT( old_cont_data, 2))
+   	     lisyh_coil_set( lisy_home_ss_coil_map[18].mapped_to_coil, 0);
+         if( CHECK_BIT( cont_data, 1) && !CHECK_BIT( old_cont_data, 1))
+   	     lisyh_coil_set( lisy_home_ss_coil_map[17].mapped_to_coil, 1);
+         if( !CHECK_BIT( cont_data, 1) && CHECK_BIT( old_cont_data, 1))
+   	     lisyh_coil_set( lisy_home_ss_coil_map[17].mapped_to_coil, 0);
+         if( CHECK_BIT( cont_data, 0) && !CHECK_BIT( old_cont_data, 0))
+   	     lisyh_coil_set( lisy_home_ss_coil_map[16].mapped_to_coil, 1);
+         if( !CHECK_BIT( cont_data, 0) && CHECK_BIT( old_cont_data, 0))
+   	     lisyh_coil_set( lisy_home_ss_coil_map[16].mapped_to_coil, 0);
+
+	old_cont_data = cont_data; */
 }
 
