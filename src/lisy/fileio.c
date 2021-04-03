@@ -1620,7 +1620,7 @@ int  lisy_file_get_home_ss_coil_mappings(void)
  int i,dum;
 
 //map to default no mapping / no activation
-for(i=0; i<=20;i++) 
+for(i=0; i<20;i++) 
   { 
      lisy_home_ss_coil_map[i].mapped_to_coil = 0;
   }
