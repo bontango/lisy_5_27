@@ -356,52 +356,36 @@ void lisy35_coil_set ( int coil, int action)
 				}	
 			break;
 		       case 16:
-  				if ( lisy_hardware_revision == 200 )
-   					lisy_home_ss_coil_set( coil, action);
-				else {
 				position = 2;  // cont1 is PB6
 				//active low
 				if (action == 0) SET_BIT( cont_coil, position);
 				  else CLEAR_BIT( cont_coil, position);
 				//do the setting
 				lisy35_cont_coil_set(cont_coil);
-				}
 			        break;
 		       case 17:
-  				if ( lisy_hardware_revision == 200 )
-   					lisy_home_ss_coil_set( coil, action);
-				else {
 				position = 0;  // cont2 is PB4 'internal via PIC not used here'
 				//active low
 				if (action == 0) SET_BIT( cont_coil, position);
 				  else CLEAR_BIT( cont_coil, position);
 				//do the setting
 				lisy35_cont_coil_set(cont_coil);
-				}
 			        break;
 		       case 18:
-  				if ( lisy_hardware_revision == 200 )
-   					lisy_home_ss_coil_set( coil, action);
-				else {
 				position = 3;  // cont3 is PB7 'internal via PIC not used here'
 				//active low
 				if (action == 0) SET_BIT( cont_coil, position);
 				  else CLEAR_BIT( cont_coil, position);
 				//do the setting
 				lisy35_cont_coil_set(cont_coil);
-				}
 			        break;
 		       case 19:
-  				if ( lisy_hardware_revision == 200 )
-   					lisy_home_ss_coil_set( coil, action);
-				else {
 				position = 1;  // cont4 is PB5
 				//active low
 				if (action == 0) SET_BIT( cont_coil, position);
 				  else CLEAR_BIT( cont_coil, position);
 				//do the setting
 				lisy35_cont_coil_set(cont_coil);
-				}
 			        break;
 	}
 
@@ -457,6 +441,9 @@ void coil_bally_led_set( int action)
 //set continous  solenoid on LISY35
 void lisy35_cont_coil_set( unsigned char value )
 {
+  	if ( lisy_hardware_revision == 200 )
+   		lisy_home_ss_cont_coil_set(value);
+	else {
         /* build control byte */
         mydata_coil.bitv4.COMMAND = LS35COIL_CONT_SOL;
         mydata_coil.bitv4.COILS = value;
@@ -473,11 +460,15 @@ void lisy35_cont_coil_set( unsigned char value )
      sprintf(debugbuf,"set cont sol (PB4..7): %s",str);
      lisy80_debug(debugbuf);
     }//debug
+ }
 }
 
 //set momentary solenoid on LISY35
 void lisy35_mom_coil_set( unsigned char value )
 {
+  	if ( lisy_hardware_revision == 200 )
+   		lisy_home_ss_mom_coil_set(value);
+	else {
         /* build control byte */
         mydata_coil.bitv4.COMMAND = LS35COIL_MOM_SOL;
         mydata_coil.bitv4.COILS = value;
@@ -485,6 +476,7 @@ void lisy35_mom_coil_set( unsigned char value )
 
         //write to PIC
         lisy80_write_byte_coil_pic( mydata_coil.byte );
+ }
 }
 
 
@@ -794,7 +786,7 @@ void lisy35_lamp_set ( int board, int lamp, int action)
 {
 
  static unsigned char active_lampboard = 0;
-
+printf("lisy35_lamp_set:%d\n",lisy_hardware_revision);
   if ( lisy_hardware_revision == 200 )
  {
    lisy_home_ss_lamp_set( lamp, action);

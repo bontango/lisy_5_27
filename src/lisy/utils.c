@@ -137,6 +137,7 @@ void lisy_init( void )
 
 
   //do system specific init
+  fprintf(stderr,"Info: internal Hardware revision is %d\n",lisy_hardware_revision);
   if ( lisy_hardware_revision == 100 ) lisy1_init( );
   else if ( lisy_hardware_revision == 350 ) lisy35_init( );
   else if ( lisy_hardware_revision == 121 ) lisy_w_init();

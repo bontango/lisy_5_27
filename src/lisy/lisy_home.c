@@ -247,10 +247,15 @@ void lisy_home_ss_lamp_set( int lamp, int action)
   } 
 }
 
-//do the ciol setting on starship
-//aware of mapping
-void lisy_home_ss_coil_set( int coil, int action)
+//map momentary solenoids to lisy home
+void lisy_home_ss_mom_coil_set( unsigned char value)
 {
-   lisyh_coil_set( lisy_home_ss_coil_map[coil].mapped_to_coil, action);
+   //lisyh_coil_set( lisy_home_ss_coil_map[coil].mapped_to_coil, action);
+}
+
+//map continous solenoids to lisy home
+void lisy_home_ss_cont_coil_set( unsigned char value)
+{
+   //lisyh_coil_set( lisy_home_ss_coil_map[coil].mapped_to_coil, action);
 }
 

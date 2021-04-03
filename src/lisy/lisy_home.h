@@ -38,7 +38,9 @@ typedef struct
 t_lisy_home_ss_coil_map;
 
 
-void lisy_home_ss_coil_set( int coil, int action);
+void lisy_home_ss_mom_coil_set( unsigned char value);
+void lisy_home_ss_cont_coil_set( unsigned char value);
+
 
 //the IDs for the event handler
 #define LISY_HOME_EVENT_INIT 0
