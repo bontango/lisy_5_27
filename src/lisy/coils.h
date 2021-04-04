@@ -44,6 +44,7 @@ void lisy35_coil_set_sound_raw( unsigned char value);
 void lisyh_coil_set( int coil, int action);
 void lisyh_led_set( int led, int line, int action);
 void lisyh_led_set_GI_color(int *color);
+void lisyh_led_set_LED_color(unsigned char line, unsigned char led, int *color);
 
 
 /* pulse time for coils in milli sec */
@@ -83,7 +84,6 @@ void lisyh_led_set_GI_color(int *color);
 #define LISYH_COILCMD_SEL_SOLBOARD_NO 3 //first solenoidboard (default))
 #define LISYH_COILCMD_SEL_LED_LINE 4
 //defines for the LED board
-#define LED_REC_COLOR_CODE 3
 #define LED_REC_COLOR_DATA 4
 #define LED_LINE5_GI_COLORS 5
 #define LED_LINE6_GI_COLORS 6

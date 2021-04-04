@@ -1643,6 +1643,13 @@ sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE);
      no = atoi(strtok(line, ";")); 	//coil number
      if ( no > 19 ) continue; //skip line if coil number is out of range
      lisy_home_ss_coil_map[no].mapped_to_coil = atoi(strtok(NULL, ";")); 
+  //debug
+  if ( ls80dbg.bitv.lamps | ls80dbg.bitv.coils )
+  {
+    sprintf(debugbuf,"LISY HOME:  map coil %d to number:%d",no,lisy_home_ss_coil_map[no].mapped_to_coil);
+    lisy80_debug(debugbuf);
+  }
+
    } //while
    fclose(fstream);
   }

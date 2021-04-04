@@ -787,7 +787,6 @@ void lisy35_lamp_set ( int board, int lamp, int action)
 {
 
  static unsigned char active_lampboard = 0;
-printf("lisy35_lamp_set:%d\n",lisy_hardware_revision);
   if ( lisy_hardware_revision == 200 )
  {
    lisy_home_ss_lamp_set( lamp, action);
@@ -1181,3 +1180,34 @@ void lisyh_led_set_GI_color(int *color)
 
 }
 
+//send color values to sk6812
+//6 bytes in sum
+//first line and led number
+//the rgbw data
+void lisyh_led_set_LED_color(unsigned char line, unsigned char led, int *color)
+{
+
+    mydata_coil.bitv5.IS_CMD = 1;        //we are sending a command here
+    mydata_coil.bitv5.COMMAND = LED_REC_COLOR_DATA;
+    //write to PIC
+    lisyh_send_to_LED_driver(  mydata_coil.byte );
+    //wait ten millisecond to give PIC time
+    usleep(10000);
+
+    //first send line
+    lisyh_send_to_LED_driver( line );
+    usleep(10000);
+    //second send led
+    lisyh_send_to_LED_driver( led );
+    usleep(10000);
+
+    //now send colorcodes RGBW
+    lisyh_send_to_LED_driver( color[0] );
+    usleep(10000);
+    lisyh_send_to_LED_driver( color[1] );
+    usleep(10000);
+    lisyh_send_to_LED_driver( color[2] );
+    usleep(10000);
+    lisyh_send_to_LED_driver( color[3] );
+    usleep(10000);
+}

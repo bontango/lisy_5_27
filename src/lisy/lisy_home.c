@@ -272,29 +272,21 @@ void lisy_home_ss_mom_coil_set( unsigned char value)
 //coils 16,17,18,19
 void lisy_home_ss_cont_coil_set( unsigned char cont_data)
 {
-
-   	lisyh_coil_set( lisy_home_ss_coil_map[19].mapped_to_coil, !CHECK_BIT( cont_data, 3));
-   	lisyh_coil_set( lisy_home_ss_coil_map[18].mapped_to_coil, !CHECK_BIT( cont_data, 2));
-   	lisyh_coil_set( lisy_home_ss_coil_map[17].mapped_to_coil, !CHECK_BIT( cont_data, 1));
-   	lisyh_coil_set( lisy_home_ss_coil_map[16].mapped_to_coil, !CHECK_BIT( cont_data, 0));
-/*
-
-        if( CHECK_BIT( cont_data, 3) && !CHECK_BIT( old_cont_data, 3))
-         if( !CHECK_BIT( cont_data, 3) && CHECK_BIT( old_cont_data, 3))
-   	     lisyh_coil_set( lisy_home_ss_coil_map[19].mapped_to_coil, 0);
-         if( CHECK_BIT( cont_data, 2) && !CHECK_BIT( old_cont_data, 2))
-   	     lisyh_coil_set( lisy_home_ss_coil_map[18].mapped_to_coil, 1);
-         if( !CHECK_BIT( cont_data, 2) && CHECK_BIT( old_cont_data, 2))
-   	     lisyh_coil_set( lisy_home_ss_coil_map[18].mapped_to_coil, 0);
-         if( CHECK_BIT( cont_data, 1) && !CHECK_BIT( old_cont_data, 1))
-   	     lisyh_coil_set( lisy_home_ss_coil_map[17].mapped_to_coil, 1);
-         if( !CHECK_BIT( cont_data, 1) && CHECK_BIT( old_cont_data, 1))
-   	     lisyh_coil_set( lisy_home_ss_coil_map[17].mapped_to_coil, 0);
-         if( CHECK_BIT( cont_data, 0) && !CHECK_BIT( old_cont_data, 0))
-   	     lisyh_coil_set( lisy_home_ss_coil_map[16].mapped_to_coil, 1);
-         if( !CHECK_BIT( cont_data, 0) && CHECK_BIT( old_cont_data, 0))
-   	     lisyh_coil_set( lisy_home_ss_coil_map[16].mapped_to_coil, 0);
-
-	old_cont_data = cont_data; */
+printf("cont data is %d\n",cont_data);
+	//PB4 cont.2
+   	lisyh_coil_set( lisy_home_ss_coil_map[17].mapped_to_coil, !CHECK_BIT( cont_data, 0));
+	//PB5 cont.4 (coin lockout)
+   	lisyh_coil_set( lisy_home_ss_coil_map[19].mapped_to_coil, !CHECK_BIT( cont_data, 1));
+	//PB6 cont.1 (flipper enable)
+   	lisyh_coil_set( lisy_home_ss_coil_map[16].mapped_to_coil, !CHECK_BIT( cont_data, 2));
+	//PB7 cont.3
+   	lisyh_coil_set( lisy_home_ss_coil_map[18].mapped_to_coil, !CHECK_BIT( cont_data, 3));
 }
 
+//send LED colorcodes  mappings to led driver
+void lisy_home_ss_send_led_colors( void)
+{
+
+
+
+}
