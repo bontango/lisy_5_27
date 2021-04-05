@@ -1608,18 +1608,17 @@ sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE);
      if ( no > 59 ) continue; //skip line if lamp number is out of range
      lisy_home_ss_lamp_map[no].no_of_maps = lisy_home_ss_lamp_map[no].no_of_maps +1;
      if ( lisy_home_ss_lamp_map[no].no_of_maps > 6 ) continue; //6 mappings in maximum
-     led = lisy_home_ss_lamp_map[no].mapped_to_line[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
-     ledline = lisy_home_ss_lamp_map[no].mapped_to_led[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
+     ledline = lisy_home_ss_lamp_map[no].mapped_to_line[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
+     led = lisy_home_ss_lamp_map[no].mapped_to_led[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
      //now read colorcodes
      //sanity check
-     led--; ledline--;
-     if (( ledline <6 ) & ( led < 48))
+     if (( ledline <=6 ) & ( led <= 48))
      {
 	 led_rgbw_color[ledline][led].red = atoi(strtok(NULL, ";"));
-printf("RTH:%d\n",led_rgbw_color[ledline][led].red);
 	 led_rgbw_color[ledline][led].green = atoi(strtok(NULL, ";"));
 	 led_rgbw_color[ledline][led].blue = atoi(strtok(NULL, ";"));
 	 led_rgbw_color[ledline][led].white = atoi(strtok(NULL, ";"));
+printf("RTH: read line:%d led:%d %d %d %d %d\n",ledline,led,led_rgbw_color[ledline][led].red,led_rgbw_color[ledline][led].green,led_rgbw_color[ledline][led].blue,led_rgbw_color[ledline][led].white);
      }
    } //while
    fclose(fstream);

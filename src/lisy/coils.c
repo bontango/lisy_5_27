@@ -1196,11 +1196,11 @@ void lisyh_led_set_LED_color(unsigned char line, unsigned char led,
     //wait ten millisecond to give PIC time
     usleep(LED_COLOR_WAIT_TIME);
 
-    //first send line
-    lisyh_send_to_LED_driver( line );
+    //first send line (-1)
+    lisyh_send_to_LED_driver( line-1 );
     usleep(LED_COLOR_WAIT_TIME);
-    //second send led
-    lisyh_send_to_LED_driver( led );
+    //second send led (-1)
+    lisyh_send_to_LED_driver( led-1 );
     usleep(LED_COLOR_WAIT_TIME);
 
     //now send colorcodes RGBW
@@ -1216,9 +1216,12 @@ void lisyh_led_set_LED_color(unsigned char line, unsigned char led,
     //debug?
     if (  ls80dbg.bitv.lamps )
     {
-     sprintf(debugbuf,"lisyh_led_set_LED_color LED %d (line %d)  to (RGBW) %d %d %d %d",
+	if(( red + green + blue + white) > 0)
+	{
+     sprintf(debugbuf,"setting color of LED %d (line %d)  to (RGBW) %d %d %d %d",
 	led,line,red, green,blue,white);
      lisy80_debug(debugbuf);
+	}
     }//debug
 
 }
