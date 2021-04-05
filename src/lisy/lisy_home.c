@@ -14,6 +14,7 @@
 #include "fileio.h"
 #include "hw_lib.h"
 #include "displays.h"
+#include "lisy_home.h"
 #include "coils.h"
 #include "switches.h"
 #include "utils.h"
@@ -286,6 +287,17 @@ printf("cont data is %d\n",cont_data);
 //send LED colorcodes  mappings to led driver
 void lisy_home_ss_send_led_colors( void)
 {
+
+ int ledline,led;
+
+ for (ledline=0; ledline <=5; ledline++)
+ {
+ 	for (led=0; led <=47; led++)
+	{
+		lisyh_led_set_LED_color(ledline, led, led_rgbw_color[ledline][led] );
+	}
+ }
+
 
 
 

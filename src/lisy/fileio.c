@@ -12,11 +12,11 @@
 #include "fileio.h"
 #include "hw_lib.h"
 #include "displays.h"
+#include "lisy_home.h"
 #include "coils.h"
 #include "fadecandy.h"
 #include "opc.h"
 #include "utils.h"
-#include "lisy_home.h"
 #include "externals.h"
 
 
@@ -1560,6 +1560,7 @@ int  lisy_m_file_get_hwrules(void)
 //read the csv file for lisy Home Starship lamp to LED mapping /lisy partition
 //give -1 in case we had an error
 //fill structure 
+//reads also led colorcodes
 int  lisy_file_get_home_ss_lamp_mappings(void)
 {
  char buffer[1024];
@@ -1569,12 +1570,23 @@ int  lisy_file_get_home_ss_lamp_mappings(void)
  int is_coil;
  int first_line = 1;
  FILE *fstream;
- int i,dum;
+ int i,k,dum;
+ unsigned char ledline,led;
 
-//map to default no mapping / no activation
+//map to default no mapping / no activation / color default off
 for(i=0; i<=59;i++) 
   { 
      lisy_home_ss_lamp_map[i].no_of_maps = 0;
+  }
+for(i=0; i<=5;i++) 
+  { 
+	for(k=0; k<=47;k++) 
+	{
+     	led_rgbw_color[i][k].red = 0;
+     	led_rgbw_color[i][k].green = 0;
+     	led_rgbw_color[i][k].blue =  0;
+     	led_rgbw_color[i][k].white = 0;
+	}
   }
 
 //LAMPS construct the filename
@@ -1596,8 +1608,18 @@ sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE);
      if ( no > 59 ) continue; //skip line if lamp number is out of range
      lisy_home_ss_lamp_map[no].no_of_maps = lisy_home_ss_lamp_map[no].no_of_maps +1;
      if ( lisy_home_ss_lamp_map[no].no_of_maps > 6 ) continue; //6 mappings in maximum
-     lisy_home_ss_lamp_map[no].mapped_to_line[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
-     lisy_home_ss_lamp_map[no].mapped_to_led[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
+     led = lisy_home_ss_lamp_map[no].mapped_to_line[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
+     ledline = lisy_home_ss_lamp_map[no].mapped_to_led[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
+     //now read colorcodes
+     //sanity check
+     led--; ledline--;
+     if (( ledline <6 ) & ( led < 48))
+     {
+	 led_rgbw_color[ledline][led].red = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].green = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].blue = atoi(strtok(NULL, ";"));
+	 led_rgbw_color[ledline][led].white = atoi(strtok(NULL, ";"));
+     }
    } //while
    fclose(fstream);
   }

@@ -19,6 +19,7 @@
 #include "fileio.h"
 #include "hw_lib.h"
 #include "displays.h"
+#include "lisy_home.h"
 #include "coils.h"
 #include "switches.h"
 #include "utils.h"
@@ -164,6 +165,8 @@ void lisy35_ss_init( void )
  //select solenoidboard by default
  lisyh_coil_select_solenoid_driver();
  lisyh_coil_select_led_driver_line(1);
+ // send colorcodes to LED driver
+ lisy_home_ss_send_led_colors();
 
  //collect latest informations and start the lisy logger
  lisy_env.has_soundcard = lisy35_has_soundcard;

@@ -44,7 +44,7 @@ void lisy35_coil_set_sound_raw( unsigned char value);
 void lisyh_coil_set( int coil, int action);
 void lisyh_led_set( int led, int line, int action);
 void lisyh_led_set_GI_color(int *color);
-void lisyh_led_set_LED_color(unsigned char line, unsigned char led, int *color);
+void lisyh_led_set_LED_color(unsigned char line, unsigned char led,  t_rgbw_color color);
 
 
 /* pulse time for coils in milli sec */

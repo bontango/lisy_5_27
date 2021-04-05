@@ -13,10 +13,10 @@
 #include "fileio.h"
 #include "hw_lib.h"
 #include "utils.h"
-#include "coils.h"
 #include "displays.h"
 #include "fadecandy.h"
 #include "lisy_home.h"
+#include "coils.h"
 #include "externals.h"
 #include "lisy.h"
 
@@ -1184,7 +1184,7 @@ void lisyh_led_set_GI_color(int *color)
 //6 bytes in sum
 //first line and led number
 //the rgbw data
-void lisyh_led_set_LED_color(unsigned char line, unsigned char led, int *color)
+void lisyh_led_set_LED_color(unsigned char line, unsigned char led, t_rgbw_color color)
 {
 
     mydata_coil.bitv5.IS_CMD = 1;        //we are sending a command here
@@ -1202,12 +1202,12 @@ void lisyh_led_set_LED_color(unsigned char line, unsigned char led, int *color)
     usleep(10000);
 
     //now send colorcodes RGBW
-    lisyh_send_to_LED_driver( color[0] );
+    lisyh_send_to_LED_driver( color.red );
     usleep(10000);
-    lisyh_send_to_LED_driver( color[1] );
+    lisyh_send_to_LED_driver( color.green );
     usleep(10000);
-    lisyh_send_to_LED_driver( color[2] );
+    lisyh_send_to_LED_driver( color.blue );
     usleep(10000);
-    lisyh_send_to_LED_driver( color[3] );
+    lisyh_send_to_LED_driver( color.white );
     usleep(10000);
 }

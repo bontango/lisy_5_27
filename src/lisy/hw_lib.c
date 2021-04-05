@@ -27,6 +27,7 @@
 #include "utils.h"
 #include "displays.h"
 #include "switches.h"
+#include "lisy_home.h"
 #include "coils.h"
 #include "fileio.h"
 #include "eeprom.h"

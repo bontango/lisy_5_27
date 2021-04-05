@@ -1,6 +1,21 @@
 #ifndef LISY_HOME_H
 #define LISY_HOME_H
 
+// This struct represents the color of a single LED. RGBW
+typedef struct rgbw_color {
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
+    unsigned char white;
+} t_rgbw_color;
+
+// This struct represents the color of a single LED. RGB
+typedef struct rgb_color {
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
+} t_rgb_color;
+
 typedef struct
 {
   unsigned char mapped_to_no;
@@ -40,7 +55,7 @@ t_lisy_home_ss_coil_map;
 
 void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);
-
+void lisy_home_ss_send_led_colors( void);
 
 //the IDs for the event handler
 #define LISY_HOME_EVENT_INIT 0
