@@ -294,11 +294,11 @@ void lisy_home_ss_send_led_colors( void)
  {
  	for (led=0; led <=47; led++)
 	{
-		lisyh_led_set_LED_color(ledline, led, led_rgbw_color[ledline][led] );
+                lisyh_led_set_LED_color(ledline, led, 
+			led_rgbw_color[ledline][led].red,
+			led_rgbw_color[ledline][led].green,
+			led_rgbw_color[ledline][led].blue,
+			led_rgbw_color[ledline][led].white);
 	}
  }
-
-
-
-
 }

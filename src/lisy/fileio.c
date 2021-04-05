@@ -1616,6 +1616,7 @@ sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE);
      if (( ledline <6 ) & ( led < 48))
      {
 	 led_rgbw_color[ledline][led].red = atoi(strtok(NULL, ";"));
+printf("RTH:%d\n",led_rgbw_color[ledline][led].red);
 	 led_rgbw_color[ledline][led].green = atoi(strtok(NULL, ";"));
 	 led_rgbw_color[ledline][led].blue = atoi(strtok(NULL, ";"));
 	 led_rgbw_color[ledline][led].white = atoi(strtok(NULL, ";"));

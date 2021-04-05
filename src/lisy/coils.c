@@ -1129,6 +1129,7 @@ void lisyh_led_set( int led, int line, int action)
         lisy80_write_byte_coil_pic(  mydata_coil.byte );
 }
 
+#define LED_COLOR_WAIT_TIME 10 //ms
 //send a byte direct to the LED driver waittime included
 void lisyh_send_to_LED_driver(unsigned char mybyte)
 {
@@ -1139,11 +1140,11 @@ void lisyh_send_to_LED_driver(unsigned char mybyte)
     //write to PIC
     lisy80_write_byte_coil_pic(  mydata_coil.byte );
     //wait ten millisecond to give PIC time
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
     //now send the byte which will send directly to the LED driver by the solenoid PIC
     lisy80_write_byte_coil_pic( mybyte );
     //wait ten millisecond to give PIC time
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
 }
 
 //send color values to sk6812 driver for GI
@@ -1155,28 +1156,28 @@ void lisyh_led_set_GI_color(int *color)
     //write to PIC
     lisyh_send_to_LED_driver(  mydata_coil.byte );
     //wait ten millisecond to give PIC time
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
     //now send colorcodes RGB
     lisyh_send_to_LED_driver( color[0] );
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
     lisyh_send_to_LED_driver( color[1] );
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
     lisyh_send_to_LED_driver( color[2] );
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
 
     mydata_coil.bitv5.IS_CMD = 1;        //we are sending a command here
     mydata_coil.bitv5.COMMAND = LED_LINE6_GI_COLORS;
     //write to PIC
     lisyh_send_to_LED_driver(  mydata_coil.byte );
     //wait ten millisecond to give PIC time
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
     //now send colorcodes RGB
     lisyh_send_to_LED_driver( color[3] );
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
     lisyh_send_to_LED_driver( color[4] );
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
     lisyh_send_to_LED_driver( color[5] );
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
 
 }
 
@@ -1184,7 +1185,8 @@ void lisyh_led_set_GI_color(int *color)
 //6 bytes in sum
 //first line and led number
 //the rgbw data
-void lisyh_led_set_LED_color(unsigned char line, unsigned char led, t_rgbw_color color)
+void lisyh_led_set_LED_color(unsigned char line, unsigned char led,
+			unsigned char red, unsigned char green,unsigned char blue,unsigned char white)
 {
 
     mydata_coil.bitv5.IS_CMD = 1;        //we are sending a command here
@@ -1192,22 +1194,31 @@ void lisyh_led_set_LED_color(unsigned char line, unsigned char led, t_rgbw_color
     //write to PIC
     lisyh_send_to_LED_driver(  mydata_coil.byte );
     //wait ten millisecond to give PIC time
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
 
     //first send line
     lisyh_send_to_LED_driver( line );
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
     //second send led
     lisyh_send_to_LED_driver( led );
-    usleep(10000);
+    usleep(LED_COLOR_WAIT_TIME);
 
     //now send colorcodes RGBW
-    lisyh_send_to_LED_driver( color.red );
-    usleep(10000);
-    lisyh_send_to_LED_driver( color.green );
-    usleep(10000);
-    lisyh_send_to_LED_driver( color.blue );
-    usleep(10000);
-    lisyh_send_to_LED_driver( color.white );
-    usleep(10000);
+    lisyh_send_to_LED_driver( red );
+    usleep(LED_COLOR_WAIT_TIME);
+    lisyh_send_to_LED_driver( green );
+    usleep(LED_COLOR_WAIT_TIME);
+    lisyh_send_to_LED_driver( blue );
+    usleep(LED_COLOR_WAIT_TIME);
+    lisyh_send_to_LED_driver( white );
+    usleep(LED_COLOR_WAIT_TIME);
+
+    //debug?
+    if (  ls80dbg.bitv.lamps )
+    {
+     sprintf(debugbuf,"lisyh_led_set_LED_color LED %d (line %d)  to (RGBW) %d %d %d %d",
+	led,line,red, green,blue,white);
+     lisy80_debug(debugbuf);
+    }//debug
+
 }
