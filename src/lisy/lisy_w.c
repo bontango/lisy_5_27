@@ -160,6 +160,8 @@ unsigned char swMatrixLISY_W[9] = { 0,0,0,0,0,0,0,0,0 };
 
 //internal flag fo AC Relais, default 0 ->not present
 unsigned char lisy_has_AC_Relais = 0;
+//number of AC solenoid, default #12, can be #14 on some games
+unsigned char lisy_AC_Relais_no = 12;
 //internal flag fo SS Relais, default 0 ->not present ( RoadKings only)
 unsigned char lisy_has_SS_Relais = 0;
 
@@ -198,8 +200,11 @@ else if (strcmp(lisymini_game.type,"SYS9") == 0) lisymini_game.typeno = LISYW_TY
 else if (strcmp(lisymini_game.type,"SYS11") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11;
 else if (strcmp(lisymini_game.type,"SYS11RK") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11RK; //Road Kings;
 else if (strcmp(lisymini_game.type,"SYS11A") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11A;
+else if (strcmp(lisymini_game.type,"SYS11A_") == 0)  { lisymini_game.typeno = LISYW_TYPE_SYS11A; lisy_AC_Relais_no = 14;}
 else if (strcmp(lisymini_game.type,"SYS11B") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11B;
+else if (strcmp(lisymini_game.type,"SYS11B_") == 0)  { lisymini_game.typeno = LISYW_TYPE_SYS11B; lisy_AC_Relais_no = 14;}
 else if (strcmp(lisymini_game.type,"SYS11C") == 0) lisymini_game.typeno = LISYW_TYPE_SYS11C;
+else if (strcmp(lisymini_game.type,"SYS11C_") == 0)  { lisymini_game.typeno = LISYW_TYPE_SYS11C; lisy_AC_Relais_no = 14;}
 else lisymini_game.typeno = LISYW_TYPE_NONE;
 
 //set internal flags based on system type
@@ -232,6 +237,26 @@ switch(lisymini_game.typeno)
  lisy_get_sw_version( &sw_main, &sw_sub, &commit);
  sprintf(s_lisy_software_version,"%d%02d %02d",sw_main,sw_sub,commit);
  fprintf(stderr,"This is LISY (Lisy W) by bontango, Version %s\n",s_lisy_software_version);
+
+  //give isome info on screen
+  if ( ls80dbg.bitv.basic )
+  {
+    if ( lisy_has_AC_Relais != 0)
+    {
+    sprintf(debugbuf,"Info: LISYMINI this game has AC Relais on solenoid %d",lisy_AC_Relais_no);
+    lisy80_debug(debugbuf);
+    }
+    else if ( lisy_has_SS_Relais != 0)
+    {
+    sprintf(debugbuf,"Info: LISYMINI this game has SS Relais on solenoid %d",lisy_AC_Relais_no);
+    lisy80_debug(debugbuf);
+    }
+    else
+    {
+    sprintf(debugbuf,"Info: LISYMINI this game has NO SS or AC Relais");
+    lisy80_debug(debugbuf);
+    }
+    }
 
   
  //set displays initial to ASCII with dot (6)  for boot message
@@ -1339,10 +1364,10 @@ if ( mysol != coreGlobals.solenoids)
                   lisy80_debug(debugbuf);
 	        }
 	   }
-	}//sol == 12 and SS_Relais present
+	}//sol == 12 and SS_Relais present Road Kings version
 
-	//Sol 14 version (Sys11 after Roadkings)
-	if ( ( sol_no == 14) & (lisy_has_AC_Relais == 1) )
+	//Sol #12 or #14 version (Sys11 after Roadkings)
+	if ( ( sol_no == lisy_AC_Relais_no) & (lisy_has_AC_Relais == 1) )
 	{
 	  //lets check if any of the muxed solenoids are active now
 	  //in pinmame these are 1..8 ( AC-relais 0) and 25..32 ( AC-relais 1)
@@ -1352,7 +1377,7 @@ if ( mysol != coreGlobals.solenoids)
           //no muxed solenoid active, activate ac relais
 	  if (mux_sol_active == 0) 
 	    {
-	      lisy_api_sol_ctrl(14,action);
+	      lisy_api_sol_ctrl(lisy_AC_Relais_no,action);
 	      current_ac_state = action;
 	      if ( ls80dbg.bitv.coils )
 		{
@@ -1376,7 +1401,7 @@ if ( mysol != coreGlobals.solenoids)
 	//if the pinball (e.g. pinbot) is using special solenoids 'normal' we do it here
 	if (lisy_has_AC_Relais == 1)
 	  {
-        	if ( ( sol_no != 14) &( sol_no <= 22 )) lisy_api_sol_ctrl(sol_no,action);
+        	if ( ( sol_no != lisy_AC_Relais_no) &( sol_no <= 22 )) lisy_api_sol_ctrl(sol_no,action);
 	  }
 	else if (lisy_has_SS_Relais == 1)
 	  {
@@ -1420,7 +1445,7 @@ if ( mysol != coreGlobals.solenoids)
         //debug? 
         if ( ls80dbg.bitv.coils )
 	{
-        if ( ( sol_no != 14) & ( lisy_has_AC_Relais == 1))
+        if ( ( sol_no != lisy_AC_Relais_no) & ( lisy_has_AC_Relais == 1))
         {
 	  if ( sol_no < 25)
            { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( AC is %d)",sol_no,action,current_ac_state); }
@@ -1476,7 +1501,7 @@ if ( mysol != coreGlobals.solenoids)
 	      for(j=24; j<=31; j++)  if ( CHECK_BIT(coreGlobals.solenoids,j)) mux_sol_active++;
 	      if (mux_sol_active == 0)
 		{
-	          lisy_api_sol_ctrl(14,ac_want_to_change-1); 
+	          lisy_api_sol_ctrl(lisy_AC_Relais_no,ac_want_to_change-1); 
                   if ( ls80dbg.bitv.coils )
                   {
                     sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: AC-Relais DELAYD change to %d",ac_want_to_change-1);
