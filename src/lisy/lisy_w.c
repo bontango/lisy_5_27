@@ -78,9 +78,6 @@ Credits: 20 28 Balls: 0 8
   } t_mysegments_s11;
 
 /*
-
-
-/*
 ********   SYSTEM 7  *************
 from core.h
 struct core_dispLayout {
@@ -1303,7 +1300,8 @@ if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
 void lisy_w_solenoid_handler( void )
 {
 
-int i,j,sol_no,real_sol;
+int j,sol_no,real_sol;
+int bitpos; //bit position in mysol
 static UINT32 mysol=0;
 int mux_sol_active = 0;
 uint8_t action;
@@ -1319,18 +1317,26 @@ static uint8_t current_ss_state = 0;
 if ( mysol != coreGlobals.solenoids)
 {
    //check all solenoids 
-   for(i=0; i<=31; i++)
+   for(bitpos=0; bitpos<=31; bitpos++)
     {
       //send to APC in case something changed
-      if( CHECK_BIT(mysol,i) != CHECK_BIT(coreGlobals.solenoids,i) )
+      if( CHECK_BIT(mysol,bitpos) != CHECK_BIT(coreGlobals.solenoids,bitpos) )
       {
-	//ignore coil activations for coils we have a hw rule set
-	if ( lisy_m_APC_coil_HW_rule[i] != 0 ) return;
-
 	//do we activate or do we deactivate
-        if ( CHECK_BIT(coreGlobals.solenoids,i)) action = 1; else action = 0;
+        if ( CHECK_BIT(coreGlobals.solenoids,bitpos)) action = 1; else action = 0;
 	//sol number starts with 1
-        sol_no = i+1;
+        sol_no = bitpos+1;
+
+	//ignore coil activations for coils we have a hw rule set
+	if ( ( sol_no < 32) & (lisy_m_APC_coil_HW_rule[sol_no] != 0 ))
+	{
+	      if ( ls80dbg.bitv.coils )
+		{
+                  sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: hardware Rule set for Solenoid %d, action %d ignored",sol_no,action);
+                  lisy80_debug(debugbuf);
+	        }
+   	   continue;
+	}
 
 	//in case of Solenoid 14 (AC Relais) or Solenoid 12 (SS Relais)
         //check if one of the multiplexed sols are still active
@@ -1460,15 +1466,19 @@ if ( mysol != coreGlobals.solenoids)
            { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( SS is %d)",sol_no,action,current_ss_state); }
           else
            { sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d(%d), changed to %d ( SS is %d)",real_sol,sol_no,action,current_ss_state); }
+           
+	   lisy80_debug(debugbuf);
 
          }
         else 
            { 
 		if ( ( lisy_has_AC_Relais == 0) & ( lisy_has_SS_Relais == 0) )
-		sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( no AC or SS  Relais) ",sol_no,action); 
+		{
+		 sprintf(debugbuf,"LISY_W_SOLENOID_HANDLER: Solenoid:%d, changed to %d ( no AC or SS  Relais) ",sol_no,action); 
+        	 lisy80_debug(debugbuf);
+		}
 	   }
 
-        lisy80_debug(debugbuf);
 
 	}
 
@@ -1641,12 +1651,13 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
 {
   char filename[40];
 
+/*
   if ( ls80dbg.bitv.sound )
   {
     sprintf(debugbuf,"LISY_W sound_handler: board:%d 0x%x (%d)",board,data,data);
     lisy80_debug(debugbuf);
     }
-
+*/
 
       //use command  play index and let do APC the work ;-)
       lisy_api_sound_play_index(board,data);
