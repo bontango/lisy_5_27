@@ -1,0 +1,12 @@
+./W_manual
+sleep 2
+./W_advance
+sleep 2
+./W_autoup
+sleep 2
+./W_advance
+sleep 1
+./W_advance
+sleep 1
+./W_advance
+sleep 1

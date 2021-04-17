@@ -1650,17 +1650,32 @@ void lisy_w_lamp_handler( )
 void lisy_w_sound_handler(unsigned char board, unsigned char data)
 {
   char filename[40];
+  static unsigned char first = 1;
+  static unsigned char sys11_patch,sys11_counter;
 
-/*
-  if ( ls80dbg.bitv.sound )
+  if(first)
   {
-    sprintf(debugbuf,"LISY_W sound_handler: board:%d 0x%x (%d)",board,data,data);
-    lisy80_debug(debugbuf);
-    }
-*/
+     //this is how pinsound do it
+     if (!strcmp(sndbrd_typestr(0) ? sndbrd_typestr(0) : sndbrd_typestr(1), "WMSS11C"))
+                {
+                        sys11_patch = TRUE;
+                        sys11_counter = TRUE;
+                }
+                else
+                        sys11_patch = FALSE;
+   first = 0;
+  }
+
+ // skip instruction every 2 instr
+  if (!(sys11_patch && sys11_counter))
+  {
 
       //use command  play index and let do APC the work ;-)
       lisy_api_sound_play_index(board,data);
+
+  }
+  // skip instruction every 2 instr
+  sys11_counter = !sys11_counter;
 
 }
 
