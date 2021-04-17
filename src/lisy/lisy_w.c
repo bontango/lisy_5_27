@@ -1651,31 +1651,42 @@ void lisy_w_sound_handler(unsigned char board, unsigned char data)
 {
   char filename[40];
   static unsigned char first = 1;
-  static unsigned char sys11_patch,sys11_counter;
+  static unsigned char old_data;
+  static unsigned char last_was_ignored = TRUE;
+  static unsigned char sys11_patch;
 
   if(first)
   {
      //this is how pinsound do it
      if (!strcmp(sndbrd_typestr(0) ? sndbrd_typestr(0) : sndbrd_typestr(1), "WMSS11C"))
-                {
                         sys11_patch = TRUE;
-                        sys11_counter = TRUE;
-                }
                 else
                         sys11_patch = FALSE;
    first = 0;
   }
 
  // skip instruction every 2 instr
-  if (!(sys11_patch && sys11_counter))
+ // if second instruction is same as first
+  if (sys11_patch)
   {
-
+    if (last_was_ignored) //did we ignore already the last one?
+     {
+	last_was_ignored = FALSE;
+     }
+    else
+     {
+	if ( old_data == data)
+	{
+	 last_was_ignored = TRUE; //remember do not ignore two times in a row
+	 return;
+	}
+     }
+  }
+ 
+      old_data = data;
       //use command  play index and let do APC the work ;-)
       lisy_api_sound_play_index(board,data);
 
-  }
-  // skip instruction every 2 instr
-  sys11_counter = !sys11_counter;
 
 }
 
