@@ -493,8 +493,10 @@ int lisy_adjust_volume(void)
      //which is for Hifiberry and Justboom
      sprintf(debugbuf,"/usr/bin/amixer sset PCM %d\%%",amix_volume);
      system(debugbuf);
+     if ( ls80dbg.bitv.sound) lisy80_debug(debugbuf);
      sprintf(debugbuf,"/usr/bin/amixer sset Digital %d\%%",amix_volume);
      system(debugbuf);
+     if ( ls80dbg.bitv.sound) lisy80_debug(debugbuf);
     // first setting, we announce here the volume setting
     // sprintf(debugbuf,"/bin/echo \"Volume set to %d percent\" | /usr/bin/festival --tts",amix_volume);
      system(debugbuf);
