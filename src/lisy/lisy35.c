@@ -162,6 +162,7 @@ void lisy35_ss_init( void )
  // do the mapping
  lisy_file_get_home_ss_lamp_mappings();
  lisy_file_get_home_ss_coil_mappings();
+ lisy_file_get_home_ss_special_coil_mappings();
  //select solenoidboard by default
  lisyh_coil_select_solenoid_driver();
  lisyh_coil_select_led_driver_line(1);

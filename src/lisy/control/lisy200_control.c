@@ -60,10 +60,11 @@ typedef struct
  unsigned char lampMatrix[2];
 } t_coreGlobals;
 t_coreGlobals coreGlobals;
-void lisy_nvram_write_to_file( void ) {  }
+void lisy_nvram_write_to_file( void ) {  };
 void sound_stream_update(int *dum ) {  };
 unsigned char sound_stream = 0;
 unsigned char  sound_enabled = 0;
+const char* sndbrd_typestr(int board) {  };
 
 
 //48 switches, keep it easy by using 49 elements
@@ -460,6 +461,20 @@ void do_mom_solenoid_set( char *buffer)
 
  //pulse the coil
  lisy35_coil_set( solenoid, 2);
+
+}
+
+//pulse specific special solenoid
+void do_ss_solenoid_set( char *buffer)
+{
+ int solenoid;
+
+ //the format here is 'Cxx' or 'Cxx'
+ //we trust ASCII values
+ solenoid = (10 * (buffer[1]-48)) + buffer[2]-48;
+
+ //pulse the coil
+ lisyH_special_coil_pulse( solenoid );
 
 }
 
@@ -1135,6 +1150,65 @@ void send_solenoid_infos( int sockfd )
   sendit( sockfd, buffer);
 
 }
+
+//send all the infos about the special Starship solenoids
+void send_ss_solenoid_infos( int sockfd )
+{
+  int coil_no;
+  char colorcode[80],buffer[512];
+
+     //basic info, header line
+     send_basic_infos(sockfd);
+     sprintf(buffer,"push button to PULSE specific solenoid<br><br>\n");
+     sendit( sockfd, buffer);
+     //the color and style
+     strcpy(colorcode,"style=\'BACKGROUND-COLOR:powderblue; width: 125px; margin:auto; height: 5em;\'");
+
+/*we have 
+  4 solenoids for bells (1..4)
+  5 solenoids for player 1 (5..9)
+  2 solenoids for credit up/down (10...11)
+  5 solenoids for player 1 (12..16)
+*/
+
+   for(coil_no=1; coil_no<=4; coil_no++)
+    {
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'I%02d\' %s>%s<BR/>%s</button></form>\n",
+	coil_no,colorcode,lisy_home_ss_special_coil_map[coil_no].comment,"");
+     sendit( sockfd, buffer);
+    }
+   sprintf(buffer,"<br>\n");
+   sendit( sockfd, buffer);
+
+ for(coil_no=5; coil_no<=9; coil_no++)
+    {
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'I%02d\' %s>%s<BR/>%s</button></form>\n",
+        coil_no,colorcode,lisy_home_ss_special_coil_map[coil_no].comment,"");
+     sendit( sockfd, buffer);
+    }
+   sprintf(buffer,"<br>\n");
+   sendit( sockfd, buffer);
+
+   for(coil_no=10; coil_no<=11; coil_no++)
+    {
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'I%02d\' %s>%s<BR/>%s</button></form>\n",
+        coil_no,colorcode,lisy_home_ss_special_coil_map[coil_no].comment,"");
+     sendit( sockfd, buffer);
+    }
+   sprintf(buffer,"<br>\n");
+   sendit( sockfd, buffer);
+
+   for(coil_no=12; coil_no<=16; coil_no++)
+    {
+     sprintf(buffer,"<form action=\'\' method=\'post\'><button type=\'submit\' name=\'I%02d\' %s>%s<BR/>%s</button></form>\n",
+        coil_no,colorcode,lisy_home_ss_special_coil_map[coil_no].comment,"");
+     sendit( sockfd, buffer);
+    }
+   sprintf(buffer,"<br>\n");
+   sendit( sockfd, buffer);
+
+}
+
 
 //send all the infos about the solenoids
 void send_mom_solenoid_infos( int sockfd )
@@ -1909,6 +1983,8 @@ void send_home_infos( int sockfd )
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_cont_solenoids.php\">Continuous Solenoids</a><br><br> \n");
    sendit( sockfd, buffer);
+   sprintf(buffer,"<p>\n<a href=\"./lisyH_special_solenoids.php\">Starship special Solenoids</a><br><br> \n");
+   sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_displays.php\">Displays</a><br><br> \n");
    sendit( sockfd, buffer);
    sprintf(buffer,"<p>\n<a href=\"./lisy35_dipswitches.php\">DIP Switches</a><br><br> \n");
@@ -2335,6 +2411,8 @@ int main(int argc, char *argv[])
      else if ( strcmp( buffer, "solenoids") == 0) { send_solenoid_infos(newsockfd); close(newsockfd); }
      //overview and control solenoids, send all the infos to teh webserver
      else if ( strcmp( buffer, "mom_solenoids") == 0) { send_mom_solenoid_infos(newsockfd); close(newsockfd); }
+     //overview and control Starship special solenoids, send all the infos to teh webserver
+     else if ( strcmp( buffer, "ss_solenoids") == 0) { send_ss_solenoid_infos(newsockfd); close(newsockfd); }
      //overview and cobtrol sounds, send all the infos to teh webserver
      else if ( strcmp( buffer, "cont_solenoids") == 0) { send_cont_solenoid_infos(newsockfd); close(newsockfd); }
      //overview and cobtrol sounds, send all the infos to teh webserver
@@ -2369,6 +2447,8 @@ int main(int argc, char *argv[])
      else if (buffer[0] == 'E') do_ext_sound_set(buffer);
      //we interpret all Messages with an uppercase 'C' as coil (solenoid) settings
      else if (buffer[0] == 'C') do_mom_solenoid_set(buffer);
+     //we interpret all Messages with an uppercase 'I' as special Starship coil (solenoid) settings
+     else if (buffer[0] == 'I') do_ss_solenoid_set(buffer);
      //we interpret all Messages with an uppercase 'C' as continuous coil (solenoid) settings
      else if (buffer[0] == 'O') do_cont_solenoid_set(buffer);
      //we interpret all Messages with an uppercase 'D' as display settings

@@ -52,6 +52,15 @@ typedef struct
 }
 t_lisy_home_ss_coil_map;
 
+//starship special solenoids ( counters and bells)
+typedef struct
+{
+  int mapped_to_coil;
+  int pulsetime;
+  char comment[30];
+}
+t_lisy_home_ss_special_coil_map;
+
 
 void lisy_home_ss_mom_coil_set( unsigned char value);
 void lisy_home_ss_cont_coil_set( unsigned char cont_data);

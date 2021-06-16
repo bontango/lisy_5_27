@@ -1,0 +1,20 @@
+#close trunk switch #1
+./a.out 127.0.0.1 113
+#close trunk switch #2
+./a.out 127.0.0.1 112
+#close trunk switch #3
+./a.out 127.0.0.1 111
+sleep 1
+#insert 2 coins
+./a.out 127.0.0.1 105
+sleep 0.2
+./a.out 127.0.0.1 5
+sleep 1
+./a.out 127.0.0.1 105
+sleep 0.2
+./a.out 127.0.0.1 5
+sleep 1
+#start game
+./a.out 127.0.0.1 103
+sleep 0.5
+./a.out 127.0.0.1 3

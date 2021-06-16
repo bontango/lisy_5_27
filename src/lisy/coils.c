@@ -309,6 +309,23 @@ for (i=1; i<=64; i++)
 }
 
 
+/* lisyH_special_coil_pulse
+	coil -> nr of coil
+
+	this routine respect pulsetime and mapping
+	from config file LisyH (Starship)
+*/
+void lisyH_special_coil_pulse ( int coil )
+{
+
+ if ( lisy_home_ss_special_coil_map[coil].mapped_to_coil != 0)
+ {
+  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 1);
+  delay (lisy_home_ss_special_coil_map[coil].pulsetime); // milliseconds delay from wiringpi library
+  lisyh_coil_set(  lisy_home_ss_special_coil_map[coil].mapped_to_coil, 0);
+ }
+
+}
 
 /*
 lisy35_coil_set, FOR TEST ROUTINE ONLY

@@ -99,6 +99,7 @@ int  lisy_file_get_led_mappings(unsigned char system);
 int  lisy_file_get_home_mappings(void);
 int lisy_file_get_home_ss_lamp_mappings(void);
 int  lisy_file_get_home_ss_coil_mappings(void);
+int  lisy_file_get_home_ss_special_coil_mappings(void);
 
 
 /* LISY80 stuff */
@@ -143,6 +144,7 @@ int  lisy_file_get_home_ss_coil_mappings(void);
 #define LISYH_COIL_MAPPING_FILE "coils.csv"
 #define LISYH_SS_LAMP_MAPPING_FILE "ss_lamps.csv"
 #define LISYH_SS_COIL_MAPPING_FILE "ss_coils.csv"
+#define LISYH_SS_SPECIAL_COIL_MAPPING_FILE "ss_special_coils.csv"
 
 /* LISYMINI stuff */
 #define LISYMINI_GAMES_CSV "/boot/lisy/lisy_m/cfg/lisyminigames.csv"
