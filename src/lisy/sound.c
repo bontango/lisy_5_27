@@ -457,7 +457,6 @@ int lisy_get_position(void)
 
 //set new volume in case postion of poti have changed
 //give back setting made (in percent)
-//for HW_ID 2 set fix to 180 71%  RTH Test
 int lisy_adjust_volume(void)
 {
   static int first = 1;
