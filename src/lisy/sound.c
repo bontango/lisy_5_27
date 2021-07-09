@@ -457,14 +457,37 @@ int lisy_get_position(void)
 
 //set new volume in case postion of poti have changed
 //give back setting made (in percent)
+//set fix volume if file /lisy/lisy/volume_level exists
 int lisy_adjust_volume(void)
 {
   static int first = 1;
   static int old_position;
+  static int fix_volume = -10; //init as -10, so check for file first time called
   int position,diff,sdl_volume,amix_volume;
 
   //no poti for hardware 3.11
   if ( lisy_hardware_revision == 311) return(0);
+  
+  //check for fix volume
+  if ( fix_volume == -10 )
+  {
+    fix_volume = lisy_file_get_volume_level();
+    if ( ( ls80dbg.bitv.sound) & ( fix_volume >= 0) )
+     {
+     sprintf(debugbuf,"Volume level from opt file: %d\%%",fix_volume);
+     lisy80_debug(debugbuf);
+     }
+  }
+  if ( fix_volume >= 0 )
+  {
+     //set both PCM AND Digital
+     //which is for Hifiberry and Justboom
+     sprintf(debugbuf,"/usr/bin/amixer sset PCM %d\%%",fix_volume);
+     system(debugbuf);
+     sprintf(debugbuf,"/usr/bin/amixer sset Digital %d\%%",fix_volume);
+     system(debugbuf);
+     return(fix_volume);
+  }
 
   //read position
   position = lisy_get_position();

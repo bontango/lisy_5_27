@@ -1453,6 +1453,28 @@ for(i=1; i<=9;i++)
  return 0;
 }
 
+//read the volume level for LISY from  file
+//give back level or -1 if file does not exist
+//fill structure stru_lisymini_games_csv
+int  lisy_file_get_volume_level(void)
+{
+ char level[20];
+
+ FILE *fstream = fopen(LISY_VOLUME_LEVEL,"r");
+   if(fstream == NULL)
+   {
+      return -1 ;
+   }
+
+   if ( fgets(level,20,fstream)!=NULL)
+        return ( atoi(level));
+   else
+        return -2;
+
+fclose(fstream);
+
+}
+
 //read the text file on /lisy partition
 //give back string for welcome message
 //fill structure stru_lisymini_games_csv
