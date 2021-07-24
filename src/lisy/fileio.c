@@ -1719,7 +1719,7 @@ int  lisy_file_get_home_ss_special_coil_mappings(void)
 //map to default no mapping / no activation
 for(i=0; i<20;i++) 
   { 
-     lisy_home_ss_coil_map[i].mapped_to_coil = 0;
+     lisy_home_ss_special_coil_map[i].mapped_to_coil = 0;
   }
 
 //COILS construct the filename
