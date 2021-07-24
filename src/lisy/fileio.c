@@ -1583,7 +1583,7 @@ int  lisy_m_file_get_hwrules(void)
 //give -1 in case we had an error
 //fill structure 
 //reads also led colorcodes
-int  lisy_file_get_home_ss_lamp_mappings(void)
+int  lisy_file_get_home_ss_lamp_mappings(int variant)
 {
  char buffer[1024];
  char *line;
@@ -1614,6 +1614,10 @@ for(i=0; i<=5;i++)
 //LAMPS construct the filename
 //Lamp ;Line of LED;LED Number;Comment
 sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE);
+//do we use a variant for testing?
+if (variant > 0)
+sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE,variant);
+
 
  fstream = fopen(file_name,"r");
   if(fstream == NULL)
@@ -1652,7 +1656,7 @@ printf("RTH: read line:%d led:%d %d %d %d %d\n",ledline,led,led_rgbw_color[ledli
 //read the csv file for lisy Home Starship coil to coil mapping /lisy partition
 //give -1 in case we had an error
 //fill structure 
-int  lisy_file_get_home_ss_coil_mappings(void)
+int  lisy_file_get_home_ss_coil_mappings(int variant)
 {
  char buffer[1024];
  char *line;
@@ -1672,6 +1676,9 @@ for(i=0; i<20;i++)
 //COILS construct the filename
 //coil ;coil Number;Comment
 sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE);
+//do we use a variant for testing?
+if (variant > 0)
+sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE,variant);
 
  fstream = fopen(file_name,"r");
   if(fstream == NULL)
@@ -1705,7 +1712,7 @@ sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_COIL_MAPPING_FILE);
 //read the csv file for lisy Home Starship special coil to coil mapping /lisy partition
 //give -1 in case we had an error
 //fill structure 
-int  lisy_file_get_home_ss_special_coil_mappings(void)
+int  lisy_file_get_home_ss_special_coil_mappings(int variant)
 {
  char buffer[1024];
  char *line;
@@ -1725,6 +1732,9 @@ for(i=0; i<20;i++)
 //COILS construct the filename
 //coil ;coil Number;Comment
 sprintf(file_name,"%s%s",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_COIL_MAPPING_FILE);
+//do we use a variant for testing?
+if (variant > 0)
+sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_SPECIAL_COIL_MAPPING_FILE,variant);
 
  fstream = fopen(file_name,"r");
   if(fstream == NULL)

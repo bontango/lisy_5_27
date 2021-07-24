@@ -98,9 +98,9 @@ int  lisy_file_get_led_mappings(unsigned char system);
 
 //lisy home stuff
 int  lisy_file_get_home_mappings(void);
-int lisy_file_get_home_ss_lamp_mappings(void);
-int  lisy_file_get_home_ss_coil_mappings(void);
-int  lisy_file_get_home_ss_special_coil_mappings(void);
+int lisy_file_get_home_ss_lamp_mappings(int variant);
+int  lisy_file_get_home_ss_coil_mappings(int variant);
+int  lisy_file_get_home_ss_special_coil_mappings(int variant);
 
 
 /* LISY80 stuff */
