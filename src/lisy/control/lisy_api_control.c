@@ -1154,6 +1154,9 @@ void send_switch_infos( int sockfd )
 
  do
     {
+     delay(1); // 1 millisecond delay from wiringpi library
+                // for giving PIC some time to send switchcodes
+
       //any switchupdates?
       ret = lisy_w_switch_reader( &action );
       if (ret < 80) switch_LISYAPI[ret] = action;

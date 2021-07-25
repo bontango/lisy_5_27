@@ -1557,6 +1557,9 @@ void send_switch_infos( int sockfd )
   //swMatrix[7] is  'special switches' bit7:Test; bit6:S33;
  do
     {
+     delay(1); // 1 millisecond delay from wiringpi library
+                // for giving PIC some time to send switchcodes
+
      ret = lisy35_switch_reader( &action );
 
      //we need to add 1, as 0 is switch one(1)

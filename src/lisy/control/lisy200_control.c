@@ -68,11 +68,14 @@ const char* sndbrd_typestr(int board) {  };
 
 
 //48 switches, keep it easy by using 49 elements
-unsigned char Switches_LISY35[49] = { 0,0,0,0,0,0,0,0,0,0,
-				      0,0,0,0,0,0,0,0,0,0,
-				      0,0,0,0,0,0,0,0,0,0,
-				      0,0,0,0,0,0,0,0,0,0,
-				      0,0,0,0,0,0,0,0 };
+unsigned char Switches_LISY35[64] = { 0,0,0,0,0,0,0,0,
+				      0,0,0,0,0,0,0,0,
+				      0,0,0,0,0,0,0,0,
+				      0,0,0,0,0,0,0,0,
+				      0,0,0,0,0,0,0,0,
+				      0,0,0,0,0,0,0,0,
+				      0,0,0,0,0,0,0,0,
+				      0,0,0,0,0,0,0,0,0 };
 
 //global vars
 char switch_description_line1[80][80];
@@ -1921,17 +1924,20 @@ void send_switch_infos( int sockfd )
   char *code_red = "<td align=center style=\"background-color:red;\">";
   char *code_green = "<td align=center>";
 
-
   //update internal switch matrix with buffer from switch pic
  do
     {
+     delay(1); // 1 millisecond delay from wiringpi library
+		// for giving PIC some time to send switchcodes
      ret = lisy35_switch_reader( &action );
 
      //we need to add 1, as 0 is switch one(1)
      ret++;
 
-     if (ret < 80) //ret is switchnumber: NOTE: Bally  8*6==48 switches in maximum, counting 01..48
+     if (ret < 80) {
+         //ret is switchnumber: NOTE: Bally  8*6==48 switches in maximum, counting 01..48
         Switches_LISY35[ret] = action;
+	}
      }while( ret < 80);
 
      //now send whole matrix back together with some header

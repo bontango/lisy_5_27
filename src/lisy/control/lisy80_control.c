@@ -1221,6 +1221,9 @@ void send_switch_infos( int sockfd )
   //update internal switch matrix with buffer from switch pic
  do
     {
+     delay(1); // 1 millisecond delay from wiringpi library
+                // for giving PIC some time to send switchcodes
+
      ret = lisy80_switch_reader( &action );
 
      if (ret < 80) //ret is switchnumber: NOTE: there are no switches with x8 & x9
