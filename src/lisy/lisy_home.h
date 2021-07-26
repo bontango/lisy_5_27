@@ -38,8 +38,8 @@ void lisy_home_event_handler( int id, int arg1, int arg2, char *str);
 typedef struct
 {
   unsigned char no_of_maps;
-  unsigned char mapped_to_line[6];
-  unsigned char mapped_to_led[6];
+  unsigned char mapped_to_line[8];
+  unsigned char mapped_to_led[8];
 }
 t_lisy_home_ss_lamp_map;
 

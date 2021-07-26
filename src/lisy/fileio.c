@@ -1633,7 +1633,7 @@ sprintf(file_name,"%s%s_%02d",LISYH_MAPPING_PATH,LISYH_SS_LAMP_MAPPING_FILE,vari
      no = atoi(strtok(line, ";")); 	//lamp number
      if ( no > 59 ) continue; //skip line if lamp number is out of range
      lisy_home_ss_lamp_map[no].no_of_maps = lisy_home_ss_lamp_map[no].no_of_maps +1;
-     if ( lisy_home_ss_lamp_map[no].no_of_maps > 6 ) continue; //6 mappings in maximum
+     if ( lisy_home_ss_lamp_map[no].no_of_maps > 8 ) continue; //8 mappings in maximum
      ledline = lisy_home_ss_lamp_map[no].mapped_to_line[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));  //line of led
      led = lisy_home_ss_lamp_map[no].mapped_to_led[lisy_home_ss_lamp_map[no].no_of_maps -1] = atoi(strtok(NULL, ";"));	  //led number in this line
      //now read colorcodes
