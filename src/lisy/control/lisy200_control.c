@@ -384,6 +384,7 @@ void do_display_set( char *buffer)
    case 1: 
 		sprintf(display_str,"%-6s",&buffer[3]);
  		display35_show_str( 1, display_str);
+ 		wheel_score( 1, display_str);  //wheelscoe in paralell
 	        strcpy(display_D1,display_str);
 		break;
    case 2: 
@@ -1912,6 +1913,35 @@ void send_display_infos( int sockfd )
  }
 }
 
+//thread fpr update the switchmatrix 
+void *do_switchmatrix_update(void *myarg)
+{
+ int i,nu,ret;
+ int action = 1;
+
+ pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, NULL);
+ pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
+ nu = (int *)myarg;
+
+ while(1) //run untilmainfunction send cancel
+ {
+     delay(20); // 20 millisecond delay from wiringpi library
+                // for giving PIC some time to send switchcodes
+     ret = lisy35_switch_reader( &action );
+
+     //we need to add 1, as 0 is switch one(1)
+     ret++;
+
+     if (ret < 80) {
+         //ret is switchnumber: NOTE: Bally  8*6==48 switches in maximum, counting 01..48
+	 //starship is using all 64 switches
+        Switches_LISY35[ret] = action;
+        }
+ }
+ return NULL;
+
+}
 
 
 void send_switch_infos( int sockfd )
@@ -1925,6 +1955,8 @@ void send_switch_infos( int sockfd )
   char *code_green = "<td align=center>";
 
   //update internal switch matrix with buffer from switch pic
+  //new: we do that in a seperate thread
+/*
  do
     {
      delay(1); // 1 millisecond delay from wiringpi library
@@ -1939,7 +1971,7 @@ void send_switch_infos( int sockfd )
         Switches_LISY35[ret] = action;
 	}
      }while( ret < 80);
-
+*/
      //now send whole matrix back together with some header
    send_basic_infos(sockfd);
 
@@ -2387,6 +2419,13 @@ int main(int argc, char *argv[])
               error("ERROR on binding");
      listen(sockfd,5);
      clilen = sizeof(cli_addr);
+
+     //start pthread for switchmatrix update
+    pthread_t p;
+    int myarg;
+    if ( pthread_create (&p, NULL, do_switchmatrix_update, (void *)myarg) != 0)
+      fprintf(stderr," could not creat do_switchmatrix_update thread\n");
+
 
      //wait and listen
     do {
