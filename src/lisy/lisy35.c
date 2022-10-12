@@ -527,6 +527,7 @@ if (ls80opt.bitv.freeplay == 1) //only if freeplay option is set
 //system35 (Credit) Replay switch strobe:0 ret:5, so matrix 1,5 to check
 
 //set volume each time replay is pressed
+/* deactivated for now
 if ( lisy35_has_soundcard )
 {
  if ( CHECK_BIT(swMatrixLISY35[1],5)) //is bit set?
@@ -535,7 +536,7 @@ if ( lisy35_has_soundcard )
           if ( ls80dbg.bitv.basic) lisy80_debug("Volume setting initiated by REPLAY Switch");
          }
 }
-
+*/
 
  if ( CHECK_BIT(swMatrixLISY35[1],5)) //is bit set?
  {

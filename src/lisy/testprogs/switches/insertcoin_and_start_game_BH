@@ -9,6 +9,8 @@ sleep 1
 ./a.out 127.0.0.1 146
 sleep 1
 ./a.out 127.0.0.1 46
-#sleep 3
+sleep 1
+#open third position
+./a.out 127.0.0.1 25
 #close saucer
 #./a.out 127.0.0.1 105
